@@ -27,7 +27,8 @@ public class FileSystemService : IFileSystemService
     public string ArchiveFolder(string folderPath)
     {
         string archiveFileName = Path.GetFileNameWithoutExtension(folderPath) + "_" + DateTimeOffset.UtcNow.ToUnixTimeSeconds() + ".zip";
-        string archiveFilePath = Path.Combine(folderPath, archiveFileName);
+        string upperFolder = Path.GetFullPath(Path.Combine(folderPath, @"..\"));
+        string archiveFilePath = Path.Combine(upperFolder, archiveFileName);
 
         ZipFile.CreateFromDirectory(folderPath, archiveFilePath);
 

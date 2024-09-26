@@ -39,8 +39,9 @@ public class NugetPackageDownloaderService(IFileSystemService fileSystemService,
     private string GetPackageDownloadCommand(PackageRequest packageRequest, string packageDownloadFolder)
     {
         return (packageRequest.PackageVersion is not null) ?
-            string.Format(DownloadPackageTemplate, packageRequest.PackageID, packageDownloadFolder) :
-            string.Format(DownloadPackageWithVersionTemplate, packageRequest.PackageID, packageDownloadFolder, packageRequest.PackageVersion);
+             string.Format(DownloadPackageWithVersionTemplate, packageRequest.PackageID, packageDownloadFolder, packageRequest.PackageVersion) :
+        string.Format(DownloadPackageTemplate, packageRequest.PackageID, packageDownloadFolder);
+           
     }
     private string CreateDotnetProjectFile(string frameworkVersion, string directoryPath)
     {

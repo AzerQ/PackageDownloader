@@ -17,11 +17,32 @@ public class ShellCommandService : IShellCommandService
 
     }
 
+    private (string shellFileName, string commandArgument) PrepareShellCommand(string shellCommandRaw)
+    {
+        bool isLinux = Environment.OSVersion.Platform == PlatformID.Unix;
+        
+        if (isLinux)
+        {
+            string escapedCommand = shellCommandRaw.Replace("\"", "\\\"");
+            return ("/bin/bash", $"-c \"{escapedCommand}\"");
+        }
+
+        else
+        {
+            return ("cmd.exe", $"/C {shellCommandRaw}");
+        }
+
+
+    }
     public CommandExecutionResult Execute(CommandInput commandInput)
     {
+
+        var shellInfo = PrepareShellCommand(commandInput.CommandName);
+
         var startInfo = new ProcessStartInfo
         {
-            FileName = commandInput.CommandName,
+            FileName = shellInfo.shellFileName,
+            Arguments = shellInfo.commandArgument,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,

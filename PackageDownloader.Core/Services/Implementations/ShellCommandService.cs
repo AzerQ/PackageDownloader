@@ -1,5 +1,6 @@
 ﻿using PackageDownloader.Core.Models;
 using PackageDownloader.Core.Services.Abstractions;
+using PackageDownloader.PackageDownloader.Core.Exceptions;
 using System.Diagnostics;
 
 namespace PackageDownloader.Core.Services.Implementations;
@@ -7,17 +8,30 @@ namespace PackageDownloader.Core.Services.Implementations;
 public class ShellCommandService : IShellCommandService
 {
 
+    public CommandExecutionResult ExecuteOrThrow(CommandInput input)
+    {
+        var executionResult = Execute(input);
+
+        return executionResult.IsSuccesed ? executionResult : 
+            throw new ShellCommandException(executionResult);
+
+    }
+
     public CommandExecutionResult Execute(CommandInput commandInput)
     {
         var startInfo = new ProcessStartInfo
         {
             FileName = commandInput.CommandName,
-            Arguments = string.Join(" ", commandInput.Arguments),
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,
             CreateNoWindow = true
         };
+
+        if (commandInput.Arguments is not null)
+        {
+            startInfo.Arguments = string.Join(" ", commandInput.Arguments);
+        }
 
         if (commandInput.WorkDirectory != null)
             startInfo.WorkingDirectory = commandInput.WorkDirectory;
@@ -33,7 +47,7 @@ public class ShellCommandService : IShellCommandService
 
         return new CommandExecutionResult
         {
-            SourceCommand = commandInput.CommandName,
+            SourceCommand = commandInput,
             CommandOutput = output,
             IsSuccesed = process.ExitCode == 0,
             ExitCode = process.ExitCode,

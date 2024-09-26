@@ -15,9 +15,11 @@
         /// Gets or sets the arguments for the command.
         /// </summary>
         /// <value>The list of command arguments.</value>
-        public required List<string> Arguments { get; set; }
+        public List<string>? Arguments { get; set; }
 
-
+        /// <summary>
+        /// Working directory of process
+        /// </summary>
         public string? WorkDirectory { get; set; }
     }
 }

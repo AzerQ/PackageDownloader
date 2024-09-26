@@ -5,7 +5,7 @@ VisualStudioVersion = 17.9.34616.47
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PackageDownloader", "PackageDownloader.csproj", "{1B669860-BA39-4C87-B542-BD0DBE98E2DC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PackageDownloader.Core", "PackageDownloader.Core\PackageDownloader.Core.csproj", "{C1616DF4-48E9-4B7C-9D53-49E7608C61EE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PackageDownloader.Core", "PackageDownloader.Core\PackageDownloader.Core.csproj", "{C1616DF4-48E9-4B7C-9D53-49E7608C61EE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

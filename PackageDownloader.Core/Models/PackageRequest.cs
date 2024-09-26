@@ -1,17 +1,33 @@
-﻿namespace PackageDownloader.Core.Models
+﻿namespace PackageDownloader.Core.Models;
+
+public enum PackageType
 {
-    public enum PackageType
-    {
-        Npm,
-        Nuget
-    }
-
-    public class PackageRequest
-    {
-        public PackageType PackageType { get; set; }
-
-        public required string PackageID { get;set; }
-
-        public string? PackageVersion { get; set; }
-    }
+    Npm,
+    Nuget
 }
+
+/// <summary>
+/// Represents a request for downloading a package.
+/// </summary>
+public class PackageRequest
+{
+    /// <summary>
+    /// The type of the package to be downloaded.
+    /// </summary>
+    public required PackageType PackageType { get; set; }
+
+    /// <summary>
+    /// The ID of the package to be downloaded.
+    /// </summary>
+    /// <remarks>This property is required.</remarks>
+    public required string PackageID { get; set; }
+
+    /// <summary>
+    /// The version of the package to be downloaded.
+    /// If not provided, the latest version will be downloaded.
+    /// </summary>
+    public string? PackageVersion { get; set; }
+
+    public string? SdkVersion { get; set; }
+}
+

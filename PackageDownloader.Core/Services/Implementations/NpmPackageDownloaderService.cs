@@ -1,12 +1,35 @@
-﻿using PackageDownloader.Core.Services.Abstractions;
+﻿
+using PackageDownloader.Core.Models;
+using PackageDownloader.Core.Services.Abstractions;
+using PackageDownloader.PackageDownloader.Core.Services.Abstractions;
 
-namespace PackageDownloader.Core.Services.Implementations
+namespace PackageDownloader.Core.Services.Implementations;
+
+/// <summary>
+/// Represents a service for downloading npm packages.
+/// </summary>
+/// <param name="fileSystemService">An instance of <see cref="IFileSystemService"/> to handle file system operations.</param>
+/// <param name="shellCommandService">An instance of <see cref="IShellCommandService"/> to execute shell commands.</param>
+public class NpmPackageDownloaderService(IFileSystemService fileSystemService, IShellCommandService shellCommandService) : PackageDownloaderBase(fileSystemService)
 {
-    public class NpmPackageDownloaderService : IPackageDownloaderService
+    const string DownloadPackageTemplate = "npm install {0} --save";
+    const string DownloadPackgeWithVersionTemplate = "npm install {0}@{1} --save ";
+
+    private string GetPackageDownloadCommand(PackageRequest packageRequest)
     {
-        public string DownloadPackage(string packageId)
+        return (packageRequest.PackageVersion is not null) ?
+            string.Format(DownloadPackgeWithVersionTemplate, packageRequest.PackageID, packageRequest.PackageVersion) :
+            string.Format(DownloadPackageTemplate, packageRequest.PackageID);
+    }
+
+    protected override void DownloadPackageInFolder(PackageRequest packageRequest, string folderPath)
+    {
+        var downloadNpmPackageCommand = new CommandInput
         {
-            throw new NotImplementedException();
-        }
+            CommandName = GetPackageDownloadCommand(packageRequest),
+            WorkDirectory = folderPath
+        };
+
+        var downloadPacakgeResult = shellCommandService.ExecuteOrThrow(downloadNpmPackageCommand);
     }
 }

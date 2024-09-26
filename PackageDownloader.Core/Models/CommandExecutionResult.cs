@@ -9,7 +9,7 @@
         /// Gets or sets the command that was executed.
         /// </summary>
         /// <value>The source command.</value>
-        public required string SourceCommand { get; set; }
+        public required CommandInput SourceCommand { get; set; }
 
         /// <summary>
         /// Gets or sets the output of the executed command.

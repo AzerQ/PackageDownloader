@@ -7,6 +7,15 @@ namespace PackageDownloader.Core.Services.Abstractions;
 /// </summary>
 public interface IShellCommandService
 {
+
+    /// <summary>
+    /// Executes a shell command and throws an exception if the command fails.
+    /// </summary>
+    /// <param name="input">The input containing the command to execute.</param>
+    /// <returns>The result of the command execution.</returns>
+    /// <exception cref="ShellCommandException">Thrown if the command execution fails.</exception>
+    CommandExecutionResult ExecuteOrThrow(CommandInput input);
+
     /// <summary>
     /// Executes a single shell command and returns the result.
     /// </summary>

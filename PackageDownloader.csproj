@@ -25,4 +25,8 @@
     <ProjectReference Include="PackageDownloader.Core\PackageDownloader.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Новая папка\" />
+  </ItemGroup>
+
 </Project>

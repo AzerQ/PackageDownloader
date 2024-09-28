@@ -7,15 +7,8 @@ namespace PackageDownloader.PackageDownloader.Core.Services.Abstractions;
 /// A base class for package downloaders. It provides functionality to download a package as an archive.
 /// </summary>
 /// <param name="fileSystemService">An instance of <see cref="IFileSystemService"/> for file system operations.</param>
-public abstract class PackageDownloaderBase(IFileSystemService fileSystemService)
+public abstract class PackageDownloaderBase(IFileSystemService fileSystemService, IArchiveService archiveService)
 {
-    private string CreateDirectoryForPackage(string packageID, string? pacakgeVersion)
-    {
-        string uniquePath = fileSystemService.CreateTempFolder();
-        string folerForPackagesPath = Path.Combine(uniquePath, packageID, pacakgeVersion ?? string.Empty);
-        Directory.CreateDirectory(folerForPackagesPath);
-        return folerForPackagesPath;
-    }
 
     /// <summary>
     /// An abstract method to be implemented by derived classes to download a package in a specified folder.
@@ -31,9 +24,12 @@ public abstract class PackageDownloaderBase(IFileSystemService fileSystemService
     /// <returns>The path of the downloaded archive.</returns>
     public string DownloadPacakgeAsArchive(PackageRequest packageRequest)
     {
-        string packageDirectory = CreateDirectoryForPackage(packageRequest.PackageID, packageRequest.PackageVersion);
+        string tempFolderPath = fileSystemService.CreateTempFolder();
+        string packageDirectory = fileSystemService.CreateDirectoryForPackage(tempFolderPath, packageRequest.PackageID, packageRequest.PackageVersion);
+
         DownloadPackageInFolder(packageRequest, packageDirectory);
-        string archivePath = fileSystemService.ArchiveFolder(packageDirectory);
+
+        string archivePath = archiveService.ArchiveFolder(packageDirectory, tempFolderPath);
         return archivePath;
     }
 }

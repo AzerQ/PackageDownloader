@@ -34,21 +34,21 @@ namespace TestDownloadPacakges
             Console.ReadLine();
         }
 
-        static (IFileSystemService fileService, IShellCommandService shellService) GetBaseServices()
+        static (IFileSystemService fileService, IShellCommandService shellService, IArchiveService archiveService) GetBaseServices()
         {
-            return (new FileSystemService(), new ShellCommandService());
+            return (new FileSystemService(), new ShellCommandService(), new ArchiveService());
         }
 
         static PackageDownloaderBase MakeNugetPackageDownloader()
         {
             var baseServices = GetBaseServices();
-            return new NugetPackageDownloaderService(baseServices.fileService, baseServices.shellService);
+            return new NugetPackageDownloaderService(baseServices.fileService, baseServices.shellService, baseServices.archiveService);
         }
 
         static PackageDownloaderBase MakeNpmPackageDownloader()
         {
             var baseServices = GetBaseServices();
-            return new NpmPackageDownloaderService(baseServices.fileService, baseServices.shellService);
+            return new NpmPackageDownloaderService(baseServices.fileService, baseServices.shellService, baseServices.archiveService);
         }
     }
 }

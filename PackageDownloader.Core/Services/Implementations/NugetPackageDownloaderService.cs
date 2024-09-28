@@ -19,7 +19,8 @@ public static class DotnetFrameworks
 /// </summary>
 /// <param name="fileSystemService">An instance of <see cref="IFileSystemService"/> to handle file system operations.</param>
 /// <param name="shellCommandService">An instance of <see cref="IShellCommandService"/> to execute shell commands.</param>
-public class NugetPackageDownloaderService(IFileSystemService fileSystemService, IShellCommandService shellCommandService) : PackageDownloaderBase(fileSystemService)
+public class NugetPackageDownloaderService(IFileSystemService fileSystemService, IShellCommandService shellCommandService, IArchiveService archiveService) :
+        PackageDownloaderBase(fileSystemService,archiveService)
 {
 
     const string DownloadPackageTemplate = "dotnet add package {0} --package-directory {1}";
@@ -50,6 +51,13 @@ public class NugetPackageDownloaderService(IFileSystemService fileSystemService,
         File.WriteAllText(filePath, fileContent);
         return filePath;
     }
+
+    private void CopyNupkgFilesAndRemoveOther(string packageOutputFolder, string packagesFolder)
+    {
+        var nupkgFiles = fileSystemService.GetAllFilesByExtension(packagesFolder, "nupkg");
+        fileSystemService.CopyFilesToFolder(nupkgFiles, packageOutputFolder);
+        fileSystemService.RemoveDirectoryItemsByFilter(packageOutputFolder, item => !item.EndsWith(".nupkg"));
+    } 
     
     
     protected override void DownloadPackageInFolder(PackageRequest packageRequest, string folderPath)
@@ -65,6 +73,8 @@ public class NugetPackageDownloaderService(IFileSystemService fileSystemService,
         };
 
         var downloadPackageResult = shellCommandService.ExecuteOrThrow(downloadDotnetPackageCommand);
+
+        CopyNupkgFilesAndRemoveOther(packageOutputFolder: folderPath, packagesFolder: pacakgeDownloadFolder);
 
     }
 }

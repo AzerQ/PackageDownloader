@@ -7,10 +7,9 @@ namespace PackageDownloader
 {
     public class Program
     {
-
-
         public static void ResolveDependencies(IServiceCollection services)
         {
+            services.AddTransient<IArchiveService, ArchiveService>();
             services.AddTransient<IFileSystemService, FileSystemService>();
             services.AddTransient<IShellCommandService, ShellCommandService>();
             services.AddTransient<NugetPackageDownloaderService>();

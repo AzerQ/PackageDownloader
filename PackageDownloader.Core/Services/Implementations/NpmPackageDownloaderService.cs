@@ -10,23 +10,24 @@ namespace PackageDownloader.Core.Services.Implementations;
 /// </summary>
 /// <param name="fileSystemService">An instance of <see cref="IFileSystemService"/> to handle file system operations.</param>
 /// <param name="shellCommandService">An instance of <see cref="IShellCommandService"/> to execute shell commands.</param>
-public class NpmPackageDownloaderService(IFileSystemService fileSystemService, IShellCommandService shellCommandService) : PackageDownloaderBase(fileSystemService)
+public class NpmPackageDownloaderService(IFileSystemService fileSystemService, IShellCommandService shellCommandService, IArchiveService archiveService) : 
+    PackageDownloaderBase(fileSystemService, archiveService)
 {
-    const string DownloadPackageTemplate = "npm install {0} --save";
-    const string DownloadPackgeWithVersionTemplate = "npm install {0}@{1} --save ";
+    const string DownloadPackageTemplate = "npm install {0} --save --prefix {1}";
+    const string DownloadPackgeWithVersionTemplate = "npm install {0}@{1} --save --prefix {2}";
 
-    private string GetPackageDownloadCommand(PackageRequest packageRequest)
+    private string GetPackageDownloadCommand(PackageRequest packageRequest, string folderPath)
     {
         return (packageRequest.PackageVersion is not null) ?
-            string.Format(DownloadPackgeWithVersionTemplate, packageRequest.PackageID, packageRequest.PackageVersion) :
-            string.Format(DownloadPackageTemplate, packageRequest.PackageID);
+            string.Format(DownloadPackgeWithVersionTemplate, packageRequest.PackageID, packageRequest.PackageVersion, folderPath) :
+            string.Format(DownloadPackageTemplate, packageRequest.PackageID, folderPath);
     }
 
     protected override void DownloadPackageInFolder(PackageRequest packageRequest, string folderPath)
     {
         var downloadNpmPackageCommand = new CommandInput
         {
-            CommandName = GetPackageDownloadCommand(packageRequest),
+            CommandName = GetPackageDownloadCommand(packageRequest, folderPath),
             WorkDirectory = folderPath
         };
 

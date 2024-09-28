@@ -1,5 +1,4 @@
 ﻿using PackageDownloader.Core.Services.Abstractions;
-using System.IO.Compression;
 
 namespace PackageDownloader.Core.Services.Implementations;
 
@@ -24,14 +23,40 @@ public class FileSystemService : IFileSystemService
         Directory.Delete(folderPath, true);
     }
 
-    public string ArchiveFolder(string folderPath)
+    public string CreateDirectoryForPackage(string baseFolderPath, string packageID, string? pacakgeVersion)
     {
-        string archiveFileName = Path.GetFileNameWithoutExtension(folderPath) + "_" + DateTimeOffset.UtcNow.ToUnixTimeSeconds() + ".zip";
-        string upperFolder = Path.GetFullPath(Path.Combine(folderPath, @"..\"));
-        string archiveFilePath = Path.Combine(upperFolder, archiveFileName);
+        string folerForPackagesPath = Path.Combine(baseFolderPath, packageID, pacakgeVersion ?? string.Empty);
+        Directory.CreateDirectory(folerForPackagesPath);
+        return folerForPackagesPath;
+    }
 
-        ZipFile.CreateFromDirectory(folderPath, archiveFilePath);
+    public void CopyFilesToFolder(IEnumerable<string> filePaths, string destinationFolder)
+    {
+        foreach (var file in filePaths)
+        {
+            string destinationPath = Path.Combine(destinationFolder, Path.GetFileName(file));
+            File.Copy(file, destinationPath);
+        }
+    }
 
-        return archiveFilePath;
+    public IEnumerable<string> GetAllFilesByExtension(string folder, string extension)
+    {
+        return Directory.GetFiles(folder, $"*.{extension}", SearchOption.AllDirectories);
+    }
+
+    public void RemoveDirectoryItemsByFilter(string directoryPath, Func<string, bool> itemsFilter)
+    {
+
+        var filesForRemove = Directory.GetFiles(directoryPath)
+                                      .Where(itemsFilter)
+                                      .ToList();
+
+        var directoriesForRemove = Directory.GetDirectories(directoryPath)
+                                      .Where(itemsFilter)
+                                      .ToList();
+
+        filesForRemove.ForEach(file => File.Delete(file));
+        directoriesForRemove.ForEach(directory => Directory.Delete(directory, recursive: true));
+
     }
 }

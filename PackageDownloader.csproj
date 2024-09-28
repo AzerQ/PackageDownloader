@@ -8,13 +8,21 @@
 
   <ItemGroup>
     <Compile Remove="PackageDownloader.Core\**" />
+    <Compile Remove="TestDownloadPackages\**" />
     <Content Remove="PackageDownloader.Core\**" />
+    <Content Remove="TestDownloadPackages\**" />
     <EmbeddedResource Remove="PackageDownloader.Core\**" />
+    <EmbeddedResource Remove="TestDownloadPackages\**" />
     <None Remove="PackageDownloader.Core\**" />
+    <None Remove="TestDownloadPackages\**" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="PackageDownloader.Core\PackageDownloader.Core.csproj" />
   </ItemGroup>
 
 </Project>

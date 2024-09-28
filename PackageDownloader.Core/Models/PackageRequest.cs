@@ -1,5 +1,8 @@
-﻿namespace PackageDownloader.Core.Models;
+﻿using System.Text.Json.Serialization;
 
+namespace PackageDownloader.Core.Models;
+
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum PackageType
 {
     Npm,

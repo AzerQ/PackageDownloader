@@ -1,3 +1,4 @@
+using Microsoft.Extensions.FileProviders;
 using PackageDownloader.Core.Models;
 using PackageDownloader.Core.Services.Abstractions;
 using PackageDownloader.Core.Services.Implementations;
@@ -22,7 +23,7 @@ namespace PackageDownloader
                     PackageType.Nuget => serviceProvider.GetRequiredService<NugetPackageDownloaderService>(),
                     _ => throw new InvalidOperationException()
                 };
-                
+
             });
 
         }
@@ -51,6 +52,13 @@ namespace PackageDownloader
 
             app.UseAuthorization();
 
+            app.UseFileServer(new FileServerOptions()
+            {
+                FileProvider = new PhysicalFileProvider(
+                Path.Combine(Directory.GetCurrentDirectory(), "UI")),
+                RequestPath = "/UI",
+                EnableDefaultFiles = true
+            });
 
             app.MapControllers();
 

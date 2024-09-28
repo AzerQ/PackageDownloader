@@ -22,7 +22,6 @@ namespace PackageDownloader.Controllers
                                     .Append(packageRequest.PackageVersion ?? "last")
                                     .Append("_")
                                     .Append(packageRequest.SdkVersion ?? "default")
-                                    .Append("_")
                                     .Append(extension);
 
             return fileNameBuilder.ToString();

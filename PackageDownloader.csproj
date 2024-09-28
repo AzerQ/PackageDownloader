@@ -9,12 +9,16 @@
   <ItemGroup>
     <Compile Remove="PackageDownloader.Core\**" />
     <Compile Remove="TestDownloadPackages\**" />
+    <Compile Remove="Новая папка\**" />
     <Content Remove="PackageDownloader.Core\**" />
     <Content Remove="TestDownloadPackages\**" />
+    <Content Remove="Новая папка\**" />
     <EmbeddedResource Remove="PackageDownloader.Core\**" />
     <EmbeddedResource Remove="TestDownloadPackages\**" />
+    <EmbeddedResource Remove="Новая папка\**" />
     <None Remove="PackageDownloader.Core\**" />
     <None Remove="TestDownloadPackages\**" />
+    <None Remove="Новая папка\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,10 +27,6 @@
 
   <ItemGroup>
     <ProjectReference Include="PackageDownloader.Core\PackageDownloader.Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Новая папка\" />
   </ItemGroup>
 
 </Project>

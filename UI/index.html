@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Скачивание пакетов</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <form id="downloadForm">
+        <label for="packageType">Тип пакета:</label>
+        <select id="packageType">
+            <option value="Nuget">Nuget</option>
+            <option value="Npm">Npm</option>
+        </select>
+
+        <label for="packageId">ID пакета:</label>
+        <input type="text" id="packageId" required>
+
+        <label for="packageVersion">Версия пакета:</label>
+        <input type="text" id="packageVersion">
+
+        <label for="sdkVersion">Версия SDK:</label>
+        <input type="text" id="sdkVersion">
+
+        <button type="submit">Скачать</button>
+    </form>
+    <div id="loading" style="display: none;">Загрузка...</div>
+    <div id="error" style="color: red;"></div>
+</body>
+<script src="script.js"></script>
+</html>

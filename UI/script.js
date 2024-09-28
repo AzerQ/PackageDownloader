@@ -1,6 +1,5 @@
 const form = document.getElementById('downloadForm');
-const loading = document.getElementById('loading');
-const error = document.getElementById('error');
+
 
 
 function collectPackageRequestData() {
@@ -80,16 +79,16 @@ async function downloadPackageWithDependencies(packageRequest) {
 
 form.addEventListener('submit', async (event) => {
     event.preventDefault();
-
     // Отправка запроса на ваш сервер (замените URL на ваш)
+
     try {
-        loading.style.display = 'block';
+        const loader = document.getElementById('loader');
+        loader.hidden = false;
         let packageRequest = collectPackageRequestData();
-        downloadPackageWithDependencies(packageRequest);
+        await downloadPackageWithDependencies(packageRequest);
     } catch (error) {
-        error.style.display = 'block';
-        error.textContent = error.message;
+        alert("Произошла ошибка при загрузке файла пакета!");
     } finally {
-        loading.style.display = 'none';
+        loader.hidden = true;
     }
 });

@@ -11,9 +11,9 @@ namespace PackageDownloader.API.Controllers
     public class PackageSearchController(Func<PackageType, IPackageSearchService> serviceAccessor) : ControllerBase
     {
 
-        // GET: api/<PackageSearchController>
-        [HttpGet]
-        public async Task<IEnumerable<PackageInfo>> Get([FromQuery] PackageType packageType, [FromQuery] string namePart)
+        
+        [HttpGet("[action]")]
+        public async Task<IEnumerable<PackageInfo>> GetSearchResults([FromQuery] PackageType packageType, [FromQuery] string namePart)
         {
             var pacakgeSearchService = serviceAccessor(packageType);
             return await pacakgeSearchService.SearchPacakgesByName(namePart);

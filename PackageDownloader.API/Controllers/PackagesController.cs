@@ -15,9 +15,9 @@ namespace PackageDownloader.API.Controllers
         const string UnknownMIME = "application/octet-stream";
 
 
-        // GET: api/<PackagesController>
-        [HttpGet]
-        public IActionResult Get([FromQuery] PackageRequest packageRequest)
+        
+        [HttpPost("[action]")]
+        public IActionResult GetPackagesAsArchive([FromBody] PackageRequest packageRequest)
         {
             var packageDownloader = serviceAccessor(packageRequest.PackageType);
             string packageFilePath = packageDownloader.DownloadPackagesAsArchive(packageRequest);

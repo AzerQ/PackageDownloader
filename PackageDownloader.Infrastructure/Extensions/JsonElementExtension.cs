@@ -14,16 +14,24 @@ namespace PackageDownloader.Infrastructure.Extensions
             return jsonElement.HasValue() ? jsonElement.GetString() ?? defaultValue : defaultValue;
         }
 
-        public static IEnumerable<string> GetStrings(this JsonElement jsonElement, string arrayFieldName, string? itemField = default)
+        public static IEnumerable<string> GetStrings(this JsonElement jsonElement, string? arrayFieldName = default, string? itemField = default)
         {
-            bool valuesExists = jsonElement.TryGetProperty(arrayFieldName, out var values);
-            IEnumerable<string> stringValues = valuesExists ?
-                values.EnumerateArray().Select(val =>
+            JsonElement values = jsonElement;
+
+            if (arrayFieldName is not null)
+            {
+                bool hasProperty = jsonElement.TryGetProperty(arrayFieldName, out values);
+                if (!hasProperty)
+                    return [];
+            }
+
+            IEnumerable<string> stringValues =
+                values.EnumerateArray()
+                .Select(val =>
                 {
                     return itemField == default ? val.GetStringOrDefault()
                     : val.GetProperty(itemField).GetStringOrDefault();
-                })
-                : [];
+                });
 
             return stringValues;
         }

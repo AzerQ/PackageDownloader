@@ -11,18 +11,24 @@ public class NpmPackageSearchService(IPackageInfoConverterService packageInfoCon
 
     const string SearchPackageRequestUrl = "https://www.npmjs.com/search/suggestions?q={0}";
 
-    public Task<IEnumerable<string>> GetPackagesNamesSuggestions(string namePart)
+    public async Task<IEnumerable<string>> GetPackagesNamesSuggestions(string namePart)
     {
-        throw new NotImplementedException();
+
+        string url = string.Format(SearchPackageRequestUrl, namePart);
+
+        var content = await new Uri(url).GetJsonContent();
+
+        return packageInfoConverter.ConvertNpmJsonToSuggestionsList(content);  
+
     }
 
-    public async Task<IEnumerable<PackageInfo>> SearchPacakgesByName(string name)
+    public async Task<IEnumerable<PackageInfo>> SearchPackagesByName(string name)
     {
         string url = string.Format(SearchPackageRequestUrl, name);
 
         var content = await new Uri(url).GetJsonContent();
 
-        return packageInfoConverter.ConvertNpmJsonStringToPackageInfo(content);
+        return packageInfoConverter.ConvertNpmJsonToPackageInfo(content);
 
     }
 }

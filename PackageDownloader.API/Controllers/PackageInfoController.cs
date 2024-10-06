@@ -8,15 +8,21 @@ namespace PackageDownloader.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PackageSearchController(Func<PackageType, IPackageSearchService> serviceAccessor) : ControllerBase
+    public class PackageInfoController(Func<PackageType, IPackageSearchService> serviceAccessor) : ControllerBase
     {
-
         
         [HttpGet("[action]")]
         public async Task<IEnumerable<PackageInfo>> GetSearchResults([FromQuery] PackageType packageType, [FromQuery] string namePart)
         {
             var pacakgeSearchService = serviceAccessor(packageType);
-            return await pacakgeSearchService.SearchPacakgesByName(namePart);
+            return await pacakgeSearchService.SearchPackagesByName(namePart);
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IEnumerable<string>> GetSearchSuggestions([FromQuery] PackageType packageType, [FromQuery] string namePart)
+        {
+            var packageSearchService = serviceAccessor(packageType);
+            return await packageSearchService.GetPackagesNamesSuggestions(namePart);
         }
     }
 }

@@ -62,14 +62,21 @@ namespace PackageDownloader.Infrastructure.Services.Implementations
             }
         }
 
-        public IEnumerable<PackageInfo> ConvertNpmJsonStringToPackageInfo(JsonDocument json)
+        public IEnumerable<PackageInfo> ConvertNpmJsonToPackageInfo(JsonDocument json)
         {
             return ConvertModelFromJson(json, NpmConverter);
         }
 
-        public IEnumerable<PackageInfo> ConvertNugetJsonStringToPackageInfo(JsonDocument json)
+        public IEnumerable<PackageInfo> ConvertNugetJsonToPackageInfo(JsonDocument json)
         {
             return ConvertModelFromJson(json, NugetConverter, arrayProprtyName: "data");
         }
+
+        public IEnumerable<string> ConvertNpmJsonToSuggestionsList(JsonDocument json) =>
+           json.RootElement.GetStrings(itemField: "name");
+
+        public IEnumerable<string> ConvertNugetJsonToSuggestionsList(JsonDocument json) =>
+           json.RootElement.GetStrings(arrayFieldName: "data");
+
     }
 }

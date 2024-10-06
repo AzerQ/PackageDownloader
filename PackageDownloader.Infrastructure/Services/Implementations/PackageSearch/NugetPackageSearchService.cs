@@ -9,18 +9,24 @@ namespace PackageDownloader.Infrastructure.Services.Implementations
     {
         const string SearchPackageRequestUrl = "https://azuresearch-usnc.nuget.org/query?q={0}";
 
-        public Task<IEnumerable<string>> GetPackagesNamesSuggestions(string namePart)
+        const string AutocompleteTemplateUrl = "https://azuresearch-ussc.nuget.org/autocomplete?q={0}";
+
+        public async Task<IEnumerable<string>> GetPackagesNamesSuggestions(string namePart)
         {
-            throw new NotImplementedException();
+            string url = string.Format(AutocompleteTemplateUrl, namePart);
+
+            var content = await new Uri(url).GetJsonContent();
+
+            return packageInfoConverter.ConvertNugetJsonToSuggestionsList(content);
         }
 
-        public async Task<IEnumerable<PackageInfo>> SearchPacakgesByName(string name)
+        public async Task<IEnumerable<PackageInfo>> SearchPackagesByName(string name)
         {
             string url = string.Format(SearchPackageRequestUrl, name);
 
             var content = await new Uri(url).GetJsonContent();
 
-            return packageInfoConverter.ConvertNugetJsonStringToPackageInfo(content);
+            return packageInfoConverter.ConvertNugetJsonToPackageInfo(content);
         }
     }
 }

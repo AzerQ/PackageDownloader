@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="PackageDownloader.Core\**" />
+    <Compile Remove="TestDownloadPackages\**" />
+    <Compile Remove="Новая папка\**" />
+    <Content Remove="PackageDownloader.Core\**" />
+    <Content Remove="TestDownloadPackages\**" />
+    <Content Remove="Новая папка\**" />
+    <EmbeddedResource Remove="PackageDownloader.Core\**" />
+    <EmbeddedResource Remove="TestDownloadPackages\**" />
+    <EmbeddedResource Remove="Новая папка\**" />
+    <None Remove="PackageDownloader.Core\**" />
+    <None Remove="TestDownloadPackages\**" />
+    <None Remove="Новая папка\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="JsonPath.Net" Version="1.1.5" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PackageDownloader.Application\PackageDownloader.Application.csproj" />
+    <ProjectReference Include="..\PackageDownloader.Core\PackageDownloader.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="UI\index.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="UI\script.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="UI\spinner.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="UI\styles.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

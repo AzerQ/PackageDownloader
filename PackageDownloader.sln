@@ -3,11 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34616.47
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PackageDownloader", "PackageDownloader.csproj", "{1B669860-BA39-4C87-B542-BD0DBE98E2DC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PackageDownloader.API", "PackageDownloader.API\PackageDownloader.API.csproj", "{1B669860-BA39-4C87-B542-BD0DBE98E2DC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PackageDownloader.Core", "PackageDownloader.Core\PackageDownloader.Core.csproj", "{C1616DF4-48E9-4B7C-9D53-49E7608C61EE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestDownloadPacakges", "TestDownloadPackages\TestDownloadPacakges.csproj", "{B40A8972-C42D-4026-B6F4-A62C42C05DBE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PackageDownloader.Infrastructure", "PackageDownloader.Infrastructure\PackageDownloader.Infrastructure.csproj", "{BD17F7D1-070B-4952-B9EA-60A1CBEEEBD2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PackageDownloader.Application", "PackageDownloader.Application\PackageDownloader.Application.csproj", "{420CAD60-D1CC-4C17-A2AC-A21C35B33CAE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +25,14 @@ Global
 		{C1616DF4-48E9-4B7C-9D53-49E7608C61EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C1616DF4-48E9-4B7C-9D53-49E7608C61EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C1616DF4-48E9-4B7C-9D53-49E7608C61EE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B40A8972-C42D-4026-B6F4-A62C42C05DBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B40A8972-C42D-4026-B6F4-A62C42C05DBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B40A8972-C42D-4026-B6F4-A62C42C05DBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B40A8972-C42D-4026-B6F4-A62C42C05DBE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD17F7D1-070B-4952-B9EA-60A1CBEEEBD2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD17F7D1-070B-4952-B9EA-60A1CBEEEBD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD17F7D1-070B-4952-B9EA-60A1CBEEEBD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD17F7D1-070B-4952-B9EA-60A1CBEEEBD2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{420CAD60-D1CC-4C17-A2AC-A21C35B33CAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{420CAD60-D1CC-4C17-A2AC-A21C35B33CAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{420CAD60-D1CC-4C17-A2AC-A21C35B33CAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{420CAD60-D1CC-4C17-A2AC-A21C35B33CAE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

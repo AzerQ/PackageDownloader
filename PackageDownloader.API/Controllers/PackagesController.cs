@@ -17,7 +17,8 @@ namespace PackageDownloader.API.Controllers
 
         
         [HttpPost("[action]")]
-        public IActionResult GetPackagesAsArchive([FromBody] PackageRequest packageRequest)
+        [Produces("application/zip")]
+        public FileResult GetPackagesAsArchive([FromBody] PackageRequest packageRequest)
         {
             var packageDownloader = serviceAccessor(packageRequest.PackageType);
             string packageFilePath = packageDownloader.DownloadPackagesAsArchive(packageRequest);

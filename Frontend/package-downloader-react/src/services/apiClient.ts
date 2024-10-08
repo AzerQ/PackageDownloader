@@ -8,7 +8,6 @@
 /* eslint-disable */
 // ReSharper disable InconsistentNaming
 
-export const ApiDevURL: string  = 'http://localhost:5026';
 
 export class PackagesAPIClient {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
@@ -370,3 +369,7 @@ function throwException(message: string, status: number, response: string, heade
     else
         throw new ApiException(message, status, response, headers, null);
 }
+
+export const ApiDevURL: string  = 'http://localhost:5026';
+
+export const packageApiClient = new PackagesAPIClient(ApiDevURL);

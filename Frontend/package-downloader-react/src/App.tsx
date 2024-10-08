@@ -16,6 +16,8 @@ const App: React.FC = () => {
   };
 
   const handleAddToCart = (packageName: string) => {
+    if (cart.some(element => element === packageName))
+      return;
     setCart((prevCart) => [...prevCart, packageName]);
   };
 

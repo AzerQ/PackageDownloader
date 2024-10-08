@@ -1,5 +1,6 @@
 import React from 'react';
-import { List, ListItem, ListItemText, Button } from '@mui/material';
+import { List, ListItem, ListItemText, Button, IconButton } from '@mui/material';
+import { AddBox } from '@mui/icons-material';
 
 interface SearchResultsListProps {
   results: string[];
@@ -12,13 +13,12 @@ const SearchResultsList: React.FC<SearchResultsListProps> = ({ results, onAddToC
       {results.map((packageName, index) => (
         <ListItem key={index} divider>
           <ListItemText primary={packageName} />
-          <Button
-            variant="contained"
+          <IconButton
             color="primary"
             onClick={() => onAddToCart(packageName)}
           >
-            Add to Cart
-          </Button>
+            <AddBox/>
+          </IconButton>
         </ListItem>
       ))}
     </List>

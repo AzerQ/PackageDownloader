@@ -1,30 +1,28 @@
 import React from 'react';
-import { List, ListItem, ListItemText, Button, IconButton } from '@mui/material';
+import { List, ListItem, ListItemText, Button, IconButton, Card, CardContent, Grid } from '@mui/material';
 import { AddBox } from '@mui/icons-material';
-import { PackageInfo } from '../services/apiClient';
+import { PackageDetails, PackageInfo } from '../services/apiClient';
 import PackageSearchResult from './PackageSearchResult';
 
 interface SearchResultsListProps {
-  results: PackageInfo[];
-  onAddToCart: (packageName: string) => void;
+    results: PackageInfo[];
+    onAddToCart: (packageItem: PackageDetails) => void;
 }
 
-const SearchResultsList: React.FC<SearchResultsListProps> = ({ results, onAddToCart }) => {
-  return (
-    <List>
-      {results.map((packageInfo, index) => (
-        <ListItem key={index} divider>
-          <PackageSearchResult packageInfo={packageInfo}/>
-          <IconButton
-            color="primary"
-            onClick={() => onAddToCart(packageInfo.id ?? "")}
-          >
-            <AddBox/>
-          </IconButton>
-        </ListItem>
-      ))}
-    </List>
-  );
+const SearchResults: React.FC<SearchResultsListProps> = ({ results, onAddToCart }) => {
+    return (
+        <Grid container spacing={2}>
+            {results.map((packageInfo, index) => (
+                <Grid item xs={12} sm={6} md={4} key={index}>
+                    <Card variant="outlined">
+                        <CardContent>
+                            <PackageSearchResult packageInfo={packageInfo} onAddToCart={onAddToCart} />
+                        </CardContent>
+                    </Card>
+                </Grid>
+            ))}
+        </Grid>
+    );
 };
 
-export default SearchResultsList;
+export default SearchResults;

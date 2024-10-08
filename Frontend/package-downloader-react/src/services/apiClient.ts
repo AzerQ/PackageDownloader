@@ -186,6 +186,12 @@ export class PackageDetails implements IPackageDetails {
         }
     }
 
+    equals(otherObject: PackageDetails): boolean {
+        return this.packageID === otherObject.packageID
+               &&
+               this.packageVersion === otherObject.packageVersion
+    }
+
     static fromJS(data: any): PackageDetails {
         data = typeof data === 'object' ? data : {};
         let result = new PackageDetails();

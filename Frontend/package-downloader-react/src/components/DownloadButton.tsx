@@ -11,8 +11,7 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ onDownload }) => {
       variant="contained"
       color="primary"
       onClick={onDownload}
-      fullWidth
-      sx={{ mt: 2 }}
+      sx={{ mt: 2, mb: 2 }}
     >
       Generate packages archive
     </Button>

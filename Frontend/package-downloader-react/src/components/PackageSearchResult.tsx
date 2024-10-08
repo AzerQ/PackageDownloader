@@ -1,13 +1,14 @@
-import { Grid, Card, CardContent, Typography, Chip, Link } from "@mui/material";
-import { PackageInfo } from "../services/apiClient";
+import { Grid, Card, CardContent, Typography, Chip, Link, CardHeader, IconButton, CardActions, Button } from "@mui/material";
+import { PackageDetails, PackageInfo } from "../services/apiClient";
+import { AddBox } from "@mui/icons-material";
 
 interface PackageSearchResultsProps {
     packageInfo: PackageInfo;
+    onAddToCart: (packageInfo: PackageDetails) => void;
 }
 
-const PackageSearchResult: React.FC<PackageSearchResultsProps> = ({ packageInfo }) => {
+const PackageSearchResult: React.FC<PackageSearchResultsProps> = ({ packageInfo, onAddToCart }) => {
     return (
-        <Grid item xs={12} sm={6} md={4} key={packageInfo.id}>
             <Card variant="outlined">
                 <CardContent>
                     <Typography variant="h6">{packageInfo.id}</Typography>
@@ -31,8 +32,19 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = ({ packageInfo 
                         </Link>
                     )}
                 </CardContent>
+                <CardActions>
+                    <Button
+                        color="primary"
+                        onClick={() => onAddToCart(new PackageDetails({
+                            packageID: packageInfo.id,
+                            packageVersion: packageInfo.currentVersion
+                        }))}
+                        variant="contained"
+                    >
+                      Add  
+                    </Button>
+                </CardActions>
             </Card>
-        </Grid>
     );
 };
 

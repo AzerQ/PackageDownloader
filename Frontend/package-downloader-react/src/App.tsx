@@ -4,17 +4,19 @@ import SearchForm from './components/SearchForm';
 import SearchResults from './components/SearchResultsList';
 import PackageCart from './components/PackageCart';
 import DownloadButton from './components/DownloadButton';
-import { packageApiClient, PackageDetails, PackageInfo, PackageType } from './services/apiClient';
+import { packageApiClient, PackageDetails, PackageInfo, PackageRequest, PackageType } from './services/apiClient';
 
 const App: React.FC = () => {
   const [searchResults, setSearchResults] = useState<PackageInfo[]>([]);
   const [cart, setCart] = useState<PackageDetails[]>([]);
+  const [packageType, setPackageType] = useState<PackageType>(PackageType.Npm);
 
   const handleSearch = async (packageType: string, query: string) => {
     // TODO: Add API call here to fetch search results
     const packageTypeEnumValue = PackageType[packageType as keyof typeof PackageType];
     const searchResults = await packageApiClient.getSearchResults(packageTypeEnumValue, query);
     setSearchResults(searchResults);
+    setPackageType(packageTypeEnumValue);
   };
 
   const handleAddToCart = (packageItem: PackageDetails) => {
@@ -27,9 +29,12 @@ const App: React.FC = () => {
     setCart((prevCart) => prevCart.filter((item) => !item.equals(packageItem)));
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     // TODO: Implement download functionality
-    alert('Downloading packages: ' + cart.join(', '));
+    await packageApiClient.getPackagesAsArchive(new PackageRequest({
+      packagesDetails: cart,
+      packageType: packageType
+    }));
   };
 
   return (

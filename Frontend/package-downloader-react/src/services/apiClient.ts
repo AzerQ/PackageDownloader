@@ -4,6 +4,8 @@
 // </auto-generated>
 //----------------------
 
+import { downloadFile } from "./fileDownloader";
+
 /* tslint:disable */
 /* eslint-disable */
 // ReSharper disable InconsistentNaming
@@ -154,7 +156,7 @@ export class PackagesAPIClient {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
-            return response.text().then((_responseText) => {
+            return downloadFile(response).then(() => {
             return;
             });
         } else if (status !== 200 && status !== 204) {

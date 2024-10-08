@@ -24,7 +24,7 @@ const App: React.FC = () => {
   };
 
   const handleRemoveFromCart = (packageItem: PackageDetails) => {
-    setCart((prevCart) => prevCart.filter((item) => item.equals(packageItem)));
+    setCart((prevCart) => prevCart.filter((item) => !item.equals(packageItem)));
   };
 
   const handleDownload = () => {

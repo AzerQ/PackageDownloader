@@ -14,7 +14,7 @@ const DownloadButton: React.FC<DownloadButtonProps> = ({ onDownload }) => {
       fullWidth
       sx={{ mt: 2 }}
     >
-      Download Selected Packages
+      Generate packages archive
     </Button>
   );
 };

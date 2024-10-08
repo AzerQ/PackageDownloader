@@ -207,7 +207,7 @@ export interface IPackageDetails {
 }
 
 export class PackageInfo implements IPackageInfo {
-    id?: string | undefined;
+    id: string | undefined;
     currentVersion?: string | undefined;
     otherVersions?: string[] | undefined;
     description?: string | undefined;

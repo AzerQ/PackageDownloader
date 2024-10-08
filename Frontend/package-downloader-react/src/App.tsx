@@ -4,15 +4,17 @@ import SearchForm from './components/SearchForm';
 import SearchResultsList from './components/SearchResultsList';
 import PackageCart from './components/PackageCart';
 import DownloadButton from './components/DownloadButton';
+import { packageApiClient, PackageInfo, PackageType } from './services/apiClient';
 
 const App: React.FC = () => {
-  const [searchResults, setSearchResults] = useState<string[]>([]);
+  const [searchResults, setSearchResults] = useState<PackageInfo[]>([]);
   const [cart, setCart] = useState<string[]>([]);
 
-  const handleSearch = (packageType: string, query: string) => {
+  const handleSearch = async (packageType: string, query: string) => {
     // TODO: Add API call here to fetch search results
-    const mockResults = ['Package 1', 'Package 2', 'Package 3']; // Mock results
-    setSearchResults(mockResults);
+    const packageTypeEnumValue = PackageType[packageType as keyof typeof PackageType];
+    const searchResults = await packageApiClient.getSearchResults(packageTypeEnumValue, query);
+    setSearchResults(searchResults);
   };
 
   const handleAddToCart = (packageName: string) => {

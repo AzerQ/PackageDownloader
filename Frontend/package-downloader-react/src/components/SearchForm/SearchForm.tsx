@@ -1,18 +1,17 @@
 import React, { useEffect } from 'react';
-import { Tabs, Tab, TextField, Box, CircularProgress, Autocomplete } from '@mui/material';
+import { Tabs, Tab, TextField, Box, CircularProgress, Autocomplete, IconButton, Container, Paper } from '@mui/material';
 import { PackageType } from '../../services/apiClient';
 import { observer } from 'mobx-react-lite';
 import { packagesSearchStore } from '../../stores/PackagesStore';
+import { Search } from '@mui/icons-material';
 
-interface SearchFormProps {
 
-}
 
-const SearchForm: React.FC<SearchFormProps> = observer(({ }) => {
+const SearchForm: React.FC = observer(() => {
 
 
   const { searchQuery, setSearchQuery, getSearchSuggestions, setRepositoryType,
-          repositoryType, searchSuggestions, isSearchSuggestionsLoading, getSearchResults } = packagesSearchStore;
+    repositoryType, searchSuggestions, isSearchSuggestionsLoading, getSearchResults } = packagesSearchStore;
 
 
   // Используем эффект для вызова API при изменении inputValue
@@ -32,36 +31,49 @@ const SearchForm: React.FC<SearchFormProps> = observer(({ }) => {
         <Tab label="NuGet" value={PackageType.Nuget} />
       </Tabs>
 
-      <Autocomplete
-        freeSolo
-        options={searchSuggestions} // Предложения, полученные от API
-        loading={isSearchSuggestionsLoading}
-        onInputChange={(event, value) => setSearchQuery(value)} // Обновляем значение при вводе
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            sx={{ mt: 2 }}
-            label="Search for packages"
-            variant="outlined"
-            fullWidth
-            value={searchQuery}
-            onKeyPress={async (e) => {
-              if (e.key === 'Enter') await getSearchResults();
-            }}
-            InputProps={{
-              ...params.InputProps,
-              endAdornment: (
-                <>
-                  {isSearchSuggestionsLoading ? <CircularProgress color="inherit" size={20} /> : null}
-                  {params.InputProps.endAdornment}
-                </>
-              ),
-            }}
-          />
-        )}
-      />
+      <Paper
+        component="form"
+        sx={{ p: '2px 4px', display: 'flex', alignItems: 'center' }}
+      >
 
-      
+        <IconButton color="primary" aria-label="search packages" onClick={ async () => await getSearchResults()}>
+          <Search />
+        </IconButton>
+
+
+        <Autocomplete
+          freeSolo
+          options={searchSuggestions} // Предложения, полученные от API
+          loading={isSearchSuggestionsLoading}
+          onInputChange={(event, value) => setSearchQuery(value)} // Обновляем значение при вводе
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              sx={{ mt: 2, ml: 2, mb: 3, flex: 1, width: 1000 }}
+              label="Search for packages"
+              variant="standard"
+              fullWidth
+              value={searchQuery}
+              onKeyPress={async (e) => {
+                if (e.key === 'Enter') await getSearchResults();
+              }}
+              InputProps={{
+                ...params.InputProps,
+                endAdornment: (
+                  <>
+                    {isSearchSuggestionsLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                    {params.InputProps.endAdornment}
+                  </>
+                ),
+              }}
+            />
+          )}
+        />
+
+      </Paper>
+
+
+
 
     </Box>
   );

@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import { Tabs, Tab, TextField, Box, CircularProgress, Autocomplete } from '@mui/material';
-import { PackageType } from '../services/apiClient';
+import { PackageType } from '../../services/apiClient';
 import { observer } from 'mobx-react-lite';
-import { packagesSearchStore } from '../stores/PackagesStore';
+import { packagesSearchStore } from '../../stores/PackagesStore';
 
 interface SearchFormProps {
 
@@ -60,6 +60,8 @@ const SearchForm: React.FC<SearchFormProps> = observer(({ }) => {
           />
         )}
       />
+
+      
 
     </Box>
   );

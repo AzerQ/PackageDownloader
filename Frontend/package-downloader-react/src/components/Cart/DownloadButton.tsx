@@ -1,16 +1,13 @@
 import React from 'react';
 import { Button } from '@mui/material';
 import { observer } from 'mobx-react-lite';
-import { packageApiClient, PackageRequest } from '../services/apiClient';
-import { cartStore } from '../stores/CartStore';
-import { packagesSearchStore } from '../stores/PackagesStore';
-
-interface DownloadButtonProps {
-
-}
+import { packageApiClient, PackageRequest } from '../../services/apiClient';
+import { cartStore } from '../../stores/CartStore';
+import { packagesSearchStore } from '../../stores/PackagesStore';
+import { FileDownload } from '@mui/icons-material';
 
 
-const DownloadButton: React.FC<DownloadButtonProps> = observer(({ }) => {
+const DownloadPackagesButton: React.FC = observer(() => {
 
   const handleDownload = async () => {
     await packageApiClient.getPackagesAsArchive(new PackageRequest({
@@ -22,14 +19,15 @@ const DownloadButton: React.FC<DownloadButtonProps> = observer(({ }) => {
 
   return (
     <Button
+      startIcon={<FileDownload/>}
       variant="contained"
       color="primary"
       onClick={handleDownload}
-      sx={{ mt: 2, mb: 2 }}
+      sx={{ mr: 1 }}
     >
-      Generate packages archive
+      Download
     </Button>
   );
 });
 
-export default DownloadButton;
+export default DownloadPackagesButton;

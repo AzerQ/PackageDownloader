@@ -1,9 +1,9 @@
 import React from 'react';
 import { Card, CardContent, Grid } from '@mui/material';
-import { PackageInfo } from '../services/apiClient';
+import { PackageInfo } from '../../services/apiClient';
 import PackageSearchResult from './PackageSearchResult';
 import { observer } from 'mobx-react-lite';
-import { packagesSearchStore } from '../stores/PackagesStore';
+import { packagesSearchStore } from '../../stores/PackagesStore';
 
 interface SearchResultsListProps {
     

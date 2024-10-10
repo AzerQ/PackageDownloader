@@ -1,7 +1,7 @@
 import { Card, CardContent, Typography, Chip, Link, CardActions, Button } from "@mui/material";
-import { PackageDetails, PackageInfo } from "../services/apiClient";
+import { PackageDetails, PackageInfo } from "../../services/apiClient";
 import { observer } from "mobx-react-lite";
-import { cartStore } from "../stores/CartStore";
+import { cartStore } from "../../stores/CartStore";
 
 interface PackageSearchResultsProps {
     packageInfo: PackageInfo;

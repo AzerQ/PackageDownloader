@@ -5,11 +5,26 @@ namespace PackageDownloader.API
     public class Program
     {
 
-      
+
+        public static void ConfigureCors(IServiceCollection services)
+        {
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAnyHost", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                });
+            });
+        }
 
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            ConfigureCors(builder.Services);
 
             // Add services to the container.
 
@@ -21,6 +36,8 @@ namespace PackageDownloader.API
             builder.Services.AddPackageDownloaderServices();
 
             var app = builder.Build();
+
+            app.UseCors("AllowAnyHost");
 
             // Configure the HTTP request pipeline.
             //if (app.Environment.IsDevelopment())

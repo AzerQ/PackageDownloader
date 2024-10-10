@@ -5,15 +5,15 @@ namespace PackageDownloader.API
     public class Program
     {
 
-      
+
         public static void ConfigureCors(IServiceCollection services)
         {
-            // Добавление CORS политики
+
             services.AddCors(options =>
             {
-                options.AddPolicy("AllowLocalhost3000", policy =>
+                options.AddPolicy("AllowAnyHost", policy =>
                 {
-                    policy.WithOrigins("http://localhost:3000")
+                    policy.AllowAnyOrigin()
                           .AllowAnyHeader()
                           .AllowAnyMethod();
                 });
@@ -37,8 +37,7 @@ namespace PackageDownloader.API
 
             var app = builder.Build();
 
-            // Применение политики CORS
-            app.UseCors("AllowLocalhost3000");
+            app.UseCors("AllowAnyHost");
 
             // Configure the HTTP request pipeline.
             //if (app.Environment.IsDevelopment())

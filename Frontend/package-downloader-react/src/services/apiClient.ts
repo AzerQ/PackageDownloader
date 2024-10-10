@@ -378,6 +378,22 @@ function throwException(message: string, status: number, response: string, heade
         throw new ApiException(message, status, response, headers, null);
 }
 
-export const ApiDevURL: string  = 'http://localhost:5026';
+function getDevAPIUrl(): string {
+
+    const backendPort = 5026;
+    const frontendPort = 3000;
+    const protocol = location.protocol + '//';
+
+    let frontendLocation = location.hostname;
+    const gitDomain = 'app.github.dev';
+    let isGithubHosting = frontendLocation.endsWith(gitDomain);
+
+    const apiURL = isGithubHosting ? frontendLocation.replace(frontendPort.toString(), backendPort.toString())
+        : `${frontendLocation}:${backendPort}`;
+
+    return  protocol + apiURL;
+}
+
+export const ApiDevURL: string  = getDevAPIUrl();
 
 export const packageApiClient = new PackagesAPIClient(ApiDevURL);

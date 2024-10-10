@@ -1,13 +1,13 @@
-import { Grid, Card, CardContent, Typography, Chip, Link, CardHeader, IconButton, CardActions, Button } from "@mui/material";
+import { Card, CardContent, Typography, Chip, Link, CardActions, Button } from "@mui/material";
 import { PackageDetails, PackageInfo } from "../services/apiClient";
-import { AddBox } from "@mui/icons-material";
+import { observer } from "mobx-react-lite";
+import { cartStore } from "../stores/CartStore";
 
 interface PackageSearchResultsProps {
     packageInfo: PackageInfo;
-    onAddToCart: (packageInfo: PackageDetails) => void;
 }
 
-const PackageSearchResult: React.FC<PackageSearchResultsProps> = ({ packageInfo, onAddToCart }) => {
+const PackageSearchResult: React.FC<PackageSearchResultsProps> = observer(({ packageInfo }) => {
     return (
             <Card variant="outlined">
                 <CardContent>
@@ -35,7 +35,7 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = ({ packageInfo,
                 <CardActions>
                     <Button
                         color="primary"
-                        onClick={() => onAddToCart(new PackageDetails({
+                        onClick={() => cartStore.addCartItem(new PackageDetails({
                             packageID: packageInfo.id,
                             packageVersion: packageInfo.currentVersion
                         }))}
@@ -46,6 +46,6 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = ({ packageInfo,
                 </CardActions>
             </Card>
     );
-};
+});
 
 export default PackageSearchResult;

@@ -1,84 +1,68 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Tabs, Tab, TextField, Box, CircularProgress, Autocomplete } from '@mui/material';
-import { packageApiClient, PackageType } from '../services/apiClient';
+import { PackageType } from '../services/apiClient';
+import { observer } from 'mobx-react-lite';
+import { packagesSearchStore } from '../stores/PackagesStore';
 
 interface SearchFormProps {
-  onSearch: (packageType: string, query: string) => void;
+
 }
 
-const SearchForm: React.FC<SearchFormProps> = ({ onSearch }) => {
-  const [packageType, setPackageType] = useState('Npm');
-  const [query, setQuery] = useState('');
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+const SearchForm: React.FC<SearchFormProps> = observer(({ }) => {
 
-  // Функция для получения подсказок при изменении ввода
-  const fetchSuggestions = async (query: string) => {
-      try {
-          setLoading(true);
-          const packageTypeEnumValue = PackageType[packageType as keyof typeof PackageType];
-          const results = await packageApiClient.getSearchSuggestions(packageTypeEnumValue, query);
-          setSuggestions(results);
-      } catch (error) {
-          console.error("Error fetching suggestions:", error);
-      } finally {
-          setLoading(false);
-      }
-  };
+
+  const { searchQuery, setSearchQuery, getSearchSuggestions, setRepositoryType,
+          repositoryType, searchSuggestions, isSearchSuggestionsLoading, getSearchResults } = packagesSearchStore;
+
 
   // Используем эффект для вызова API при изменении inputValue
   useEffect(() => {
-      if (query.length > 2) {
-          fetchSuggestions(query);
-      } else {
-          setSuggestions([]);
-      }
-  }, [query]);
-
-  const handleSearch = () => {
-    if (query.trim()) {
-      onSearch(packageType, query);
+    if (searchQuery.length > 2) {
+      getSearchSuggestions();
     }
-  };
+  }, [searchQuery]);
+
+
+  const onRepositoryTypeChange = (e: React.SyntheticEvent, newValue: PackageType) => setRepositoryType(newValue);
 
   return (
     <Box sx={{ mb: 3 }}>
-      <Tabs value={packageType} onChange={(e, newValue) => setPackageType(newValue)} centered>
-        <Tab label="NPM" value="Npm" />
-        <Tab label="NuGet" value="Nuget" />
+      <Tabs value={repositoryType} onChange={onRepositoryTypeChange} centered>
+        <Tab label="NPM" value={PackageType.Npm} />
+        <Tab label="NuGet" value={PackageType.Nuget} />
       </Tabs>
-    
-    <Autocomplete
-            freeSolo
-            options={suggestions} // Предложения, полученные от API
-            loading={loading}
-            onInputChange={(event, value) => setQuery(value)} // Обновляем значение при вводе
-            renderInput={(params) => (
-                <TextField
-                    {...params}
-                    sx={{ mt: 2 }}
-                    label="Search for packages"
-                    variant="outlined"
-                    fullWidth
-                    value={query}
-                    onKeyPress={(e) => {
-                        if (e.key === 'Enter') handleSearch();
-                      }}
-                    InputProps={{
-                        ...params.InputProps,
-                        endAdornment: (
-                            <>
-                                {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                                {params.InputProps.endAdornment}
-                            </>
-                        ),
-                    }}
-                />
-            )}
-        />
+
+      <Autocomplete
+        freeSolo
+        options={searchSuggestions} // Предложения, полученные от API
+        loading={isSearchSuggestionsLoading}
+        onInputChange={(event, value) => setSearchQuery(value)} // Обновляем значение при вводе
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            sx={{ mt: 2 }}
+            label="Search for packages"
+            variant="outlined"
+            fullWidth
+            value={searchQuery}
+            onKeyPress={async (e) => {
+              if (e.key === 'Enter') await getSearchResults();
+            }}
+            InputProps={{
+              ...params.InputProps,
+              endAdornment: (
+                <>
+                  {isSearchSuggestionsLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                  {params.InputProps.endAdornment}
+                </>
+              ),
+            }}
+          />
+        )}
+      />
 
     </Box>
   );
-};
+});
 
 export default SearchForm;

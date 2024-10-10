@@ -17,12 +17,6 @@ const App: React.FC = () => {
       <SearchForm />
       <PackageCart/>
 
-      <Typography variant="h6" gutterBottom>
-        Search Results
-      </Typography>
-
-      <SearchResults/>
-
     </Container>
 
   );

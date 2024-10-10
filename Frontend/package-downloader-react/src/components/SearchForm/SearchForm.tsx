@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
-import { Tabs, Tab, TextField, Box, CircularProgress, Autocomplete, IconButton, Container, Paper } from '@mui/material';
+import { Tabs, Tab, TextField, Box, CircularProgress, Autocomplete, IconButton, Container, Paper, Typography } from '@mui/material';
 import { PackageType } from '../../services/apiClient';
 import { observer } from 'mobx-react-lite';
 import { packagesSearchStore } from '../../stores/PackagesStore';
 import { Search } from '@mui/icons-material';
+import SearchResults from './SearchResultsList';
 
 
 
@@ -72,7 +73,7 @@ const SearchForm: React.FC = observer(() => {
 
       </Paper>
 
-
+      <SearchResults/>
 
 
     </Box>

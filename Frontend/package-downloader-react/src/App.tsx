@@ -3,7 +3,6 @@ import { Box, Container, Typography } from '@mui/material';
 import SearchForm from './components/SearchForm/SearchForm';
 import SearchResults from './components/SearchForm/SearchResultsList';
 import PackageCart from './components/Cart/PackageCart';
-import DownloadPackagesButton from './components/Cart/DownloadButton';
 import { packagesSearchStore } from './stores/PackagesStore';
 
 const App: React.FC = () => {
@@ -12,7 +11,7 @@ const App: React.FC = () => {
 
     <Container maxWidth="xl">
       <Typography variant="h4" align="center" gutterBottom>
-        Package Manager
+        Package Downloader
       </Typography>
 
       <SearchForm />

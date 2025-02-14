@@ -8,7 +8,7 @@ namespace PackageDownloader.Application
 {
     public static class DIExtension
     {
-        private static IPackageDownloadService PacakgeDownloaderFactory(IServiceProvider serviceProvider,
+        private static IPackageDownloadService PackageDownloaderFactory(IServiceProvider serviceProvider,
                                                                    PackageType packageType)
         {
             return packageType switch
@@ -45,7 +45,7 @@ namespace PackageDownloader.Application
             services.AddTransient<NpmPackageDownloaderService>();
             services.AddTransient<Func<PackageType, IPackageDownloadService>>(serviceProvider => packageType =>
             {
-                return PacakgeDownloaderFactory(serviceProvider, packageType);
+                return PackageDownloaderFactory(serviceProvider, packageType);
             });
 
             // Pacakge search services

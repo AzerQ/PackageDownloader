@@ -12,6 +12,10 @@ interface PackageCartProps {
 
 const PackageCart: React.FC<PackageCartProps> = observer(({ }) => {
   const { cartItems, removeCartItem } = cartStore;
+  
+  if (cartItems.length === 0)
+    return <></>
+  
   return (
     <Box
       sx={{

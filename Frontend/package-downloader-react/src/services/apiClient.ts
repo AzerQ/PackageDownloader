@@ -222,6 +222,7 @@ export class PackageInfo implements IPackageInfo {
     tags?: string[] | undefined;
     authorInfo?: string | undefined;
     repositoryUrl?: string | undefined;
+    iconUrl?: string | undefined;
 
     constructor(data?: IPackageInfo) {
         if (data) {
@@ -249,6 +250,7 @@ export class PackageInfo implements IPackageInfo {
             }
             this.authorInfo = _data["authorInfo"];
             this.repositoryUrl = _data["repositoryUrl"];
+            this.iconUrl = _data["iconUrl"];
         }
     }
 
@@ -276,6 +278,7 @@ export class PackageInfo implements IPackageInfo {
         }
         data["authorInfo"] = this.authorInfo;
         data["repositoryUrl"] = this.repositoryUrl;
+        data["iconUrl"] = this.iconUrl;
         return data;
     }
 }
@@ -288,6 +291,7 @@ export interface IPackageInfo {
     tags?: string[] | undefined;
     authorInfo?: string | undefined;
     repositoryUrl?: string | undefined;
+    iconUrl?: string | undefined;
 }
 
 export class PackageRequest implements IPackageRequest {

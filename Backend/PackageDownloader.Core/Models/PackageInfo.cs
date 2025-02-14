@@ -9,6 +9,6 @@
         public required IEnumerable<string> Tags { get; set; }
         public required string AuthorInfo { get; set; }
         public string? RepositoryUrl { get; set; }
-
+        public string? IconUrl { get; set; }
     }
 }

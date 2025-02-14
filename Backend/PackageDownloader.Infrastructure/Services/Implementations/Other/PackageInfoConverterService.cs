@@ -34,7 +34,7 @@ namespace PackageDownloader.Infrastructure.Services.Implementations
                             .GetStringOrDefault();
 
             bool hasProjectUrl = element.TryGetProperty("projectUrl", out var projectUrl);
-
+            bool hasIconUrl = element.TryGetProperty("iconUrl", out var iconUrl);
 
             PackageInfo pacakgeInfo = new()
             {
@@ -44,7 +44,8 @@ namespace PackageDownloader.Infrastructure.Services.Implementations
                 AuthorInfo = author,
                 RepositoryUrl = hasProjectUrl ? projectUrl.GetStringOrDefault() : "",
                 Tags = element.GetStrings(arrayFieldName: "tags"),
-                OtherVersions = element.GetStrings(arrayFieldName: "versions", itemField: "version")
+                OtherVersions = element.GetStrings(arrayFieldName: "versions", itemField: "version"),
+                IconUrl = hasIconUrl ? iconUrl.GetStringOrDefault() : ""
             };
 
             return pacakgeInfo;

@@ -52,7 +52,7 @@ namespace PackageDownloader.API
             {
                 FileProvider = new PhysicalFileProvider(
                 Path.Combine(Directory.GetCurrentDirectory(), "UI")),
-                RequestPath = "/UI",
+                RequestPath = "",
                 EnableDefaultFiles = true
             });
 

@@ -1,44 +1,21 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <title>Скачивание пакетов</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="spinner.css">
+    <meta charset="utf-8" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="Web site created using create-react-app" />
+    <link rel="apple-touch-icon" href="/logo192.png" />
+    <link rel="manifest" href="/manifest.json" />
+    <title>Package downloader</title>
+    <script defer="defer" src="/static/js/main.f94b096b.js"></script>
+    <link href="/static/css/main.e6c13ad2.css" rel="stylesheet">
 </head>
 
-<body>
-    <form id="downloadForm">
-        <label for="packageType">Тип пакета:</label>
-        <select id="packageType">
-            <option value="Nuget">Nuget</option>
-            <option value="Npm">Npm</option>
-        </select>
-
-        <label for="packageId">ID пакета:</label>
-        <input type="text" id="packageId" required>
-
-        <label for="packageVersion">Версия пакета:</label>
-        <input type="text" id="packageVersion">
-
-        <label for="sdkVersion">Версия SDK:</label>
-        <input type="text" id="sdkVersion">
-
-        <button type="submit">Скачать</button>
-
-        <div id="loader" hidden>
-            <div id="preparePackage">
-                <img height="70" width="70" src="https://www.svgrepo.com/show/471737/package-search.svg">
-                <p>Собираем пакет...</p>
-            </div>
-
-            <div class="loader"></div>
-        </div>
-        
-    </form>
-    
+<body><noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
 </body>
-<script src="script.js"></script>
 
 </html>

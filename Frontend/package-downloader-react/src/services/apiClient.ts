@@ -223,6 +223,8 @@ export class PackageInfo implements IPackageInfo {
     authorInfo?: string | undefined;
     repositoryUrl?: string | undefined;
     iconUrl?: string | undefined;
+    downloadsCount?: number | undefined;
+    packageUrl? : string | undefined;
 
     constructor(data?: IPackageInfo) {
         if (data) {
@@ -251,6 +253,8 @@ export class PackageInfo implements IPackageInfo {
             this.authorInfo = _data["authorInfo"];
             this.repositoryUrl = _data["repositoryUrl"];
             this.iconUrl = _data["iconUrl"];
+            this.downloadsCount = _data["downloadsCount"];
+            this.packageUrl = _data["packageUrl"];
         }
     }
 
@@ -279,6 +283,8 @@ export class PackageInfo implements IPackageInfo {
         data["authorInfo"] = this.authorInfo;
         data["repositoryUrl"] = this.repositoryUrl;
         data["iconUrl"] = this.iconUrl;
+        data["downloadsCount"] = this.downloadsCount;
+        data["packageUrl"] = this.packageUrl;
         return data;
     }
 }
@@ -292,6 +298,8 @@ export interface IPackageInfo {
     authorInfo?: string | undefined;
     repositoryUrl?: string | undefined;
     iconUrl?: string | undefined;
+    downloadsCount?: number | undefined;
+    packageUrl? : string | undefined;
 }
 
 export class PackageRequest implements IPackageRequest {

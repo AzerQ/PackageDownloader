@@ -10,5 +10,8 @@
         public required string AuthorInfo { get; set; }
         public string? RepositoryUrl { get; set; }
         public string? IconUrl { get; set; }
+        
+        public string? PackageUrl { get; set; }
+        public long DownloadsCount { get; set; }
     }
 }

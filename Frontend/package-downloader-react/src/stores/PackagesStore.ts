@@ -25,6 +25,10 @@ class PackagesSearchStore {
         this.searchSuggestions = [];
     }
 
+    clearSearchQuery = () => {
+        this.searchQuery = '';
+    }
+
     clearSearchResults = () => {
         this.fondedPackages = [];
     }
@@ -68,9 +72,9 @@ class PackagesSearchStore {
     setRepositoryType= (packageType: PackageType) => {
 
         this.repositoryType = packageType;
-
         this.clearSuggestions();
         this.clearSearchResults();
+        this.clearSearchQuery();
         cartStore.clearCartItems();
     }
 

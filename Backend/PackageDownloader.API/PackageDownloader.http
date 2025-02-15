@@ -2,7 +2,7 @@
 @NpmJSApiHost = https://www.npmjs.com
 @NugetApiHost = https://azuresearch-usnc.nuget.org
 
-@NPMPackageName = react
+@NPMPackageName = lodash
 @NugetPackageName = Dapper
 
 # Найти пакеты на сайте nuget.org через собственное API
@@ -23,15 +23,31 @@ Accept: application/json
 
 ###
 
-# Найти пакеты через API npmjs.com
+# Получить подсказки через API npmjs.com
 GET {{NpmJSApiHost}}/search/suggestions?q={{NPMPackageName}}
+Accept: application/json
 
 ###
 
+# Найти пакеты через API npmjs.com
+GET {{NpmJSApiHost}}/search?q={{NPMPackageName}}
+Accept: application/json
+X-Spiferack: 1
+
+### 
+
+GET {{NpmJSApiHost}}/package/{{NPMPackageName}}
+Accept: application/json
+X-Spiferack: 1
+###
+
+
 # Найти пакеты через API Nuget
 GET {{NugetApiHost}}/query?q={{NugetPackageName}}
+Accept: application/json
 
 ###
 
 # Полуить подсказки поиска через API Nuget
 GET {{NugetApiHost}}/autocomplete?q={{NugetPackageName}}
+Accept: application/json

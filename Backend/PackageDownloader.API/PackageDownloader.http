@@ -1,6 +1,37 @@
 @PackageDownloader_HostAddress = http://localhost:5026
+@NpmJSApiHost = https://www.npmjs.com
+@NugetApiHost = https://azuresearch-usnc.nuget.org
 
-GET {{PackageDownloader_HostAddress}}/weatherforecast/
+@NPMPackageName = react
+@NugetPackageName = Dapper
+
+# Найти пакеты на сайте nuget.org через собственное API
+GET {{PackageDownloader_HostAddress}}/api/PackageInfo/GetSearchResults?packageType=Nuget&namePart={{NugetPackageName}}
 Accept: application/json
 
 ###
+
+# Найти пакеты на сайте npmjs.com через собственное API
+GET {{PackageDownloader_HostAddress}}/api/PackageInfo/GetSearchResults?packageType=NPM&namePart={{NPMPackageName}}
+Accept: application/json
+
+###
+
+# Полуть автокомплит на сайте npmjs.com через собственное API
+GET {{PackageDownloader_HostAddress}}/api/PackageInfo/GetSearchSuggestions?packageType=Npm&namePart={{NPMPackageName}}
+Accept: application/json
+
+###
+
+# Найти пакеты через API npmjs.com
+GET {{NpmJSApiHost}}/search/suggestions?q={{NPMPackageName}}
+
+###
+
+# Найти пакеты через API Nuget
+GET {{NugetApiHost}}/query?q={{NugetPackageName}}
+
+###
+
+# Полуить подсказки поиска через API Nuget
+GET {{NugetApiHost}}/autocomplete?q={{NugetPackageName}}

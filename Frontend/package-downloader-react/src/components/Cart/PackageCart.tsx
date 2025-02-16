@@ -1,11 +1,12 @@
 import React from 'react';
-import { List, ListItem, ListItemText, IconButton, Box, Typography, Avatar } from '@mui/material';
+import { List, ListItem, ListItemText, IconButton, Box, Typography, Avatar, FormControl, Select, MenuItem, InputLabel } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { observer } from 'mobx-react-lite';
 import { cartStore } from '../../stores/CartStore';
 import DownloadPackagesButton from './DownloadButton';
 import ClearCartButton from './ClearCartButton';
 import { packagesSearchStore } from '../../stores/PackagesStore';
+
 
 interface PackageCartProps {
 
@@ -17,7 +18,7 @@ const PackageCart: React.FC<PackageCartProps> = observer(({ }) => {
   if (cartItems.length === 0)
     return <></>
 
-
+  let availableSdks = cartStore.getAvailableSdkVersions();
 
   return (
     <Box
@@ -35,6 +36,29 @@ const PackageCart: React.FC<PackageCartProps> = observer(({ }) => {
       <Typography variant="h6" gutterBottom>
         {`${cartItems.length} ${packagesSearchStore.repositoryType.toLowerCase()} packages selected`}
       </Typography>
+
+      {availableSdks.length > 0 &&
+        (
+          <FormControl sx={{ m: 0, minWidth: 160 }} size="small">
+            <InputLabel id="selectedPackagesSdk">
+              SDK version
+            </InputLabel>
+            <Select
+              value={cartStore.getSdkVersion()}
+              onChange={(e) => cartStore.setSdkVersion(e.target.value)}
+              labelId="selectedPackagesSdk"
+              label="SDK version"
+            >
+              {
+                availableSdks.map((sdkVer) => (
+                  <MenuItem key={sdkVer} value={sdkVer}>
+                    {sdkVer}
+                  </MenuItem>
+                ))}
+            </Select>
+          </FormControl>
+        )}
+
       <List>
         {cartItems.map((packageDetailItem, index) => (
           <ListItem key={index} divider>

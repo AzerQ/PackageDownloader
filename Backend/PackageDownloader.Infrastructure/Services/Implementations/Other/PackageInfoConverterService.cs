@@ -19,17 +19,18 @@ namespace PackageDownloader.Infrastructure.Services.Implementations
             var npmUrl = element.GetJsonElement("links.npm").GetStringOrDefault();
             
             string authors = string.Join(",", element.GetStrings("maintainers", itemField: "username"));
+            string packageLastVersion = element.GetProperty("version").GetStringOrDefault();
             
             PackageInfo pacakgeInfo = new()
             {
                 Id = element.GetProperty("name").GetStringOrDefault(),
-                CurrentVersion = element.GetProperty("version").GetStringOrDefault(),
+                CurrentVersion = packageLastVersion,
                 Description = element.GetProperty("description").GetStringOrDefault(),
                 AuthorInfo = authors,
                 RepositoryUrl = repositoryUrl,
                 PackageUrl = npmUrl,
                 Tags = element.GetStrings(arrayFieldName: "keywords"),
-                OtherVersions = [],
+                OtherVersions = [packageLastVersion],
                 DownloadsCount = element.GetJsonElement("downloads.monthly").GetInt64()
             };
 

@@ -12,6 +12,7 @@ namespace PackageDownloader.API.Controllers
     {
         
         [HttpGet("[action]")]
+        [Produces("application/json")]
         public async Task<IEnumerable<PackageInfo>> GetSearchResults([FromQuery] PackageType packageType, [FromQuery] string namePart)
         {
             var pacakgeSearchService = serviceAccessor(packageType);
@@ -19,6 +20,7 @@ namespace PackageDownloader.API.Controllers
         }
 
         [HttpGet("[action]")]
+        [Produces("application/json")]
         public async Task<IEnumerable<string>> GetSearchSuggestions([FromQuery] PackageType packageType, [FromQuery] string namePart)
         {
             var packageSearchService = serviceAccessor(packageType);

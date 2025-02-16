@@ -4,6 +4,13 @@
 
 @NPMPackageName = lodash
 @NugetPackageName = Dapper
+@AIQuestion = 2D графика
+
+# Рекомендации по пакетам через AI
+
+GET {{PackageDownloader_HostAddress}}/api/Recommendations/GetRecommendations?packageType=Nuget&userPrompt={{AIQuestion}}
+
+###
 
 # Найти пакеты на сайте nuget.org через собственное API
 GET {{PackageDownloader_HostAddress}}/api/PackageInfo/GetSearchResults?packageType=Nuget&namePart={{NugetPackageName}}

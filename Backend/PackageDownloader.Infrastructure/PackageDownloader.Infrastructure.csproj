@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Utis\**" />
+    <EmbeddedResource Remove="Utis\**" />
+    <None Remove="Utis\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\PackageDownloader.AI\PackageDownloader.AI.csproj" />
     <ProjectReference Include="..\PackageDownloader.Core\PackageDownloader.Core.csproj" />
   </ItemGroup>
@@ -24,10 +30,6 @@
       <LastGenOutput>ProjectTemplates.Designer.cs</LastGenOutput>
       <Generator>ResXFileCodeGenerator</Generator>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Utis\" />
   </ItemGroup>
 
 </Project>

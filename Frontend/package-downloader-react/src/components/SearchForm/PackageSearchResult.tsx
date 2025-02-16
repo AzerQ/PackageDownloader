@@ -100,10 +100,10 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = observer(({ pac
                                 color="primary"
                                 onClick={() => {
                                     cartStore.addCartItem(
-                                        new PackageDetails({
+                                        {
                                             packageID: packageInfo.id,
                                             packageVersion: selectedVersion,
-                                        })
+                                        }
                                     )
                                 }
                                 }

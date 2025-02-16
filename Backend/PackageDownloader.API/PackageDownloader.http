@@ -6,10 +6,18 @@
 @NugetPackageName = Dapper
 @AIQuestion = 2D графика
 
+# Поисковые подcказки яндекса
+
+GET https://suggest.yandex.ru/suggest-ff.cgi?part=Ктоя
+Accept: application/json
+
+###
+
+
 # Рекомендации по пакетам через AI
 
 GET {{PackageDownloader_HostAddress}}/api/Recommendations/GetRecommendations?packageType=Nuget&userPrompt={{AIQuestion}}
-
+Accept: application/json
 ###
 
 # Найти пакеты на сайте nuget.org через собственное API

@@ -53,7 +53,7 @@ namespace PackageDownloader.API
             app.UseFileServer(new FileServerOptions()
             {
                 FileProvider = new PhysicalFileProvider(
-                Path.Combine(Directory.GetCurrentDirectory(), "UI")),
+                Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")),
                 RequestPath = "",
                 EnableDefaultFiles = true
             });

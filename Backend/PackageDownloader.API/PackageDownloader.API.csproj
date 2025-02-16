@@ -31,19 +31,23 @@
     <ProjectReference Include="..\PackageDownloader.Core\PackageDownloader.Core.csproj" />
   </ItemGroup>
 
+  <Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
+  <!-- Ensure Node.js is installed -->
+  <Exec Command="node --version" IgnoreExitCode="false" />
+  <!-- <Error Condition="'$(LastExitCode)' != '0'" Text="Node.js is required to publish this application." /> -->
+
+  <!-- Run webpack or other build tools -->
+  <Exec WorkingDirectory="../../Frontend/package-downloader-react" Command="npm install" />
+  <Exec WorkingDirectory="../../Frontend/package-downloader-react" Command="npm run build" />
+
+  <!-- Collect the generated files and add them to the publish output -->
   <ItemGroup>
-    <None Update="UI\index.html">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="UI\script.js">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="UI\spinner.css">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="UI\styles.css">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <DistFiles Include="../../Frontend/package-downloader-react/build/**" />
+    <ResolvedFileToPublish Include="%(DistFiles.Identity)" Exclude="%(ResolvedFileToPublish.Identity)">
+      <RelativePath>wwwroot/%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </ResolvedFileToPublish>
   </ItemGroup>
+</Target>
 
 </Project>

@@ -202,6 +202,7 @@ export class PackagesAPIClient {
 export interface PackageDetails {
     packageID: string;
     packageVersion: string;
+    packageIconUrl: string;
 }
 
 export interface IPackageInfo {

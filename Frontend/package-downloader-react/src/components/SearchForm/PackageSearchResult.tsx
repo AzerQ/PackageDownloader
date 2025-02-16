@@ -103,6 +103,7 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = observer(({ pac
                                         {
                                             packageID: packageInfo.id,
                                             packageVersion: selectedVersion,
+                                            packageIconUrl: packageInfo.getPackageIconOrStockImage()
                                         }
                                     )
                                 }

@@ -41,7 +41,7 @@ const PackageCart: React.FC<PackageCartProps> = observer(({ }) => {
             <Avatar
               sx={{ width: 32, height: 32, marginRight: 1 }}
               alt="Package icon"
-              src={packagesSearchStore.getPackageIcon(packageDetailItem.packageID)}
+              src={packageDetailItem.packageIconUrl}
               variant="square"
             />
             <ListItemText primary={packageDetailItem.packageID} secondary={packageDetailItem.packageVersion} />

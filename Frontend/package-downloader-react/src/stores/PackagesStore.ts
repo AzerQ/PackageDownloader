@@ -82,14 +82,14 @@ class PackagesSearchStore {
     getFullPackageItem = (packageId: string) =>
         this.fondedPackages.find(packageItem => packageItem.id === packageId)
 
-    getPackageIcon = (packageId: string) => {
-        let packageItem = this.getFullPackageItem(packageId);
-        console.log("packageItem", packageItem);
-        return packageItem?.getPackageIconOrStockImage();
-    }
-
     private setIsInCartItemFlag = (packageId: string, isInCartItem: boolean) => {
+       
         let packageIndex = this.fondedPackages.findIndex(packageItem => packageItem.id === packageId);
+
+        const NOT_FOUND = -1;
+        if (packageIndex === NOT_FOUND)
+            return;
+        
         let originalPackage = this.getFullPackageItem(packageId);
         let packageItem = cloneObject(originalPackage);
 

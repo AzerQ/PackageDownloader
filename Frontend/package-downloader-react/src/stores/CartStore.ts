@@ -1,5 +1,6 @@
 import { makeAutoObservable } from "mobx";
 import { PackageDetails } from "../services/apiClient";
+import { packagesSearchStore } from "./PackagesStore";
 
 class CartStore {
     
@@ -10,19 +11,30 @@ class CartStore {
     }
 
     addCartItem = (packageDetail: PackageDetails) => {
-        if (this.cartItems.some(element => element.equals(packageDetail)))
+        let itemAlreadyAddedInCart = packagesSearchStore.getFullPackageItem(packageDetail.packageID)?.isAddedInCart;
+        if (itemAlreadyAddedInCart)
             return;
 
-        this.cartItems = [...this.cartItems, packageDetail]
+        this.cartItems = [...this.cartItems, packageDetail];
+        packagesSearchStore.markAsAddedCartItem(packageDetail.packageID);
     }
 
     removeCartItem = (packageDetail: PackageDetails) => {
-        this.cartItems =  this.cartItems.filter((item) => !item.equals(packageDetail));
+        let newCartItems: PackageDetails[] = [];
+        for (const cartItem of this.cartItems) {
+            if (!cartItem.equals(packageDetail))
+                newCartItems.push(cartItem);
+            else
+                packagesSearchStore.markAsRemovedCartItem(packageDetail.packageID);
+        }
+        this.cartItems = newCartItems
     }
 
     clearCartItems = () => {
+        this.cartItems.forEach(({packageID}) => packagesSearchStore.markAsRemovedCartItem(packageID));
         this.cartItems = [];
     }
+
 
 }
 

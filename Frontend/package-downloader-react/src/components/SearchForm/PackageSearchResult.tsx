@@ -1,30 +1,35 @@
-import { Card, CardContent, Typography, Chip, Link, CardActions, Button, CardHeader, Avatar, Badge, Stack } from "@mui/material";
+import { Card, CardContent, Typography, Chip, Link, CardActions, Button, CardHeader, Avatar, Badge, Stack, Select, MenuItem, FormControl, InputLabel, Box } from "@mui/material";
 import { PackageDetails, PackageInfo } from "../../services/apiClient";
 import { observer } from "mobx-react-lite";
 import { cartStore } from "../../stores/CartStore";
 import DownloadIcon from '@mui/icons-material/Download'; // Импортируем иконку загрузки
-import { GitHub, Public } from "@mui/icons-material";
+import { Add, GitHub, Label, Public } from "@mui/icons-material";
 import { packagesSearchStore } from "../../stores/PackagesStore";
+import { compareVersions } from "../../utils/versionsComparer";
+import { useState } from "react";
 
 interface PackageSearchResultsProps {
     packageInfo: PackageInfo;
 }
 
 const PackageSearchResult: React.FC<PackageSearchResultsProps> = observer(({ packageInfo }) => {
+
+    let [selectedVersion, setSelectedVersion] = useState<string>(packageInfo.currentVersion);
+
     return (
         <Card variant="outlined">
             {/* Заголовок карточки */}
             <CardHeader
                 avatar={
-                    <Avatar 
-                        sx={{width:64, height:64}}
+                    <Avatar
+                        sx={{ width: 64, height: 64 }}
                         alt="Package icon"
-                        src={Boolean(packageInfo.iconUrl) ? packageInfo.iconUrl : "https://img.icons8.com/isometric/64/box.png"}
+                        src={packageInfo.getPackageIconOrStockImage()}
                         variant="square"
                     />
                 }
                 title={packageInfo.id}
-                subheader={"Version: " + packageInfo.currentVersion}
+                subheader={"Latest version: " + packageInfo.currentVersion}
             />
 
             {/* Блок с количеством скачиваний */}
@@ -68,22 +73,47 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = observer(({ pac
 
             {/* Действия с карточкой */}
             <CardActions>
-                <Button
-                    color="primary"
-                    onClick={() => cartStore.addCartItem(new PackageDetails({
-                        packageID: packageInfo.id,
-                        packageVersion: packageInfo.currentVersion
-                    }))}
-                    variant="contained"
-                >
-                    Add
-                </Button>
-                <Button
-                    color="secondary"
-                    variant="contained"
-                >
-                    Select version
-                </Button>
+                <Typography variant="overline" gutterBottom sx={{ display: 'block', mb: 0.5 }}>
+                    Chose version
+                </Typography>
+                {packageInfo.otherVersions?.length && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}> {/* Используем Box для создания гибкого контейнера */}
+                        <FormControl sx={{ m: 0, minWidth: 120 }} size="small">
+                            <Select
+                                value={selectedVersion}
+                                onChange={(e) => setSelectedVersion(e.target.value)}
+                            >
+                                {packageInfo.otherVersions
+                                    ?.sort((a, b) => compareVersions(a, b, "DESC"))
+                                    .map((ver) => (
+                                        <MenuItem key={packageInfo.id + ver} value={ver}>
+                                            {ver}
+                                        </MenuItem>
+                                    ))}
+                            </Select>
+                        </FormControl>
+                        {
+                            !packageInfo.isAddedInCart &&
+                            (<Button
+                                startIcon={<Add />}
+                                sx={{ m: 0 }}
+                                color="primary"
+                                onClick={() => {
+                                    cartStore.addCartItem(
+                                        new PackageDetails({
+                                            packageID: packageInfo.id,
+                                            packageVersion: selectedVersion,
+                                        })
+                                    )
+                                }
+                                }
+                                variant="contained"
+                            >
+                                Add
+                            </Button>)
+                        }
+                    </Box>
+                )}
             </CardActions>
         </Card>
     );

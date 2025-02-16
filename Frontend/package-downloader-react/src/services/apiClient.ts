@@ -169,8 +169,8 @@ export class PackagesAPIClient {
 }
 
 export class PackageDetails implements IPackageDetails {
-    packageID?: string | undefined;
-    packageVersion?: string | undefined;
+    packageID!: string;
+    packageVersion!: string;
 
     constructor(data?: IPackageDetails) {
         if (data) {
@@ -210,13 +210,13 @@ export class PackageDetails implements IPackageDetails {
 }
 
 export interface IPackageDetails {
-    packageID?: string | undefined;
-    packageVersion?: string | undefined;
+    packageID: string;
+    packageVersion: string;
 }
 
 export class PackageInfo implements IPackageInfo {
-    id: string | undefined;
-    currentVersion?: string | undefined;
+    id!: string;
+    currentVersion!: string;
     otherVersions?: string[] | undefined;
     description?: string | undefined;
     tags?: string[] | undefined;
@@ -225,6 +225,12 @@ export class PackageInfo implements IPackageInfo {
     iconUrl?: string | undefined;
     downloadsCount?: number | undefined;
     packageUrl? : string | undefined;
+
+    isAddedInCart: boolean = false;
+
+    getPackageIconOrStockImage() : string {
+        return this.iconUrl ? this.iconUrl : "https://img.icons8.com/isometric/64/box.png";
+    }
 
     constructor(data?: IPackageInfo) {
         if (data) {
@@ -285,13 +291,14 @@ export class PackageInfo implements IPackageInfo {
         data["iconUrl"] = this.iconUrl;
         data["downloadsCount"] = this.downloadsCount;
         data["packageUrl"] = this.packageUrl;
+        data["isAddedInCart"] =this.isAddedInCart;
         return data;
     }
 }
 
 export interface IPackageInfo {
-    id?: string | undefined;
-    currentVersion?: string | undefined;
+    id: string;
+    currentVersion: string;
     otherVersions?: string[] | undefined;
     description?: string | undefined;
     tags?: string[] | undefined;
@@ -300,6 +307,9 @@ export interface IPackageInfo {
     iconUrl?: string | undefined;
     downloadsCount?: number | undefined;
     packageUrl? : string | undefined;
+
+    // Поле-флаг, что запись включена в корзину
+    isAddedInCart : boolean;
 }
 
 export class PackageRequest implements IPackageRequest {

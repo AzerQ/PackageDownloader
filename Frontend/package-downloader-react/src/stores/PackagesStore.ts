@@ -21,7 +21,7 @@ class PackagesSearchStore {
         this.searchQuery = searchQuery;
     }
 
-    clearSuggestions= () => {
+    clearSuggestions = () => {
         this.searchSuggestions = [];
     }
 
@@ -69,7 +69,7 @@ class PackagesSearchStore {
 
     }
 
-    setRepositoryType= (packageType: PackageType) => {
+    setRepositoryType = (packageType: PackageType) => {
 
         this.repositoryType = packageType;
         this.clearSuggestions();
@@ -77,6 +77,32 @@ class PackagesSearchStore {
         this.clearSearchQuery();
         cartStore.clearCartItems();
     }
+
+    getFullPackageItem = (packageId: string) =>
+        this.fondedPackages.find(packageItem => packageItem.id === packageId)
+
+    getPackageIcon = (packageId: string) => {
+        let packageItem = this.getFullPackageItem(packageId);
+        console.log("packageItem", packageItem);
+        return packageItem?.getPackageIconOrStockImage();
+    }
+
+    private setIsInCartItemFlag = (packageId: string, isInCartItem: boolean) => {
+        let packageIndex = this.fondedPackages.findIndex(packageItem => packageItem.id === packageId);
+        let originalPackage = this.getFullPackageItem(packageId);
+        let packageItem = Object.assign(Object.create(Object.getPrototypeOf(originalPackage)), originalPackage)
+
+        if (packageItem) {
+            packageItem.isAddedInCart = isInCartItem;
+            this.fondedPackages[packageIndex] = packageItem;
+        }
+
+
+    }
+
+    markAsAddedCartItem = (packageId: string) => this.setIsInCartItemFlag(packageId, true);
+
+    markAsRemovedCartItem = (packageId: string) => this.setIsInCartItemFlag(packageId, false);
 
 }
 

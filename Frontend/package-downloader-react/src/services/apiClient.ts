@@ -298,11 +298,11 @@ function getAPIUrl(): string {
     let isGithubHosting = frontendLocation.endsWith(gitDomain);
 
     const apiURL = isGithubHosting ? frontendLocation.replace(frontendPort.toString(), backendPort.toString())
-        : `${frontendLocation}`;
+        : `${frontendLocation}:${backendPort}`;
 
     return protocol + apiURL;
 }
 
 export const ApiDevURL: string = getAPIUrl();
 
-export const packageApiClient = new PackagesAPIClient(ApiDevURL);
+export const packageApiClient = new PackagesAPIClient(location.origin);

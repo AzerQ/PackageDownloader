@@ -1,6 +1,7 @@
 import { makeAutoObservable } from "mobx";
 import { PackageDetails } from "../services/apiClient";
 import { packagesSearchStore } from "./PackagesStore";
+import { objectsAreEqual } from "../utils/objectsTools";
 
 class CartStore {
     
@@ -22,7 +23,8 @@ class CartStore {
     removeCartItem = (packageDetail: PackageDetails) => {
         let newCartItems: PackageDetails[] = [];
         for (const cartItem of this.cartItems) {
-            if (!cartItem.equals(packageDetail))
+            
+            if (!objectsAreEqual(cartItem, packageDetail))
                 newCartItems.push(cartItem);
             else
                 packagesSearchStore.markAsRemovedCartItem(packageDetail.packageID);

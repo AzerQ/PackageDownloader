@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import { packageApiClient, PackageInfo, PackageType } from "../services/apiClient";
 import { cartStore } from "./CartStore";
+import { cloneObject } from "../utils/objectsTools";
 
 class PackagesSearchStore {
 
@@ -90,7 +91,7 @@ class PackagesSearchStore {
     private setIsInCartItemFlag = (packageId: string, isInCartItem: boolean) => {
         let packageIndex = this.fondedPackages.findIndex(packageItem => packageItem.id === packageId);
         let originalPackage = this.getFullPackageItem(packageId);
-        let packageItem = Object.assign(Object.create(Object.getPrototypeOf(originalPackage)), originalPackage)
+        let packageItem = cloneObject(originalPackage);
 
         if (packageItem) {
             packageItem.isAddedInCart = isInCartItem;

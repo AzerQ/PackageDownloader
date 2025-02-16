@@ -287,7 +287,7 @@ function throwException(message: string, status: number, response: string, heade
         throw new ApiException(message, status, response, headers, null);
 }
 
-function getDevAPIUrl(): string {
+function getAPIUrl(): string {
 
     const backendPort = 5026;
     const frontendPort = 3000;
@@ -298,11 +298,11 @@ function getDevAPIUrl(): string {
     let isGithubHosting = frontendLocation.endsWith(gitDomain);
 
     const apiURL = isGithubHosting ? frontendLocation.replace(frontendPort.toString(), backendPort.toString())
-        : `${frontendLocation}:${backendPort}`;
+        : `${frontendLocation}`;
 
     return protocol + apiURL;
 }
 
-export const ApiDevURL: string = getDevAPIUrl();
+export const ApiDevURL: string = getAPIUrl();
 
 export const packageApiClient = new PackagesAPIClient(ApiDevURL);

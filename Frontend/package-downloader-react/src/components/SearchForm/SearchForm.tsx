@@ -8,12 +8,14 @@ import {
   Autocomplete,
   IconButton,
   Paper,
+  Tooltip,
 } from '@mui/material';
 import { PackageType } from '../../services/apiClient';
 import { observer } from 'mobx-react-lite';
 import { packagesSearchStore } from '../../stores/PackagesStore';
-import { Search } from '@mui/icons-material';
+import { Search, SmartToy } from '@mui/icons-material';
 import SearchResults from './SearchResultsList';
+import { recommendationsStore } from '../Recommendations/RecommendationsList';
 
 const SearchForm: React.FC = observer(() => {
   const {
@@ -50,9 +52,18 @@ const SearchForm: React.FC = observer(() => {
         <Tab label="NuGet" value={PackageType.Nuget} />
       </Tabs>
       <Paper component="div" sx={{ p: '2px 4px', display: 'flex', alignItems: 'center' }}>
-        <IconButton color="primary" aria-label="search packages" onClick={handleSearch}>
-          <Search />
-        </IconButton>
+
+        <Tooltip title="Начать поиск" aria-label="search">
+          <IconButton color="primary" aria-label="search packages" onClick={handleSearch}>
+            <Search />
+          </IconButton>
+        </Tooltip>
+
+        <Tooltip title="Порекомендовать пакеты" aria-label="aiRecommendations">
+          <IconButton color="primary" aria-label="ai recommendations" onClick={() => recommendationsStore.openRecommendationsForm()}>
+            <SmartToy />
+          </IconButton>
+        </Tooltip>
 
         <Autocomplete
           freeSolo

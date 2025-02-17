@@ -8,7 +8,7 @@ RUN npm ci
 
 # Копируем исходники фронтенда и собираем проект
 COPY Frontend/package-downloader-react/ .
-RUN npm run build
+# RUN npm run build
 
 # Этап сборки бэкенда
 FROM mcr.microsoft.com/dotnet/sdk:8.0 as backend-build
@@ -48,7 +48,7 @@ RUN apt-get update && \
     apt-get install -y nodejs
 
 # Копируем собранный фронтенд
-COPY --from=frontend-build /app/build ./wwwroot
+# COPY --from=frontend-build /app/build ./wwwroot
 
 # Копируем собранный бэкенд
 COPY --from=backend-build /app/publish .

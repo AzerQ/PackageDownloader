@@ -10,19 +10,35 @@ namespace PackageDownloader.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PackagesController(Func<PackageType, IPackageDownloadService> serviceAccessor) : ControllerBase
+    public class PackagesController(Func<PackageType, IPackageDownloadService> serviceAccessor, 
+                                    IPackagesStorageService packagesStorageService) : ControllerBase
     {
         const string UnknownMIME = "application/octet-stream";
 
+        private string ControllerName(string controllerFullName) => controllerFullName.Replace("Controller","");
 
-        
         [HttpPost("[action]")]
-        [Produces("application/zip")]
-        public FileResult GetPackagesAsArchive([FromBody] PackageRequest packageRequest)
+        public string PreparePackagesDownloadLink([FromBody] PackageRequest packageRequest)
         {
             var packageDownloader = serviceAccessor(packageRequest.PackageType);
             string packageFilePath = packageDownloader.DownloadPackagesAsArchive(packageRequest);
+            Guid packagesArchiveId = packagesStorageService.SetPackagesArchivePath(packageFilePath);
+            
+            string packagesDownloadUrl = Url.Action(nameof(GetPackagesAsArchive), 
+                ControllerName(nameof(PackagesController)), new { packagesArchiveId }, Request.Scheme);
 
+            return packagesDownloadUrl;
+        }
+
+        [HttpGet("[action]")]
+        [Produces("application/zip")]
+        public IActionResult GetPackagesAsArchive([FromQuery] Guid packagesArchiveId)
+        {
+            string packageFilePath = packagesStorageService.GetPackagesArchivePath(packagesArchiveId);
+            
+            if (!System.IO.File.Exists(packageFilePath))
+                return NotFound();
+            
             string fileName = Path.GetFileName(packageFilePath);
 
             new FileExtensionContentTypeProvider()

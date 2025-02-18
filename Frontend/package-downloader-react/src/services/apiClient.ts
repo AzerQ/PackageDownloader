@@ -118,8 +118,8 @@ export class PackagesAPIClient {
      * @param body (optional) 
      * @return Success
      */
-    getPackagesAsArchive(body: PackageRequest | undefined): Promise<void> {
-        let url_ = this.baseUrl + "/api/Packages/GetPackagesAsArchive";
+    preparePackagesDownloadLink(body: PackageRequest | undefined): Promise<string> {
+        let url_ = this.baseUrl + "/api/Packages/PreparePackagesDownloadLink";
         url_ = url_.replace(/[?&]$/, "");
 
         const content_ = JSON.stringify(body);
@@ -133,23 +133,21 @@ export class PackagesAPIClient {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processGetPackagesAsArchive(_response);
+            return this.processPreparePackagesDownloadLink(_response);
         });
     }
 
-    protected processGetPackagesAsArchive(response: Response): Promise<void> {
+    protected async processPreparePackagesDownloadLink(response: Response): Promise<string> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
-            return downloadFile(response).then(() => {
-                return;
-            });
+            return await response.text();
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
                 return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<void>(null as any);
+        return Promise.reject<string>(null as any);
     }
 
     /**

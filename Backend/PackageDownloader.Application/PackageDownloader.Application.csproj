@@ -14,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\PackageDownloader.Core\PackageDownloader.Core.csproj" />
     <ProjectReference Include="..\PackageDownloader.Infrastructure\PackageDownloader.Infrastructure.csproj" />
+    <ProjectReference Include="..\PackageDownloader.Persistence\PackageDownloader.Persistence.csproj" />
   </ItemGroup>
 
 </Project>

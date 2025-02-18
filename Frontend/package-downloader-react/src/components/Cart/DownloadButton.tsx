@@ -8,6 +8,7 @@ import {
   Alert,
   AlertTitle,
   LinearProgress,
+  Link,
 } from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import { cartStore } from '../../stores/CartStore';
@@ -21,6 +22,7 @@ const DownloadPackagesButton: React.FC = observer(() => {
   const [loading, setLoading] = useState(false); // Состояние загрузки
   const [success, setSuccess] = useState(false); // Успешная загрузка
   const [error, setError] = useState<string | null>(null); // Ошибка
+  const [downloadLink, setDownloadLink] = useState<string>('');
 
   const handleDownload = async () => {
     setOpen(true); // Открываем модальное окно
@@ -29,13 +31,14 @@ const DownloadPackagesButton: React.FC = observer(() => {
     setError(null); // Сбрасываем ошибку
 
     try {
-      await packageApiClient.getPackagesAsArchive({
+    let downloadLink =  await packageApiClient.preparePackagesDownloadLink({
         packagesDetails: cartStore.cartItems,
         packageType: packagesSearchStore.repositoryType,
         sdkVersion: cartStore.getSdkVersion()
       });
       setLoading(false); // Завершаем загрузку
       setSuccess(true); // Устанавливаем флаг успеха
+      setDownloadLink(downloadLink);
     } catch (err: any) {
       setLoading(false); // Завершаем загрузку
       setError(err.message || 'An unexpected error occurred'); // Устанавливаем ошибку
@@ -92,8 +95,11 @@ const DownloadPackagesButton: React.FC = observer(() => {
                 style={{ width: '80px', height: '80px', marginBottom: '16px' }}
               />
               <Typography variant="h6" gutterBottom>
-                Download completed successfully!
+                Packages link created successfully!
               </Typography>
+
+              <Link href={downloadLink}>Download prepared packages</Link>
+              
             </>
           )}
           {error && (
@@ -106,7 +112,7 @@ const DownloadPackagesButton: React.FC = observer(() => {
             variant="contained"
             color="secondary"
             onClick={handleClose}
-            sx={{ mt: 2 }}
+            sx={{ mt: 2, ml: 2 }}
           >
             Close
           </Button>

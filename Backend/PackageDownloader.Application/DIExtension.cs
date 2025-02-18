@@ -6,6 +6,7 @@ using PackageDownloader.Core.Services.Abstractions;
 using PackageDownloader.Infrastructure.Services.Abstractions;
 using PackageDownloader.Infrastructure.Services.Implementations;
 using PackageDownloader.Infrastructure.Services.Implementations.Recommendations;
+using PackageDownloader.Persistence.Services;
 
 namespace PackageDownloader.Application
 {
@@ -69,6 +70,7 @@ namespace PackageDownloader.Application
             });
 
             services.AddTransient<IPackageRecommendationService, PackageRecommendationService>();
+            services.AddTransient<IPackagesStorageService, CachedPackagesStorageService>();
         }
     }
 }

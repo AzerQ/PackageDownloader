@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import { packageApiClient, PackageInfo, PackageType } from "../services/apiClient";
 import { cartStore } from "./CartStore";
+import { cloneObject } from "../utils/objectsTools";
 
 class PackagesSearchStore {
 
@@ -21,8 +22,12 @@ class PackagesSearchStore {
         this.searchQuery = searchQuery;
     }
 
-    clearSuggestions= () => {
+    clearSuggestions = () => {
         this.searchSuggestions = [];
+    }
+
+    clearSearchQuery = () => {
+        this.searchQuery = '';
     }
 
     clearSearchResults = () => {
@@ -65,14 +70,40 @@ class PackagesSearchStore {
 
     }
 
-    setRepositoryType= (packageType: PackageType) => {
+    setRepositoryType = (packageType: PackageType) => {
 
         this.repositoryType = packageType;
-
         this.clearSuggestions();
         this.clearSearchResults();
+        this.clearSearchQuery();
         cartStore.clearCartItems();
     }
+
+    getFullPackageItem = (packageId: string) =>
+        this.fondedPackages.find(packageItem => packageItem.id === packageId)
+
+    private setIsInCartItemFlag = (packageId: string, isInCartItem: boolean) => {
+       
+        let packageIndex = this.fondedPackages.findIndex(packageItem => packageItem.id === packageId);
+
+        const NOT_FOUND = -1;
+        if (packageIndex === NOT_FOUND)
+            return;
+        
+        let originalPackage = this.getFullPackageItem(packageId);
+        let packageItem = cloneObject(originalPackage);
+
+        if (packageItem) {
+            packageItem.isAddedInCart = isInCartItem;
+            this.fondedPackages[packageIndex] = packageItem;
+        }
+
+
+    }
+
+    markAsAddedCartItem = (packageId: string) => this.setIsInCartItemFlag(packageId, true);
+
+    markAsRemovedCartItem = (packageId: string) => this.setIsInCartItemFlag(packageId, false);
 
 }
 

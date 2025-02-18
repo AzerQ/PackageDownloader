@@ -1,8 +1,11 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using PackageDownloader.AI;
 using PackageDownloader.Core.Models;
 using PackageDownloader.Core.Services.Abstractions;
 using PackageDownloader.Infrastructure.Services.Abstractions;
 using PackageDownloader.Infrastructure.Services.Implementations;
+using PackageDownloader.Infrastructure.Services.Implementations.Recommendations;
 
 namespace PackageDownloader.Application
 {
@@ -57,6 +60,15 @@ namespace PackageDownloader.Application
             {
                 return PacakgeSearchFactory(serviceProvider, packageType);
             });
+
+            services.AddTransient<OpenRouterClient>(serviceProvider =>
+            {
+                var confiuration = serviceProvider.GetService<IConfiguration>();
+
+                return new OpenRouterClient(confiuration["AI:API_URL"] ,confiuration["AI:API_KEY"], confiuration["AI:MODEL"]);
+            });
+
+            services.AddTransient<IPackageRecommendationService, PackageRecommendationService>();
         }
     }
 }

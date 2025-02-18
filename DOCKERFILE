@@ -1,0 +1,64 @@
+# Этап сборки фронтенда
+FROM node:18-alpine as frontend-build
+WORKDIR /app
+
+# Копируем зависимости фронтенда и устанавливаем их
+COPY Frontend/package-downloader-react/package*.json ./
+RUN npm ci
+
+# Копируем исходники фронтенда и собираем проект
+COPY Frontend/package-downloader-react/ .
+RUN npm run build
+
+# Этап сборки бэкенда
+FROM mcr.microsoft.com/dotnet/sdk:8.0 as backend-build
+WORKDIR /src
+
+# Копируем файлы решения и проектов
+COPY Backend/*.sln .
+COPY Backend/PackageDownloader.API/*.csproj ./PackageDownloader.API/
+COPY Backend/PackageDownloader.Application/*.csproj ./PackageDownloader.Application/
+COPY Backend/PackageDownloader.Core/*.csproj ./PackageDownloader.Core/
+COPY Backend/PackageDownloader.Infrastructure/*.csproj ./PackageDownloader.Infrastructure/
+COPY Backend/PackageDownloader.AI/*.csproj ./PackageDownloader.AI/
+
+# Восстанавливаем зависимости
+RUN dotnet restore "PackageDownloader.API/PackageDownloader.API.csproj"
+
+# Копируем весь исходный код
+COPY Backend/ .
+
+# Публикуем проект
+RUN dotnet publish "PackageDownloader.API/PackageDownloader.API.csproj" -c Release -o /app/publish
+
+# Финальный этап
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+WORKDIR /app
+
+# Устанавливаем зависимости для рантайма
+RUN apt-get update && \
+    apt-get install -y wget && \
+    # Устанавливаем .NET SDK
+    wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh && \
+    chmod +x ./dotnet-install.sh && \
+    ./dotnet-install.sh --channel 8.0 --install-dir /usr/share/dotnet && \
+    # Устанавливаем Node.js и npm
+    apt-get install -y curl && \
+    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs
+
+# Копируем собранный фронтенд
+COPY --from=frontend-build /app/build ./wwwroot
+
+# Копируем собранный бэкенд
+COPY --from=backend-build /app/publish .
+
+# Открываем порты
+EXPOSE 80
+EXPOSE 443
+
+# Настраиваем переменную окружения для биндинга на порт 80
+ENV ASPNETCORE_URLS=http://+:80
+
+# Запускаем приложение
+ENTRYPOINT ["dotnet", "PackageDownloader.API.dll"]

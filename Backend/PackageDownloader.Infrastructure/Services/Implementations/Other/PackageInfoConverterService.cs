@@ -9,18 +9,29 @@ namespace PackageDownloader.Infrastructure.Services.Implementations
     {
         private PackageInfo NpmConverter(JsonElement element)
         {
-            var authorElement = element.GetJsonElement("author.name");
-            var repositroryElement = element.GetJsonElement("links.repository");
 
+            var repositoryElement = element.GetJsonElement("links.repository");
+            var repositoryUrl = repositoryElement.GetStringOrDefault();
+            repositoryUrl = repositoryUrl.StartsWith("git+")
+                ? repositoryUrl.Substring(4, repositoryUrl.Length - 4)
+                : repositoryUrl;
+             
+            var npmUrl = element.GetJsonElement("links.npm").GetStringOrDefault();
+            
+            string authors = string.Join(",", element.GetStrings("maintainers", itemField: "username"));
+            string packageLastVersion = element.GetProperty("version").GetStringOrDefault();
+            
             PackageInfo pacakgeInfo = new()
             {
                 Id = element.GetProperty("name").GetStringOrDefault(),
-                CurrentVersion = element.GetProperty("version").GetStringOrDefault(),
+                CurrentVersion = packageLastVersion,
                 Description = element.GetProperty("description").GetStringOrDefault(),
-                AuthorInfo = authorElement.GetStringOrDefault(),
-                RepositoryUrl = repositroryElement.GetStringOrDefault(),
+                AuthorInfo = authors,
+                RepositoryUrl = repositoryUrl,
+                PackageUrl = npmUrl,
                 Tags = element.GetStrings(arrayFieldName: "keywords"),
-                OtherVersions = []
+                OtherVersions = [packageLastVersion],
+                DownloadsCount = element.GetJsonElement("downloads.monthly").GetInt64()
             };
 
             return pacakgeInfo;
@@ -35,26 +46,29 @@ namespace PackageDownloader.Infrastructure.Services.Implementations
 
             bool hasProjectUrl = element.TryGetProperty("projectUrl", out var projectUrl);
             bool hasIconUrl = element.TryGetProperty("iconUrl", out var iconUrl);
-
+            string packageId = element.GetProperty("id").GetStringOrDefault();
+            
             PackageInfo pacakgeInfo = new()
             {
-                Id = element.GetProperty("id").GetStringOrDefault(),
+                Id = packageId,
                 CurrentVersion = element.GetProperty("version").GetStringOrDefault(),
                 Description = element.GetProperty("description").GetStringOrDefault(),
                 AuthorInfo = author,
                 RepositoryUrl = hasProjectUrl ? projectUrl.GetStringOrDefault() : "",
+                PackageUrl = $"https://www.nuget.org/packages/{packageId}",
                 Tags = element.GetStrings(arrayFieldName: "tags"),
                 OtherVersions = element.GetStrings(arrayFieldName: "versions", itemField: "version"),
-                IconUrl = hasIconUrl ? iconUrl.GetStringOrDefault() : ""
+                IconUrl = hasIconUrl ? iconUrl.GetStringOrDefault() : "",
+                DownloadsCount = element.GetJsonElement("totalDownloads").GetInt64()
             };
 
             return pacakgeInfo;
         }
 
-        private IEnumerable<T> ConvertModelFromJson<T>(JsonDocument data, Func<JsonElement, T> converter, string? arrayProprtyName = default)
+        private IEnumerable<T> ConvertModelFromJson<T>(JsonDocument data, Func<JsonElement, T> converter, string? arrayPropertyName = default)
         {
-            var rootElements = arrayProprtyName != default ?
-                  data.RootElement.GetProperty(arrayProprtyName).EnumerateArray()
+            var rootElements = arrayPropertyName != default ?
+                  data.RootElement.GetProperty(arrayPropertyName).EnumerateArray()
                 : data.RootElement.EnumerateArray();
 
             foreach (var element in rootElements)
@@ -70,7 +84,7 @@ namespace PackageDownloader.Infrastructure.Services.Implementations
 
         public IEnumerable<PackageInfo> ConvertNugetJsonToPackageInfo(JsonDocument json)
         {
-            return ConvertModelFromJson(json, NugetConverter, arrayProprtyName: "data");
+            return ConvertModelFromJson(json, NugetConverter, arrayPropertyName: "data");
         }
 
         public IEnumerable<string> ConvertNpmJsonToSuggestionsList(JsonDocument json) =>

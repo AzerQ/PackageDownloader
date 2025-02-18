@@ -1,8 +1,12 @@
 import { makeAutoObservable } from "mobx";
-import { PackageDetails } from "../services/apiClient";
+import { PackageDetails, PackageType } from "../services/apiClient";
+import { packagesSearchStore } from "./PackagesStore";
+import { objectsAreEqual } from "../utils/objectsTools";
 
 class CartStore {
-    
+
+    sdkVersion: string | null = null;
+
     cartItems: PackageDetails[] = [];
 
     constructor() {
@@ -10,19 +14,54 @@ class CartStore {
     }
 
     addCartItem = (packageDetail: PackageDetails) => {
-        if (this.cartItems.some(element => element.equals(packageDetail)))
+        let itemAlreadyAddedInCart = packagesSearchStore.getFullPackageItem(packageDetail.packageID)?.isAddedInCart;
+        if (itemAlreadyAddedInCart)
             return;
 
-        this.cartItems = [...this.cartItems, packageDetail]
+        this.cartItems = [...this.cartItems, packageDetail];
+        packagesSearchStore.markAsAddedCartItem(packageDetail.packageID);
     }
 
     removeCartItem = (packageDetail: PackageDetails) => {
-        this.cartItems =  this.cartItems.filter((item) => !item.equals(packageDetail));
+        let newCartItems: PackageDetails[] = [];
+        for (const cartItem of this.cartItems) {
+
+            if (!objectsAreEqual(cartItem, packageDetail))
+                newCartItems.push(cartItem);
+            else
+                packagesSearchStore.markAsRemovedCartItem(packageDetail.packageID);
+        }
+        this.cartItems = newCartItems
     }
 
     clearCartItems = () => {
+        this.cartItems.forEach(({ packageID }) => packagesSearchStore.markAsRemovedCartItem(packageID));
         this.cartItems = [];
     }
+
+    getAvailableSdkVersions = (): string[] => {
+        let packageType: PackageType = packagesSearchStore.repositoryType;
+        switch (packageType) {
+            case PackageType.Npm: return [];
+            case PackageType.Nuget:
+                {
+                    return [
+                        "netstandard2.0",
+                        "netstandard2.1",
+                        "net6.0",
+                        "net7.0",
+                        "net8.0"
+                    ];
+                }
+        }
+    }
+
+    setSdkVersion = (sdkVersion: string | null) => {
+        this.sdkVersion = sdkVersion;
+    }
+
+    getSdkVersion = (): string | null => this.sdkVersion;
+
 
 }
 

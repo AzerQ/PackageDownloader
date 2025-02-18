@@ -4,9 +4,10 @@ import SearchForm from './components/SearchForm/SearchForm';
 import SearchResults from './components/SearchForm/SearchResultsList';
 import PackageCart from './components/Cart/PackageCart';
 import { packagesSearchStore } from './stores/PackagesStore';
+import RecommendationsModal from './components/Recommendations/RecommendationsModal';
 
 const App: React.FC = () => {
-  const {fondedPackages} = packagesSearchStore;
+  const { fondedPackages } = packagesSearchStore;
   return (
 
     <Container maxWidth="xl">
@@ -15,8 +16,9 @@ const App: React.FC = () => {
       </Typography>
 
       <SearchForm />
-      <PackageCart/>
-
+      <PackageCart />
+      <RecommendationsModal />
+      
     </Container>
 
   );

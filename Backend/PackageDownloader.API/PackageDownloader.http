@@ -1,6 +1,68 @@
 @PackageDownloader_HostAddress = http://localhost:5026
+@NpmJSApiHost = https://www.npmjs.com
+@NugetApiHost = https://azuresearch-usnc.nuget.org
 
-GET {{PackageDownloader_HostAddress}}/weatherforecast/
+@NPMPackageName = lodash
+@NugetPackageName = Dapper
+@AIQuestion = 2D графика
+
+# Поисковые подcказки яндекса
+
+GET https://suggest.yandex.ru/suggest-ff.cgi?part=Ктоя
 Accept: application/json
 
 ###
+
+
+# Рекомендации по пакетам через AI
+
+GET {{PackageDownloader_HostAddress}}/api/Recommendations/GetRecommendations?packageType=Nuget&userPrompt={{AIQuestion}}
+Accept: application/json
+###
+
+# Найти пакеты на сайте nuget.org через собственное API
+GET {{PackageDownloader_HostAddress}}/api/PackageInfo/GetSearchResults?packageType=Nuget&namePart={{NugetPackageName}}
+Accept: application/json
+
+###
+
+# Найти пакеты на сайте npmjs.com через собственное API
+GET {{PackageDownloader_HostAddress}}/api/PackageInfo/GetSearchResults?packageType=NPM&namePart={{NPMPackageName}}
+Accept: application/json
+
+###
+
+# Полуть автокомплит на сайте npmjs.com через собственное API
+GET {{PackageDownloader_HostAddress}}/api/PackageInfo/GetSearchSuggestions?packageType=Npm&namePart={{NPMPackageName}}
+Accept: application/json
+
+###
+
+# Получить подсказки через API npmjs.com
+GET {{NpmJSApiHost}}/search/suggestions?q={{NPMPackageName}}
+Accept: application/json
+
+###
+
+# Найти пакеты через API npmjs.com
+GET {{NpmJSApiHost}}/search?q={{NPMPackageName}}
+Accept: application/json
+X-Spiferack: 1
+
+### 
+
+GET {{NpmJSApiHost}}/package/{{NPMPackageName}}
+Accept: application/json
+X-Spiferack: 1
+###
+
+
+# Найти пакеты через API Nuget
+GET {{NugetApiHost}}/query?q={{NugetPackageName}}
+Accept: application/json
+
+###
+
+# Полуить подсказки поиска через API Nuget
+GET {{NugetApiHost}}/autocomplete?q={{NugetPackageName}}
+Accept: application/json

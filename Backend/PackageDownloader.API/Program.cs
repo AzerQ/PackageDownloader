@@ -28,6 +28,8 @@ namespace PackageDownloader.API
 
             // Add services to the container.
 
+            //builder.Services
+
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -51,7 +53,7 @@ namespace PackageDownloader.API
             app.UseFileServer(new FileServerOptions()
             {
                 FileProvider = new PhysicalFileProvider(
-                Path.Combine(Directory.GetCurrentDirectory(), "UI")),
+                Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")),
                 RequestPath = "",
                 EnableDefaultFiles = true
             });

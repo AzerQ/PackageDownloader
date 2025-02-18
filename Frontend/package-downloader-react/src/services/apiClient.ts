@@ -217,7 +217,7 @@ export interface IPackageInfo {
     packageUrl: string | null;
     downloadsCount: number;
     isAddedInCart: boolean;
-    getPackageIconOrStockImage() : string;
+    getPackageIconOrStockImage(): string;
 }
 
 export class PackageInfo implements IPackageInfo {
@@ -232,7 +232,7 @@ export class PackageInfo implements IPackageInfo {
     packageUrl!: string | null;
     downloadsCount!: number;
     isAddedInCart: boolean = false;
-    getPackageIconOrStockImage() : string {
+    getPackageIconOrStockImage(): string {
         return this.iconUrl ? this.iconUrl : "https://img.icons8.com/isometric/64/box.png";
     }
 }
@@ -287,22 +287,43 @@ function throwException(message: string, status: number, response: string, heade
         throw new ApiException(message, status, response, headers, null);
 }
 
-function getAPIUrl(): string {
-
-    const backendPort = 5026;
-    const frontendPort = 3000;
-    const protocol = location.protocol + '//';
-
-    let frontendLocation = location.hostname;
-    const gitDomain = 'app.github.dev';
-    let isGithubHosting = frontendLocation.endsWith(gitDomain);
-
-    const apiURL = isGithubHosting ? frontendLocation.replace(frontendPort.toString(), backendPort.toString())
-        : `${frontendLocation}:${backendPort}`;
-
-    return protocol + apiURL;
+interface ApiHeartbeat {
+    isAlive: boolean;
 }
 
-export const ApiDevURL: string = getAPIUrl();
+const HEARTBEAT_ENDPOINT = '/api/Heartbeat/HeartbeatExists';
 
-export const packageApiClient = new PackagesAPIClient(location.origin);
+export async function isHeartbeatExists(baseUrl: string) {
+    let response = await fetch(baseUrl + HEARTBEAT_ENDPOINT, { method: 'GET' });
+    try {
+        let result = await response.json() as ApiHeartbeat;
+        return result.isAlive;
+    }
+    catch (error) {
+        return false;
+    }
+}
+
+async function getApiUrl(): Promise<string> {
+
+    const FRONTEND_PORT_DEV = '3000';
+    const BACKEND_PORT_DEV = '5026';
+
+    let UrlMain = location.origin;
+    let UrlDev = UrlMain.replace(FRONTEND_PORT_DEV, BACKEND_PORT_DEV);
+
+    let UrlBaseVariants = [UrlMain, UrlDev];
+
+    for (const urlVariant of UrlBaseVariants) {
+        if (await isHeartbeatExists(urlVariant)) {
+            return urlVariant;
+        }
+    }
+
+    throw new Error("API server not found!");
+}
+
+
+export const API_URL: string = await getApiUrl();
+
+export const packageApiClient = new PackagesAPIClient(API_URL);

@@ -1,21 +1,19 @@
 using Microsoft.Extensions.FileProviders;
 using PackageDownloader.Application;
+
 namespace PackageDownloader.API
 {
     public class Program
     {
-
-
         public static void ConfigureCors(IServiceCollection services)
         {
-
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowAnyHost", policy =>
                 {
                     policy.AllowAnyOrigin()
-                          .AllowAnyHeader()
-                          .AllowAnyMethod();
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
                 });
             });
         }
@@ -50,13 +48,17 @@ namespace PackageDownloader.API
 
             app.UseAuthorization();
 
-            app.UseFileServer(new FileServerOptions()
+
+            string wwwRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            if (Directory.Exists(wwwRootPath))
             {
-                FileProvider = new PhysicalFileProvider(
-                Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")),
-                RequestPath = "",
-                EnableDefaultFiles = true
-            });
+                app.UseFileServer(new FileServerOptions()
+                {
+                    FileProvider = new PhysicalFileProvider(wwwRootPath),
+                    RequestPath = "",
+                    EnableDefaultFiles = true
+                });
+            }
 
             app.MapControllers();
 

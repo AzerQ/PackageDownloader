@@ -36,7 +36,7 @@ const SearchForm: React.FC = observer(() => {
     }
   }, [searchQuery]);
 
-  const onRepositoryTypeChange = (e: React.SyntheticEvent, newValue: PackageType) =>
+  const onRepositoryTypeChange = (_e: React.SyntheticEvent, newValue: PackageType) =>
     setRepositoryType(newValue);
 
   const handleSearch = async () => {
@@ -70,7 +70,7 @@ const SearchForm: React.FC = observer(() => {
           value={searchQuery}
           options={searchSuggestions} // Предложения, полученные от API
           loading={isSearchSuggestionsLoading}
-          onInputChange={(event, value) => setSearchQuery(value)} // Обновляем значение при вводе
+          onInputChange={(_event, value) => setSearchQuery(value)} // Обновляем значение при вводе
           onChange={async (_, value) => {
             if (value !== null) {
               setSearchQuery(value as string);

@@ -1,13 +1,11 @@
 import React from 'react';
-import { Box, Container, Typography } from '@mui/material';
+import {  Container, Typography } from '@mui/material';
 import SearchForm from './components/SearchForm/SearchForm';
-import SearchResults from './components/SearchForm/SearchResultsList';
 import PackageCart from './components/Cart/PackageCart';
-import { packagesSearchStore } from './stores/PackagesStore';
 import RecommendationsModal from './components/Recommendations/RecommendationsModal';
 
 const App: React.FC = () => {
-  const { fondedPackages } = packagesSearchStore;
+
   return (
 
     <Container maxWidth="xl">

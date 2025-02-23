@@ -1,3 +1,7 @@
+# Git
+
+git pull
+
 # Build docker image
 docker build -t packagedownloader .
 

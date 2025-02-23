@@ -48,7 +48,7 @@ RUN apt-get update && \
     apt-get install -y nodejs
 
 # Копируем собранный фронтенд
-COPY --from=frontend-build /app/build ./wwwroot
+COPY --from=frontend-build /app/dist ./wwwroot
 
 # Копируем собранный бэкенд
 COPY --from=backend-build /app/publish .

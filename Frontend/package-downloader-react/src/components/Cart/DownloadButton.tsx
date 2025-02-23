@@ -13,7 +13,7 @@ import { observer } from 'mobx-react-lite';
 import { cartStore } from '../../stores/CartStore';
 import { packagesSearchStore } from '../../stores/PackagesStore';
 import { FileDownload } from '@mui/icons-material';
-import { packageApiClient } from '../../services/apiClient';
+import { getPackageApiClient } from '../../services/apiClient';
 
 
 const DownloadPackagesButton: React.FC = observer(() => {
@@ -30,7 +30,7 @@ const DownloadPackagesButton: React.FC = observer(() => {
     setError(null); // Сбрасываем ошибку
 
     try {
-    let downloadLink =  await packageApiClient.preparePackagesDownloadLink({
+    let downloadLink =  await (await getPackageApiClient()).preparePackagesDownloadLink({
         packagesDetails: cartStore.cartItems,
         packageType: packagesSearchStore.repositoryType,
         sdkVersion: cartStore.getSdkVersion()

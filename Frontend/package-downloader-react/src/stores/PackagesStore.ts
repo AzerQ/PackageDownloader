@@ -1,7 +1,8 @@
 import { makeAutoObservable, runInAction } from "mobx";
-import { packageApiClient, PackageInfo, PackageType } from "../services/apiClient";
+import { getPackageApiClient, PackageInfo, PackageType } from "../services/apiClient";
 import { cartStore } from "./CartStore";
 import { cloneObject } from "../utils/objectsTools";
+import { notificationStore } from "./NotificationStore";
 
 class PackagesSearchStore {
 
@@ -35,7 +36,9 @@ class PackagesSearchStore {
     }
 
     getSearchResults = async () => {
+        
         try {
+            let packageApiClient = await getPackageApiClient();
             this.isSearchResultsLoading = true;
             const results = await packageApiClient.getSearchResults(this.repositoryType, this.searchQuery);
 
@@ -47,13 +50,14 @@ class PackagesSearchStore {
         }
         catch (error) {
             this.isSearchResultsLoading = false;
-            console.error(`Error fetching search results (query='${this.searchQuery})':`, error);
+            notificationStore.addError( `Error fetching search results (query='${this.searchQuery}) : ${error}'`);
         }
     }
 
     getSearchSuggestions = async () => {
 
         try {
+            let packageApiClient = await getPackageApiClient();
             this.isSearchSuggestionsLoading = true;
             const results = await packageApiClient.getSearchSuggestions(this.repositoryType, this.searchQuery);
 
@@ -65,7 +69,7 @@ class PackagesSearchStore {
         }
         catch (error) {
             this.isSearchSuggestionsLoading = false;
-            console.error(`Error fetching suggestions (query='${this.searchQuery})':`, error);
+            notificationStore.addError(`Error fetching suggestions (query='${this.searchQuery})': ${error}`);
         }
 
     }

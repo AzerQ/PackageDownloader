@@ -4,6 +4,7 @@
 // </auto-generated>
 //----------------------
 
+import { notificationStore } from "../stores/NotificationStore";
 import { cloneObject } from "../utils/objectsTools";
 
 
@@ -292,8 +293,9 @@ interface ApiHeartbeat {
 const HEARTBEAT_ENDPOINT = '/api/Heartbeat/HeartbeatExists';
 
 export async function isHeartbeatExists(baseUrl: string) {
-    let response = await fetch(baseUrl + HEARTBEAT_ENDPOINT, { method: 'GET' });
+
     try {
+        let response = await fetch(baseUrl + HEARTBEAT_ENDPOINT, { method: 'GET' });
         let result = await response.json() as ApiHeartbeat;
         return result.isAlive;
     }
@@ -321,7 +323,17 @@ async function getApiUrl(): Promise<string> {
     throw new Error("API server not found!");
 }
 
+let apiClient: PackagesAPIClient | undefined = undefined;
 
-export const API_URL: string = await getApiUrl();
+export const getPackageApiClient = async () => {
 
-export const packageApiClient = new PackagesAPIClient(API_URL);
+    try {
+        if (!apiClient) {
+            apiClient = new PackagesAPIClient(await getApiUrl());
+        }
+        return apiClient;
+    } catch (error: any) {
+        notificationStore.addError(error.toString());
+        throw error;
+    }
+};

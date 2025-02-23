@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction } from "mobx";
-import { packageApiClient, PackageRecommendation } from "../services/apiClient";
+import { getPackageApiClient, PackageRecommendation } from "../services/apiClient";
 import { packagesSearchStore } from "./PackagesStore";
+import { notificationStore } from "./NotificationStore";
 
 class RecommendationsStore {
 
@@ -22,6 +23,7 @@ class RecommendationsStore {
         let repositoryType = packagesSearchStore.repositoryType;
 
         try {
+            let packageApiClient = await getPackageApiClient();
             this.isRecommendationsLoading = true;
             const results = await packageApiClient.getRecommendations(repositoryType, this.userPrompt);
 
@@ -33,8 +35,7 @@ class RecommendationsStore {
         }
         catch (error) {
             this.isRecommendationsLoading = false;
-            console.log(`User prompt: ` + this.userPrompt);
-            console.error(`Error fetching recommendations`, error);
+             notificationStore.addError(`Error fetching recommendations ${error}`);
         }
 
     }

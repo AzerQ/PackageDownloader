@@ -5,7 +5,7 @@
 //----------------------
 
 import { cloneObject } from "../utils/objectsTools";
-import { downloadFile } from "./fileDownloader";
+
 
 /* tslint:disable */
 /* eslint-disable */
@@ -304,7 +304,7 @@ export async function isHeartbeatExists(baseUrl: string) {
 
 async function getApiUrl(): Promise<string> {
 
-    const FRONTEND_PORT_DEV = '3000';
+    const FRONTEND_PORT_DEV = '5173';
     const BACKEND_PORT_DEV = '5026';
 
     let UrlMain = location.origin;

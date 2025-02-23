@@ -1,9 +1,9 @@
-import { Card, CardContent, Typography, Chip, Link, CardActions, Button, CardHeader, Avatar, Badge, Stack, Select, MenuItem, FormControl, InputLabel, Box } from "@mui/material";
-import { PackageDetails, PackageInfo } from "../../services/apiClient";
+import { Card, CardContent, Typography, Chip, Link, CardActions, Button, CardHeader, Avatar, Stack, Select, MenuItem, FormControl, Box } from "@mui/material";
+import { PackageInfo } from "../../services/apiClient";
 import { observer } from "mobx-react-lite";
 import { cartStore } from "../../stores/CartStore";
 import DownloadIcon from '@mui/icons-material/Download'; // Импортируем иконку загрузки
-import { Add, GitHub, Label, Public } from "@mui/icons-material";
+import { Add, GitHub, Public } from "@mui/icons-material";
 import { packagesSearchStore } from "../../stores/PackagesStore";
 import { compareVersions } from "../../utils/versionsComparer";
 import { useState } from "react";

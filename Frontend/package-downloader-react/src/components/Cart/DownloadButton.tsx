@@ -4,7 +4,6 @@ import {
   Modal,
   Box,
   Typography,
-  CircularProgress,
   Alert,
   AlertTitle,
   LinearProgress,

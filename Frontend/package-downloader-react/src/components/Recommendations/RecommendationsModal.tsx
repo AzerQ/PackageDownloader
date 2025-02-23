@@ -13,10 +13,6 @@ import { RecommendationsList, recommendationsStore } from "./RecommendationsList
 import { Close } from "@mui/icons-material";
 
 const RecommendationsModal: React.FC = observer(() => {
-  // Обработчик открытия/закрытия модального окна
-  const handleOpen = () => {
-    recommendationsStore.isRecommendationsFormEnabled = true;
-  };
 
   const handleClose = () => {
     recommendationsStore.clearUserPrompt();

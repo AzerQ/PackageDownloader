@@ -44,6 +44,37 @@ jobs:
     - name: Test backend
       run: dotnet test --no-build --verbosity normal Backend/PackageDownloader.API
 
+    - name: Deploy
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+            #!/bin/bash
+
+            # Проверяем, существует ли папка packagedownloader
+            if [ -d packagedownloader ]; then
+                # Проверяем, является ли папка Git-репозиторием (проверяем наличие папки .git)
+                if [ -d packagedownloader/.git ]; then
+                    echo "Папка 'packagedownloader' существует и является Git-репозиторием. Выполняется git pull..."
+                    cd packagedownloader
+                    git pull
+                else
+                    echo "Ошибка: Папка 'packagedownloader' существует, но не является Git-репозиторием."
+                    exit 1
+                fi
+            else
+                # Если папка не существует, клонируем репозиторий
+                echo "Папка 'packagedownloader' не существует. Клонируется репозиторий..."
+                git clone https://github.com/AzerQ/PackageDownloader.git packagedownloader
+                echo "Репозиторий склонирован. Переходим в папку 'packagedownloader' и выполняем git pull..."
+                cd packagedownloader
+                git pull
+            fi
+
+            chmod +x ./start.sh
+            ./start.sh
 
   deploy:
     runs-on: app-host

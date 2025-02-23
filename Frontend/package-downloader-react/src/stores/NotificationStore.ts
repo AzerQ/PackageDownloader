@@ -26,6 +26,22 @@ class NotificationStore {
     setTimeout(() => this.removeNotification(newNotification.id), 5000);
   }
 
+  addInfo = (message: string) => this.addNotification ({
+    message: message,
+    type: "info"
+  });
+
+  addWarn = (message: string) => this.addNotification ({
+    message: message,
+    type: "warning"
+  });
+
+  addError = (message: string) => this.addNotification ({
+    message: message,
+    type: "error"
+  });
+
+
   // Метод для удаления уведомления по ID
   removeNotification(id: string) {
     runInAction(() => {

@@ -25,28 +25,59 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
             #!/bin/bash
-            set -e
-            # Проверяем, существует ли папка packagedownloader
-            if [ -d packagedownloader ]; then
-                # Проверяем, является ли папка Git-репозиторием (проверяем наличие папки .git)
-                if [ -d packagedownloader/.git ]; then
-                    echo "Папка 'packagedownloader' существует и является Git-репозиторием. Выполняется git pull..."
-                    cd packagedownloader
-                    git pull
-                else
-                    echo "Ошибка: Папка 'packagedownloader' существует, но не является Git-репозиторием."
-                    exit 1
-                fi
-            else
-                # Если папка не существует, клонируем репозиторий
-                echo "Папка 'packagedownloader' не существует. Клонируется репозиторий..."
-                git clone https://github.com/AzerQ/PackageDownloader.git packagedownloader
-                echo "Репозиторий склонирован. Переходим в папку 'packagedownloader' и выполняем git pull..."
-                cd packagedownloader
-                git pull
-            fi
+            set -euo pipefail
 
-            chmod +x ./start.sh
-            ./start.sh ${{ secrets.AI_API_KEY }}
-      
-      
+            # Configuration variables
+            REPO_DIR="packagedownloader"
+            REPO_URL="https://github.com/AzerQ/PackageDownloader.git"
+            START_SCRIPT="./start.sh"
+
+            # Function to handle repository checkout/update
+            checkout_repository() {
+                if [ -d "$REPO_DIR" ]; then
+                    echo "Directory '$REPO_DIR' exists. Validating Git repository..."
+                    
+                    if [ -d "$REPO_DIR/.git" ]; then
+                        echo "Valid Git repository found. Updating code..."
+                        cd "$REPO_DIR"
+                        
+                        # Clean working tree and force update
+                        git reset --hard HEAD
+                        git clean -fd
+                        git pull --force origin master
+                        
+                        cd ..
+                    else
+                        echo "Error: '$REPO_DIR' exists but is not a Git repository!" >&2
+                        exit 1
+                    fi
+                else
+                    echo "Cloning repository into '$REPO_DIR'..."
+                    git clone "$REPO_URL" "$REPO_DIR"
+                fi
+            }
+
+            # Main execution
+            {
+                echo "Starting deployment process..."
+                checkout_repository
+                
+                echo "Preparing to start application..."
+                cd "$REPO_DIR"
+                
+                # Ensure start script is executable
+                if [ ! -x "$START_SCRIPT" ]; then
+                    echo "Making start.sh executable..."
+                    chmod +x "$START_SCRIPT"
+                fi
+
+                # Execute start script with API key
+                echo "Launching application..."
+                ./"$START_SCRIPT" "${{ secrets.AI_API_KEY }}"
+                
+            } || {
+                echo "Deployment failed! See errors above." >&2
+                exit 1
+            }
+
+            echo "Deployment completed successfully!"

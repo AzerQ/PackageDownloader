@@ -1,3 +1,5 @@
+set -e
+
 # Git
 
 git pull

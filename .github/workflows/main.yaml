@@ -52,7 +52,7 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
             #!/bin/bash
-
+            set -e
             # Проверяем, существует ли папка packagedownloader
             if [ -d packagedownloader ]; then
                 # Проверяем, является ли папка Git-репозиторием (проверяем наличие папки .git)

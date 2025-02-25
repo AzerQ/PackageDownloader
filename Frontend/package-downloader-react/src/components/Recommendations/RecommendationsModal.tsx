@@ -11,8 +11,11 @@ import {
 } from "@mui/material";
 import { RecommendationsList, recommendationsStore } from "./RecommendationsList";
 import { Close } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 
 const RecommendationsModal: React.FC = observer(() => {
+
+  const { t } = useTranslation();
 
   const handleClose = () => {
     recommendationsStore.clearUserPrompt();
@@ -63,7 +66,7 @@ const RecommendationsModal: React.FC = observer(() => {
               marginBottom: 2,
             }}
           >
-            <Typography variant="h6">Введите запрос для получения рекомендаций</Typography>
+            <Typography variant="h6">{t("RecommendationsRequestLabel")}</Typography>
             <IconButton onClick={handleClose} aria-label="close">
               <Close /> {/* Кнопка закрытия */}
             </IconButton>
@@ -72,7 +75,7 @@ const RecommendationsModal: React.FC = observer(() => {
           {/* Поле ввода для запроса пользователя */}
           <TextField
             fullWidth
-            label="Ваш запрос"
+            label={t("YourRequest")}
             value={recommendationsStore.userPrompt}
             onChange={(e) => recommendationsStore.setUserPrompt(e.target.value)}
             disabled={!recommendationsStore.isRecommendationsFormEnabled}
@@ -90,11 +93,12 @@ const RecommendationsModal: React.FC = observer(() => {
             }
             style={{ marginTop: "16px" }}
           >
-            {recommendationsStore.isRecommendationsLoading ? (
+            { recommendationsStore.isRecommendationsLoading ? 
+            (
               <CircularProgress size={20} />
-            ) : (
-              "Получить рекомендации"
-            )}
+            ) :
+              t("GetRecommendations")
+            }
           </Button>
 
           {/* Прокручиваемый контейнер для списка рекомендаций */}

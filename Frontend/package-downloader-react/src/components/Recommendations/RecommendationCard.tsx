@@ -4,6 +4,7 @@ import { PackageRecommendation } from '../../services/apiClient';
 import { observer } from 'mobx-react-lite';
 import { packagesSearchStore } from '../../stores/PackagesStore';
 import { recommendationsStore } from './RecommendationsList';
+import { useTranslation } from 'react-i18next';
 
 // Определяем интерфейс для входных данных
 interface RecommendationCardProps {
@@ -20,6 +21,8 @@ const searchPackageRecommendation = async (packageId: string) => {
 const RecommendationCard: React.FC<RecommendationCardProps> = observer(({ data }) => {
   // Состояние для управления видимостью блока кода
   const [isCodeExpanded, setIsCodeExpanded] = React.useState(false);
+
+  const { t } = useTranslation();
 
   return (
     <Card sx={{ minWidth: 275, marginBottom: 2 }}>
@@ -44,7 +47,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = observer(({ data }
         {/* Пример кода */}
         <Box sx={{ marginTop: 1 }}>
           <Typography variant="caption" gutterBottom>
-            Пример кода:
+            {t("CodeExample")}
           </Typography>
           {/* Кнопка для разворачивания/сворачивания блока кода */}
           <Button
@@ -52,7 +55,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = observer(({ data }
             onClick={() => setIsCodeExpanded((prev) => !prev)} // Переключение состояния
             sx={{ textTransform: 'none', display: 'block' }}
           >
-            {isCodeExpanded ? 'Свернуть код' : 'Показать код'}
+            {isCodeExpanded ? t("FoldCode") : t("ShowCode")}
           </Button>
           {/* Блок кода, видимый только если isCodeExpanded === true */}
           {isCodeExpanded && (
@@ -78,7 +81,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = observer(({ data }
         {/* Кнопка "Найти пакет" */}
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginTop: 2 }}>
           <Button variant="contained" onClick={async () => await searchPackageRecommendation(data.id)}>
-            Найти пакет
+            {t("SearchPackage")}
           </Button>
         </Box>
       </CardContent>

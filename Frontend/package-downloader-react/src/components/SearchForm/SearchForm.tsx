@@ -16,8 +16,12 @@ import { packagesSearchStore } from '../../stores/PackagesStore';
 import { Search, SmartToy } from '@mui/icons-material';
 import SearchResults from './SearchResultsList';
 import { recommendationsStore } from '../Recommendations/RecommendationsList';
+import { useTranslation } from 'react-i18next';
 
 const SearchForm: React.FC = observer(() => {
+
+  const { t } = useTranslation();
+
   const {
     searchQuery,
     setSearchQuery,
@@ -44,6 +48,7 @@ const SearchForm: React.FC = observer(() => {
       await getSearchResults();
     }
   };
+  
 
   return (
     <Box sx={{ mb: 3 }}>
@@ -53,13 +58,13 @@ const SearchForm: React.FC = observer(() => {
       </Tabs>
       <Paper component="div" sx={{ p: '2px 4px', display: 'flex', alignItems: 'center' }}>
 
-        <Tooltip title="Начать поиск" aria-label="search">
+        <Tooltip title={t("StartSearchTooltip")} aria-label="search">
           <IconButton color="primary" aria-label="search packages" onClick={handleSearch}>
             <Search />
           </IconButton>
         </Tooltip>
 
-        <Tooltip title="Порекомендовать пакеты" aria-label="aiRecommendations">
+        <Tooltip title={t("RecommendPackagesTooltip")} aria-label="aiRecommendations">
           <IconButton color="primary" aria-label="ai recommendations" onClick={() => recommendationsStore.openRecommendationsForm()}>
             <SmartToy />
           </IconButton>
@@ -87,7 +92,7 @@ const SearchForm: React.FC = observer(() => {
             <TextField
               {...params}
               sx={{ mt: 2, ml: 2, mb: 3, flex: 1, width: 1000 }}
-              label="Search for packages"
+              label={t("SearchForPackagesLabel")}
               variant="standard"
               fullWidth
               InputProps={{

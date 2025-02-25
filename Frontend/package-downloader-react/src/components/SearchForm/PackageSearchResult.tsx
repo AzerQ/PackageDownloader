@@ -7,12 +7,15 @@ import { Add, GitHub, Public } from "@mui/icons-material";
 import { packagesSearchStore } from "../../stores/PackagesStore";
 import { compareVersions } from "../../utils/versionsComparer";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface PackageSearchResultsProps {
     packageInfo: PackageInfo;
 }
 
 const PackageSearchResult: React.FC<PackageSearchResultsProps> = observer(({ packageInfo }) => {
+
+    const { t } = useTranslation();
 
     let [selectedVersion, setSelectedVersion] = useState<string>(packageInfo.currentVersion);
 
@@ -29,14 +32,14 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = observer(({ pac
                     />
                 }
                 title={packageInfo.id}
-                subheader={"Latest version: " + packageInfo.currentVersion}
+                subheader={t("LatestVersion", {version: packageInfo.currentVersion})}
             />
 
             {/* Блок с количеством скачиваний */}
             <Stack direction="row" alignItems="center" spacing={1} sx={{ px: 2, pt: 1 }}>
                 <DownloadIcon color="primary" fontSize="small" /> {/* Иконка загрузки */}
                 <Typography variant="subtitle2" color="text.secondary">
-                    {packageInfo.downloadsCount?.toLocaleString() ?? 0} downloads {/* Форматированное число */}
+                    {t("Downloads", {num: packageInfo.downloadsCount.toLocaleString()})}  {/* Форматированное число */}
                 </Typography>
             </Stack>
 
@@ -46,7 +49,7 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = observer(({ pac
                     {packageInfo.description}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                    Author: {packageInfo.authorInfo}
+                    {`${t("Author")}: ${packageInfo.authorInfo}`}
                 </Typography>
                 <div>
                     {packageInfo.tags?.map((tag) => (
@@ -57,7 +60,7 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = observer(({ pac
                     <Stack direction="row" alignItems="center" spacing={1} sx={{ px: 2, pt: 1 }}>
                         <GitHub color="primary" fontSize="small" /> {/* Иконка загрузки */}
                         <Link href={packageInfo.repositoryUrl} target="_blank" rel="noopener">
-                            View source repository
+                            {t("ViewSourceRepository")}
                         </Link>
                     </Stack>
                 )}
@@ -65,7 +68,7 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = observer(({ pac
                     <Stack direction="row" alignItems="center" spacing={1} sx={{ px: 2, pt: 1 }}>
                         <Public color="primary" fontSize="small" /> {/* Иконка загрузки */}
                         <Link href={packageInfo.packageUrl} target="_blank" rel="noopener">
-                            {`View on official ${packagesSearchStore.repositoryType} package repository site`}
+                            {t("ViewOnPackageRepositorySite", {repositoryType: packagesSearchStore.repositoryType})}
                         </Link>
                     </Stack>
                 )}
@@ -74,7 +77,7 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = observer(({ pac
             {/* Действия с карточкой */}
             <CardActions>
                 <Typography variant="overline" gutterBottom sx={{ display: 'block', mb: 0.5 }}>
-                    Chose version
+                    {t("ChoseVersion")}
                 </Typography>
                 {packageInfo.otherVersions?.length && (
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}> {/* Используем Box для создания гибкого контейнера */}
@@ -110,7 +113,7 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = observer(({ pac
                                 }
                                 variant="contained"
                             >
-                                Add
+                                {t("Add")}
                             </Button>)
                         }
                     </Box>

@@ -6,6 +6,7 @@ import { cartStore } from '../../stores/CartStore';
 import DownloadPackagesButton from './DownloadButton';
 import ClearCartButton from './ClearCartButton';
 import { packagesSearchStore } from '../../stores/PackagesStore';
+import { useTranslation } from 'react-i18next';
 
 
 interface PackageCartProps {
@@ -13,6 +14,9 @@ interface PackageCartProps {
 }
 
 const PackageCart: React.FC<PackageCartProps> = observer(({ }) => {
+  
+  const { t } = useTranslation();
+
   const { cartItems, removeCartItem } = cartStore;
 
   if (cartItems.length === 0)
@@ -34,14 +38,14 @@ const PackageCart: React.FC<PackageCartProps> = observer(({ }) => {
       }}
     >
       <Typography variant="h6" gutterBottom>
-        {`${cartItems.length} ${packagesSearchStore.repositoryType.toLowerCase()} packages selected`}
+        {t("PackagesSelected", {count: cartItems.length, repositoryType: packagesSearchStore.repositoryType})}
       </Typography>
 
       {availableSdks.length > 0 &&
         (
           <FormControl sx={{ m: 0, minWidth: 160 }} size="small">
             <InputLabel id="selectedPackagesSdk">
-              SDK version
+              {t("SdkVersion")}
             </InputLabel>
             <Select
               value={cartStore.getSdkVersion()}

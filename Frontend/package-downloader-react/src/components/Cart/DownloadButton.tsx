@@ -14,6 +14,7 @@ import { cartStore } from '../../stores/CartStore';
 import { packagesSearchStore } from '../../stores/PackagesStore';
 import { FileDownload } from '@mui/icons-material';
 import { getPackageApiClient } from '../../services/apiClient';
+import { useTranslation } from 'react-i18next';
 
 
 const DownloadPackagesButton: React.FC = observer(() => {
@@ -22,6 +23,8 @@ const DownloadPackagesButton: React.FC = observer(() => {
   const [success, setSuccess] = useState(false); // Успешная загрузка
   const [error, setError] = useState<string | null>(null); // Ошибка
   const [downloadLink, setDownloadLink] = useState<string>('');
+
+  const { t } = useTranslation();
 
   const handleDownload = async () => {
     setOpen(true); // Открываем модальное окно
@@ -40,7 +43,7 @@ const DownloadPackagesButton: React.FC = observer(() => {
       setDownloadLink(downloadLink);
     } catch (err: any) {
       setLoading(false); // Завершаем загрузку
-      setError(err.message || 'An unexpected error occurred'); // Устанавливаем ошибку
+      setError(err.message || t("ErrorOccurred")); // Устанавливаем ошибку
     }
   };
 
@@ -59,7 +62,7 @@ const DownloadPackagesButton: React.FC = observer(() => {
         onClick={handleDownload}
         sx={{ mr: 1 }}
       >
-        Download
+        {t("Download")}
       </Button>
 
       {/* Модальное окно */}
@@ -81,7 +84,7 @@ const DownloadPackagesButton: React.FC = observer(() => {
           {loading && (
             <>
               <Typography variant="h6" gutterBottom>
-                Preparing packages...
+                {t("PreparingPackages")}
               </Typography>
               <LinearProgress color="secondary" />
             </>
@@ -94,16 +97,16 @@ const DownloadPackagesButton: React.FC = observer(() => {
                 style={{ width: '80px', height: '80px', marginBottom: '16px' }}
               />
               <Typography variant="h6" gutterBottom>
-                Packages link created successfully!
+                {t("PackagesLinkCreated")}
               </Typography>
 
-              <Link href={downloadLink}>Download prepared packages</Link>
+              <Link href={downloadLink}>{t("DownloadPackages")}</Link>
               
             </>
           )}
           {error && (
             <Alert severity="error">
-              <AlertTitle>Error</AlertTitle>
+              <AlertTitle>{t("Error")}</AlertTitle>
               {error}
             </Alert>
           )}
@@ -113,7 +116,7 @@ const DownloadPackagesButton: React.FC = observer(() => {
             onClick={handleClose}
             sx={{ mt: 2, ml: 2 }}
           >
-            Close
+            {t("Close")}
           </Button>
         </Box>
       </Modal>

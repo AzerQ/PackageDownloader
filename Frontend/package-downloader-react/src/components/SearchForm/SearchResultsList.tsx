@@ -3,6 +3,7 @@ import { Card, CardContent, CircularProgress, Grid, Typography } from '@mui/mate
 import PackageSearchResult from './PackageSearchResult';
 import { observer } from 'mobx-react-lite';
 import { packagesSearchStore } from '../../stores/PackagesStore';
+import { useTranslation } from 'react-i18next';
 
 interface SearchResultsListProps {
 
@@ -10,18 +11,20 @@ interface SearchResultsListProps {
 
 const SearchResults: React.FC<SearchResultsListProps> = observer(() => {
 
+    const { t } = useTranslation();
+
     const { fondedPackages, isSearchResultsLoading } = packagesSearchStore;
 
     if (isSearchResultsLoading)
         return (
         <>
-        <CircularProgress title='Loading data' color="secondary" size="3rem" />
+        <CircularProgress title={t("LoadingData")} color="secondary" size="3rem" />
         </>);
 
     return (
         <>
             <Typography sx={{ mt: 2 }} variant="h6" gutterBottom>
-                Search Results
+                {t("SearchResults")}
             </Typography>
 
             <Grid container spacing={2}>

@@ -4,5 +4,5 @@ namespace PackageDownloader.Core.Services.Abstractions;
 
 public interface IPackageRecommendationService
 {
-    Task<IEnumerable<PackageRecommendation>?> GetRecommendations(PackageType packageType, string userPrompt);
+    Task<IEnumerable<PackageRecommendation>?> GetRecommendations(PackageType packageType, string userPrompt, string langCode);
 }

@@ -156,7 +156,7 @@ export class PackagesAPIClient {
      * @param userPrompt (optional) 
      * @return Success
      */
-    getRecommendations(packageType: PackageType | undefined, userPrompt: string | undefined): Promise<PackageRecommendation[]> {
+    getRecommendations(packageType: PackageType | undefined, userPrompt: string | undefined, langCode : string | undefined): Promise<PackageRecommendation[]> {
         let url_ = this.baseUrl + "/api/Recommendations/GetRecommendations?";
         if (packageType === null)
             throw new Error("The parameter 'packageType' cannot be null.");
@@ -166,6 +166,9 @@ export class PackagesAPIClient {
             throw new Error("The parameter 'userPrompt' cannot be null.");
         else if (userPrompt !== undefined)
             url_ += "userPrompt=" + encodeURIComponent("" + userPrompt) + "&";
+       
+        if (langCode)
+            url_ += "langCode=" + encodeURIComponent("" + langCode) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_: RequestInit = {

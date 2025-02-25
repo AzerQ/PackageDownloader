@@ -1,5 +1,6 @@
 ﻿using PackageDownloader.AI;
 using PackageDownloader.AI.Models;
+using PackageDownloader.AI.PromptTemplates.Models;
 using PackageDownloader.Core.Models;
 using PackageDownloader.Core.Services.Abstractions;
 using System.Text;
@@ -15,10 +16,10 @@ namespace PackageDownloader.Infrastructure.Services.Implementations.Recommendati
         {
             _openRouterClient = openRouterClient;
         }
-        public async Task<IEnumerable<PackageRecommendation>?> GetRecommendations(PackageType packageType, string userPrompt)
+        public async Task<IEnumerable<PackageRecommendation>?> GetRecommendations(PackageType packageType, string userPrompt, string langCode)
         {
             ChatCompletionResponse? serverResponse =
-                await _openRouterClient.GetChatCompletionAsync(PreparePrompt(packageType, userPrompt));
+                await _openRouterClient.GetChatCompletionAsync(PreparePrompt(packageType, userPrompt, langCode));
 
             if (serverResponse == null)
                 throw new NullReferenceException("Не удалось получить корректнй ответ от модели AI");
@@ -39,15 +40,18 @@ namespace PackageDownloader.Infrastructure.Services.Implementations.Recommendati
                 .Select(prop => $"{prop.PropertyType} {prop.Name};"));
         }
 
-        private string PreparePrompt(PackageType packageType, string userPrompt)
+        private string PreparePrompt(PackageType packageType, string userPrompt, string langCode)
         {
-            var result = new StringBuilder();
-            result.AppendFormat("Пользователь хочет получить рекомендации по пакетам для системы {0}.", packageType);
-            result.AppendFormat("Он задал следующий вопрос: {0}.", userPrompt);
-            result.AppendFormat("Пожалуйста, ответь в формате голого Json, содержащий следующие поля (Тип поля - имя поля, язык C#): {0}."
-                , GetClassSchemeDescription(typeof(PackageRecommendation)));
-            result.AppendFormat("Дай на выходе не менее 5-6 актуальных и популярных пакетов, которые подходят под заданный запрос.");
-            return result.ToString();
+            PackageRecommendationsPrompt packageRecommendationsPrompt = new()
+            {
+                ClassSchemeDescription = GetClassSchemeDescription(typeof(PackageRecommendation)),
+                LangCode = langCode,
+                MinRecommendationsCount = 6,
+                PackageType = packageType.ToString(),
+                UserPrompt = userPrompt
+            };
+            
+            return PromptFormatter.FormatPacakgeRecommendationsPrompt(packageRecommendationsPrompt);
         }
 
         private string ClearAiResponse(string aiResponse)

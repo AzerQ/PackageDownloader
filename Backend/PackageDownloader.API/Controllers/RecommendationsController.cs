@@ -10,8 +10,8 @@ public class RecommendationsController(IPackageRecommendationService packageReco
 {
     [Produces("application/json")]
     [HttpGet("[action]")]
-    public async Task<IEnumerable<PackageRecommendation>?> GetRecommendations([FromQuery] PackageType packageType, [FromQuery] string userPrompt)
+    public async Task<IEnumerable<PackageRecommendation>?> GetRecommendations([FromQuery] PackageType packageType, [FromQuery] string userPrompt, [FromQuery] string langCode)
     {
-      return await packageRecommendationService.GetRecommendations(packageType, userPrompt);
+      return await packageRecommendationService.GetRecommendations(packageType, userPrompt, langCode);
     }
 }

@@ -2,6 +2,7 @@ import { makeAutoObservable, runInAction } from "mobx";
 import { getPackageApiClient, PackageRecommendation } from "../services/apiClient";
 import { packagesSearchStore } from "./PackagesStore";
 import { notificationStore } from "./NotificationStore";
+import i18n from "../localization/i18n";
 
 class RecommendationsStore {
 
@@ -25,7 +26,7 @@ class RecommendationsStore {
         try {
             let packageApiClient = await getPackageApiClient();
             this.isRecommendationsLoading = true;
-            const results = await packageApiClient.getRecommendations(repositoryType, this.userPrompt);
+            const results = await packageApiClient.getRecommendations(repositoryType, this.userPrompt, i18n.language);
 
             runInAction(() => {
                 this.packagesRecommendations = results;

@@ -16,7 +16,7 @@ Accept: application/json
 
 # Рекомендации по пакетам через AI
 
-GET {{PackageDownloader_HostAddress}}/api/Recommendations/GetRecommendations?packageType=Nuget&userPrompt={{AIQuestion}}
+GET {{PackageDownloader_HostAddress}}/api/Recommendations/GetRecommendations?packageType=Nuget&userPrompt={{AIQuestion}}&langCode=en
 Accept: application/json
 ###
 
@@ -51,6 +51,8 @@ X-Spiferack: 1
 
 ### 
 
+
+# Подробная информация о пакете NPM
 GET {{NpmJSApiHost}}/package/{{NPMPackageName}}
 Accept: application/json
 X-Spiferack: 1

@@ -22,7 +22,7 @@ namespace PackageDownloader.Infrastructure.Services.Implementations.Recommendati
                 await _openRouterClient.GetChatCompletionAsync(PreparePrompt(packageType, userPrompt, langCode));
 
             if (serverResponse == null)
-                throw new NullReferenceException("Не удалось получить корректнй ответ от модели AI");
+                throw new NullReferenceException("Не удалось получить корректный ответ от модели AI");
 
             string chatResponse = ClearAiResponse(serverResponse.Choices[0].Message.Content);
 

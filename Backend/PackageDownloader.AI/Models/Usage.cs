@@ -1,9 +1,17 @@
-﻿namespace PackageDownloader.AI.Models;
+﻿using System.Text.Json.Serialization;
+
+namespace PackageDownloader.AI.Models;
 
 
 public class Usage
 {
-    public int PromptTokens { get; set; }
-    public int CompletionTokens { get; set; }
-    public int TotalTokens { get; set; }
+    [JsonPropertyName("prompt_tokens")]
+    public required int PromptTokens { get; set; }
+    
+    [JsonPropertyName("completion_tokens")]
+    public required int CompletionTokens { get; set; }
+    
+    [JsonPropertyName("total_tokens")]
+    public required int TotalTokens { get; set; }
+    
 }

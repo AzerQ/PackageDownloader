@@ -2,11 +2,11 @@
 
 public class ChatCompletionResponse
 {
-    public string Id { get; set; }
-    public string Provider { get; set; }
-    public string Model { get; set; }
-    public string Object { get; set; }
+    public required string Id { get; set; }
+    public required string Provider { get; set; }
+    public required string Model { get; set; }
+    public required string Object { get; set; }
     public long Created { get; set; }
-    public Choice[] Choices { get; set; }
-    public Usage Usage { get; set; }
+    public required Choice[] Choices { get; set; }
+    public Usage? Usage { get; set; }
 }

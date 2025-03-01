@@ -49,7 +49,7 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = observer(({ pac
                     {packageInfo.description}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                    {`${t("Author")}: ${packageInfo.authorInfo}`}
+                    {t("Author",{authorInfo: packageInfo.authorInfo})}
                 </Typography>
                 <div>
                     {packageInfo.tags?.map((tag) => (

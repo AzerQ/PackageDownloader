@@ -2,12 +2,12 @@
 using PackageDownloader.Infrastructure.Resources;
 using PackageDownloader.Infrastructure.Services.Abstractions;
 
-namespace PackageDownloader.Infrastructure.Services.Implementations;
+namespace PackageDownloader.Infrastructure.Services.Implementations.PackageDownloader;
 
 public static class DotnetFrameworks
 {
-    public const string NetStandart2_0 = "netstandard2.0";
-    public const string NetStandart2_1 = "netstandard2.1";
+    public const string NetStandart20 = "netstandard2.0";
+    public const string NetStandart21 = "netstandard2.1";
     public const string Net6 = "net6.0";
     public const string Net7 = "net7.0";
     public const string Net8 = "net8.0";
@@ -46,10 +46,10 @@ public class NugetPackageDownloaderService : CLIPackageDownloader, IPackageDownl
 
     private static string GetAvailableFrameworkVersion(string? currentVersion)
     {
-        string[] availableFrameworks = [DotnetFrameworks.NetStandart2_0, DotnetFrameworks.NetStandart2_1,
+        string[] availableFrameworks = [DotnetFrameworks.NetStandart20, DotnetFrameworks.NetStandart21,
                                                     DotnetFrameworks.Net6, DotnetFrameworks.Net7, DotnetFrameworks.Net8];
 
-        string defaultFrameworkVersion = DotnetFrameworks.NetStandart2_0;
+        string defaultFrameworkVersion = DotnetFrameworks.NetStandart20;
 
         return !string.IsNullOrEmpty(currentVersion) && availableFrameworks.Contains(currentVersion)
             ? currentVersion : defaultFrameworkVersion;

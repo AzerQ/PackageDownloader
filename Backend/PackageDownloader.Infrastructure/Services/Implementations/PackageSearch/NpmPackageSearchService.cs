@@ -3,8 +3,7 @@ using PackageDownloader.Core.Services.Abstractions;
 using PackageDownloader.Infrastructure.Extensions;
 using PackageDownloader.Infrastructure.Services.Abstractions;
 
-
-namespace PackageDownloader.Infrastructure.Services.Implementations;
+namespace PackageDownloader.Infrastructure.Services.Implementations.PackageSearch;
 
 public class NpmPackageSearchService(IPackageInfoConverterService packageInfoConverter) : IPackageSearchService
 {

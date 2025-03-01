@@ -1,10 +1,10 @@
-﻿using PackageDownloader.Core.Models;
+﻿using System.Text;
+using PackageDownloader.Core.Models;
 using PackageDownloader.Core.Services.Abstractions;
 using PackageDownloader.Infrastructure.Models;
 using PackageDownloader.Infrastructure.Services.Abstractions;
-using System.Text;
 
-namespace PackageDownloader.Infrastructure.Services.Implementations
+namespace PackageDownloader.Infrastructure.Services.Implementations.PackageDownloader
 {
     public delegate void PackageAction(PackageRequest packageRequest, string packagesOutputFolder);
 

@@ -5,6 +5,8 @@ using PackageDownloader.Core.Models;
 using PackageDownloader.Core.Services.Abstractions;
 using PackageDownloader.Infrastructure.Services.Abstractions;
 using PackageDownloader.Infrastructure.Services.Implementations;
+using PackageDownloader.Infrastructure.Services.Implementations.PackageDownloader;
+using PackageDownloader.Infrastructure.Services.Implementations.PackageSearch;
 using PackageDownloader.Infrastructure.Services.Implementations.Recommendations;
 using PackageDownloader.Persistence.Services;
 

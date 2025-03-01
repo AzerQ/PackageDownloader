@@ -1,7 +1,7 @@
 ﻿using PackageDownloader.Core.Services.Abstractions;
 using PackageDownloader.Infrastructure.Services.Abstractions;
 
-namespace PackageDownloader.Infrastructure.Services.Implementations;
+namespace PackageDownloader.Infrastructure.Services.Implementations.PackageDownloader;
 
 /// <summary>
 /// Represents a service for downloading npm packages.

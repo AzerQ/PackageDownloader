@@ -13,7 +13,7 @@ namespace PackageDownloader.API.Controllers
     public class PackagesController(Func<PackageType, IPackageDownloadService> serviceAccessor, 
                                     IPackagesStorageService packagesStorageService) : ControllerBase
     {
-        const string UnknownMIME = "application/octet-stream";
+        const string UnknownMime = "application/octet-stream";
 
         private string ControllerName(string controllerFullName) => controllerFullName.Replace("Controller","");
 
@@ -25,8 +25,9 @@ namespace PackageDownloader.API.Controllers
             Guid packagesArchiveId = packagesStorageService.SetPackagesArchivePath(packageFilePath);
             
             string packagesDownloadUrl = Url.Action(nameof(GetPackagesAsArchive), 
-                ControllerName(nameof(PackagesController)), new { packagesArchiveId }, Request.Scheme);
-
+                ControllerName(nameof(PackagesController)), new { packagesArchiveId }, Request.Scheme) ?? 
+                                         throw new InvalidOperationException("Can't resolve package download link");
+            
             return packagesDownloadUrl;
         }
 
@@ -34,7 +35,7 @@ namespace PackageDownloader.API.Controllers
         [Produces("application/zip")]
         public IActionResult GetPackagesAsArchive([FromQuery] Guid packagesArchiveId)
         {
-            string packageFilePath = packagesStorageService.GetPackagesArchivePath(packagesArchiveId);
+            string? packageFilePath = packagesStorageService.GetPackagesArchivePath(packagesArchiveId);
             
             if (!System.IO.File.Exists(packageFilePath))
                 return NotFound();
@@ -44,7 +45,7 @@ namespace PackageDownloader.API.Controllers
             new FileExtensionContentTypeProvider()
                 .TryGetContentType(packageFilePath, out string? contentType);
 
-            return PhysicalFile(packageFilePath, contentType ?? UnknownMIME, fileName);
+            return PhysicalFile(packageFilePath, contentType ?? UnknownMime, fileName);
         }
     }
 }

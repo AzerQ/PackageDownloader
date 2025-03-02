@@ -15,7 +15,7 @@ public class NpmPackageSearchService(IPackageInfoConverterService packageInfoCon
 
         string url = string.Format(SearchPackageRequestUrl, namePart);
 
-        var content = await new Uri(url).GetJsonContent();
+        var content = await new Uri(url).GetJsonContentAsync();
 
         return packageInfoConverter.ConvertNpmJsonToSuggestionsList(content);  
 
@@ -25,7 +25,7 @@ public class NpmPackageSearchService(IPackageInfoConverterService packageInfoCon
     {
         string url = string.Format(SearchPackageRequestUrl, name);
 
-        var content = await new Uri(url).GetJsonContent();
+        var content = await new Uri(url).GetJsonContentAsync();
 
         return packageInfoConverter.ConvertNpmJsonToPackageInfo(content);
 

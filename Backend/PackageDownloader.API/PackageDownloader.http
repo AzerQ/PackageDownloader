@@ -68,3 +68,11 @@ Accept: application/json
 # Полуить подсказки поиска через API Nuget
 GET {{NugetApiHost}}/autocomplete?q={{NugetPackageName}}
 Accept: application/json
+
+###
+@ExtensionName = vscode-typescript-next
+@Publisher = ms-vscode
+@Version = 5.9.20250301
+
+# Скачать vsix расширение для Vs Code
+GET https://marketplace.visualstudio.com/_apis/public/gallery/publishers/{{Publisher}}/vsextensions/{{ExtensionName}}/{{Version}}/vspackage

@@ -8,10 +8,13 @@ namespace PackageDownloader.Infrastructure.Services.Abstractions
         IEnumerable<PackageInfo> ConvertNugetJsonToPackageInfo(JsonDocument json);
 
         IEnumerable<PackageInfo> ConvertNpmJsonToPackageInfo(JsonDocument json);
+        
+        IEnumerable<PackageInfo> ConvertVsCodeJsonToPackageInfo(JsonDocument json);
 
         IEnumerable<string> ConvertNpmJsonToSuggestionsList(JsonDocument json);
 
         IEnumerable<string> ConvertNugetJsonToSuggestionsList(JsonDocument json);
+        
 
     }
 }

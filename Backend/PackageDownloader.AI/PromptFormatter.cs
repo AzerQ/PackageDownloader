@@ -26,7 +26,7 @@ namespace PackageDownloader.AI
             
         }
 
-        public static string FormatPacakgeRecommendationsPrompt(PackageRecommendationsPrompt packageRecommendationsPrompt)
+        public static string FormatPackageRecommendationsPrompt(PackageRecommendationsPrompt packageRecommendationsPrompt)
         {
             var renderer = new StubbleBuilder().Build();
             return renderer.Render(GetPromptTemplate("PackageRecommendations.mustache"), packageRecommendationsPrompt);

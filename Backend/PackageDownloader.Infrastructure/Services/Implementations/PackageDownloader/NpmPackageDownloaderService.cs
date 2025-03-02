@@ -6,13 +6,12 @@ namespace PackageDownloader.Infrastructure.Services.Implementations.PackageDownl
 /// <summary>
 /// Represents a service for downloading npm packages.
 /// </summary>
-/// <param name="fileSystemService">An instance of <see cref="IFileSystemService"/> to handle file system operations.</param>
 /// <param name="shellCommandService">An instance of <see cref="IShellCommandService"/> to execute shell commands.</param>
-public class NpmPackageDownloaderService(IFileSystemService fileSystemService, IShellCommandService shellCommandService, IArchiveService archiveService) :
-    CLIPackageDownloader(fileSystemService, shellCommandService, archiveService), IPackageDownloadService 
+public class NpmPackageDownloaderService(IPackagesDirectoryCreator packagesDirectoryCreator, IShellCommandService shellCommandService, IArchiveService archiveService) :
+    CliPackageDownloader(packagesDirectoryCreator, shellCommandService, archiveService) 
 {
     protected override string DownloadPackageCommandTemplate => "npm install {0} --save --prefix {1}";
 
-    protected override string DownloadPackgeWithVersionCommandTemplate => "npm install {0}@{1} --save --prefix {2}";
+    protected override string DownloadPackageWithVersionCommandTemplate => "npm install {0}@{1} --save --prefix {2}";
 
 }

@@ -33,7 +33,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="PromptTemplates\" />
+    <PackageReference Include="JsonCons.JsonPath" Version="1.1.0" />
   </ItemGroup>
 
 </Project>

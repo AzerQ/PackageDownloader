@@ -51,7 +51,7 @@ namespace PackageDownloader.Infrastructure.Services.Implementations.Recommendati
                 UserPrompt = userPrompt
             };
             
-            return PromptFormatter.FormatPacakgeRecommendationsPrompt(packageRecommendationsPrompt);
+            return PromptFormatter.FormatPackageRecommendationsPrompt(packageRecommendationsPrompt);
         }
 
         private string ClearAiResponse(string aiResponse)

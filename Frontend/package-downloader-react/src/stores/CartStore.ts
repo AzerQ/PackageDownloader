@@ -42,7 +42,7 @@ class CartStore {
     getAvailableSdkVersions = (): string[] => {
         let packageType: PackageType = packagesSearchStore.repositoryType;
         switch (packageType) {
-            case PackageType.Npm: return [];
+            
             case PackageType.Nuget:
                 {
                     return [
@@ -53,6 +53,8 @@ class CartStore {
                         "net8.0"
                     ];
                 }
+            
+            default: return [];
         }
     }
 

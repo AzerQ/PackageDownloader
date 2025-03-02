@@ -17,9 +17,9 @@ public interface IFileSystemService
     /// <param name="folderPath">The path of the temporary folder to be removed.</param>
     void RemoveTempFolder(string folderPath);
 
-    string CreateDirectory(string baseFolderPath, string directiryName);
+    string CreateDirectory(string baseFolderPath, string directoryName);
 
-    void CopyFilesToFolder(IEnumerable<string> filePaths, string destinationFodler);
+    void CopyFilesToFolder(IEnumerable<string> filePaths, string destinationFolder);
 
     IEnumerable<string> GetAllFilesByExtension(string folder, string extension);
 

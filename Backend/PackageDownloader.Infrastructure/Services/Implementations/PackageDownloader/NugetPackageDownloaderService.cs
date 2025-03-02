@@ -2,12 +2,12 @@
 using PackageDownloader.Infrastructure.Resources;
 using PackageDownloader.Infrastructure.Services.Abstractions;
 
-namespace PackageDownloader.Infrastructure.Services.Implementations;
+namespace PackageDownloader.Infrastructure.Services.Implementations.PackageDownloader;
 
 public static class DotnetFrameworks
 {
-    public const string NetStandart2_0 = "netstandard2.0";
-    public const string NetStandart2_1 = "netstandard2.1";
+    public const string NetStandart20 = "netstandard2.0";
+    public const string NetStandart21 = "netstandard2.1";
     public const string Net6 = "net6.0";
     public const string Net7 = "net7.0";
     public const string Net8 = "net8.0";
@@ -16,15 +16,12 @@ public static class DotnetFrameworks
 /// <summary>
 /// Represents a service for downloading nuget packages.
 /// </summary>
-/// <param name="fileSystemService">An instance of <see cref="IFileSystemService"/> to handle file system operations.</param>
-/// <param name="shellCommandService">An instance of <see cref="IShellCommandService"/> to execute shell commands.</param>
-public class NugetPackageDownloaderService : CLIPackageDownloader, IPackageDownloadService
+public class NugetPackageDownloaderService : CliPackageDownloader
 {
+    private readonly IFileSystemService _fileSystemService;
 
-    protected readonly IFileSystemService _fileSystemService;
-
-    public NugetPackageDownloaderService(IFileSystemService fileSystemService, IShellCommandService shellCommandService, IArchiveService archiveService) :
-        base(fileSystemService, shellCommandService, archiveService)
+    public NugetPackageDownloaderService(IFileSystemService fileSystemService, IShellCommandService shellCommandService, IArchiveService archiveService, IPackagesDirectoryCreator packagesDirectoryCreator) :
+        base(packagesDirectoryCreator, shellCommandService, archiveService)
     {
         _fileSystemService = fileSystemService;
 
@@ -42,14 +39,14 @@ public class NugetPackageDownloaderService : CLIPackageDownloader, IPackageDownl
 
     protected override string DownloadPackageCommandTemplate => "dotnet add package {0} --package-directory {1}";
 
-    protected override string DownloadPackgeWithVersionCommandTemplate => "dotnet add package {0} --version {1} --package-directory {2}";
+    protected override string DownloadPackageWithVersionCommandTemplate => "dotnet add package {0} --version {1} --package-directory {2}";
 
     private static string GetAvailableFrameworkVersion(string? currentVersion)
     {
-        string[] availableFrameworks = [DotnetFrameworks.NetStandart2_0, DotnetFrameworks.NetStandart2_1,
+        string[] availableFrameworks = [DotnetFrameworks.NetStandart20, DotnetFrameworks.NetStandart21,
                                                     DotnetFrameworks.Net6, DotnetFrameworks.Net7, DotnetFrameworks.Net8];
 
-        string defaultFrameworkVersion = DotnetFrameworks.NetStandart2_0;
+        string defaultFrameworkVersion = DotnetFrameworks.NetStandart20;
 
         return !string.IsNullOrEmpty(currentVersion) && availableFrameworks.Contains(currentVersion)
             ? currentVersion : defaultFrameworkVersion;

@@ -30,5 +30,6 @@
     "CodeExample": "Code example",
     "FoldCode": "Fold code",
     "ShowCode": "Show code",
-    "SearchPackage": "Search package"
+    "SearchPackage": "Search package",
+    "SearchSuggestionsEnabled": "Suggestions on search"
 }

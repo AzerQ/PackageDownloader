@@ -3,7 +3,7 @@ using PackageDownloader.Core.Services.Abstractions;
 using PackageDownloader.Infrastructure.Extensions;
 using PackageDownloader.Infrastructure.Services.Abstractions;
 
-namespace PackageDownloader.Infrastructure.Services.Implementations
+namespace PackageDownloader.Infrastructure.Services.Implementations.PackageSearch
 {
     public class NugetPackageSearchService(IPackageInfoConverterService packageInfoConverter) : IPackageSearchService
     {
@@ -15,7 +15,7 @@ namespace PackageDownloader.Infrastructure.Services.Implementations
         {
             string url = string.Format(AutocompleteTemplateUrl, namePart);
 
-            var content = await new Uri(url).GetJsonContent();
+            var content = await new Uri(url).GetJsonContentAsync();
 
             return packageInfoConverter.ConvertNugetJsonToSuggestionsList(content);
         }
@@ -24,7 +24,7 @@ namespace PackageDownloader.Infrastructure.Services.Implementations
         {
             string url = string.Format(SearchPackageRequestUrl, name);
 
-            var content = await new Uri(url).GetJsonContent();
+            var content = await new Uri(url).GetJsonContentAsync();
 
             return packageInfoConverter.ConvertNugetJsonToPackageInfo(content);
         }

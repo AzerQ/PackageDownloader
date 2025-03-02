@@ -9,6 +9,8 @@ import {
   IconButton,
   Paper,
   Tooltip,
+  FormControlLabel,
+  Switch,
 } from '@mui/material';
 import { PackageType } from '../../services/apiClient';
 import { observer } from 'mobx-react-lite';
@@ -31,6 +33,7 @@ const SearchForm: React.FC = observer(() => {
     searchSuggestions,
     isSearchSuggestionsLoading,
     getSearchResults,
+    setSearchSuggestionEnabledFlag
   } = packagesSearchStore;
 
   // Используем эффект для вызова API при изменении inputValue
@@ -48,13 +51,14 @@ const SearchForm: React.FC = observer(() => {
       await getSearchResults();
     }
   };
-  
+
 
   return (
     <Box sx={{ mb: 3 }}>
       <Tabs value={repositoryType} onChange={onRepositoryTypeChange} centered>
         <Tab label="NPM" value={PackageType.Npm} />
         <Tab label="NuGet" value={PackageType.Nuget} />
+        <Tab label="VsCode" value={PackageType.VsCode} />
       </Tabs>
       <Paper component="div" sx={{ p: '2px 4px', display: 'flex', alignItems: 'center' }}>
 
@@ -109,6 +113,9 @@ const SearchForm: React.FC = observer(() => {
             />
           )}
         />
+        <FormControlLabel sx={{ marginLeft: 3 }}
+          control={<Switch checked={packagesSearchStore.isSearchSuggestionsEnabled} onChange={(_, checked) => setSearchSuggestionEnabledFlag(checked)} />}
+          label={t("SearchSuggestionsEnabled")} />
       </Paper>
       <SearchResults />
     </Box>

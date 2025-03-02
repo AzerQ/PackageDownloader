@@ -6,5 +6,6 @@ namespace PackageDownloader.Core.Models;
 public enum PackageType
 {
     Npm,
-    Nuget
+    Nuget,
+    VsCode
 }

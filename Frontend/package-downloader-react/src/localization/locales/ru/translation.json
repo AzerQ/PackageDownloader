@@ -30,5 +30,6 @@
     "CodeExample": "Пример кода",
     "FoldCode": "Свернуть код",
     "ShowCode": "Показать код",
-    "SearchPackage": "Поиск пакета"
+    "SearchPackage": "Поиск пакета",
+    "SearchSuggestionsEnabled": "Подсказки при поиске"
 }

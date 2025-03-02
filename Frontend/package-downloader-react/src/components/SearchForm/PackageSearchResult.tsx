@@ -87,7 +87,7 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = observer(({ pac
                                 onChange={(e) => setSelectedVersion(e.target.value)}
                             >
                                 {packageInfo.otherVersions
-                                    ?.sort((a, b) => compareVersions(a, b, "DESC"))
+                                    .sort((a, b) => compareVersions(a, b, "DESC"))
                                     .map((ver) => (
                                         <MenuItem key={packageInfo.id + ver} value={ver}>
                                             {ver}

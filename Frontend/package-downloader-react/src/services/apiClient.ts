@@ -256,6 +256,7 @@ export interface PackageRequest {
 export enum PackageType {
     Npm = "Npm",
     Nuget = "Nuget",
+    VsCode = "VsCode"
 }
 
 export class ApiException extends Error {

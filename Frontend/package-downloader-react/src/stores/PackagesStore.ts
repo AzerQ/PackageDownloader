@@ -15,6 +15,8 @@ class PackagesSearchStore {
     isSearchSuggestionsLoading: boolean = false;
     isSearchResultsLoading: boolean = false;
 
+    isSearchSuggestionsEnabled: boolean = false;
+
     constructor() {
         makeAutoObservable(this);
     }
@@ -55,6 +57,9 @@ class PackagesSearchStore {
     }
 
     getSearchSuggestions = async () => {
+
+        if (!this.isSearchSuggestionsEnabled)
+            return;
 
         try {
             let packageApiClient = await getPackageApiClient();
@@ -108,6 +113,8 @@ class PackagesSearchStore {
     markAsAddedCartItem = (packageId: string) => this.setIsInCartItemFlag(packageId, true);
 
     markAsRemovedCartItem = (packageId: string) => this.setIsInCartItemFlag(packageId, false);
+
+    setSearchSuggestionEnabledFlag = (flagValue: boolean) => this.isSearchSuggestionsEnabled = flagValue;
 
 }
 

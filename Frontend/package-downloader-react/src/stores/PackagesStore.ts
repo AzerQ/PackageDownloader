@@ -114,7 +114,11 @@ class PackagesSearchStore {
 
     markAsRemovedCartItem = (packageId: string) => this.setIsInCartItemFlag(packageId, false);
 
-    setSearchSuggestionEnabledFlag = (flagValue: boolean) => this.isSearchSuggestionsEnabled = flagValue;
+    setSearchSuggestionEnabledFlag = (flagValue: boolean) => {
+         this.isSearchSuggestionsEnabled = flagValue;
+         if (!flagValue)
+            this.clearSuggestions();
+    }
 
 }
 

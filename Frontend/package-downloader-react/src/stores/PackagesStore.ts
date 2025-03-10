@@ -3,6 +3,7 @@ import { getPackageApiClient, PackageInfo, PackageType } from "../services/apiCl
 import { cartStore } from "./CartStore";
 import { cloneObject } from "../utils/objectsTools";
 import { notificationStore } from "./NotificationStore";
+import { packageInfoStore } from "./PackageInfoStore";
 
 class PackagesSearchStore {
 
@@ -86,6 +87,7 @@ class PackagesSearchStore {
         this.clearSearchResults();
         this.clearSearchQuery();
         cartStore.clearCartItems();
+        packageInfoStore.clearPackageInfo();
     }
 
     getFullPackageItem = (packageId: string) =>

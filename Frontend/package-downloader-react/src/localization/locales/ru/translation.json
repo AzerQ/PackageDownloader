@@ -31,5 +31,6 @@
     "FoldCode": "Свернуть код",
     "ShowCode": "Показать код",
     "SearchPackage": "Поиск пакета",
-    "SearchSuggestionsEnabled": "Подсказки при поиске"
+    "SearchSuggestionsEnabled": "Подсказки при поиске",
+    "ViewReadmeFile": "Посмотреть файл readme"
 }

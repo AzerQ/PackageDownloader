@@ -31,5 +31,6 @@
     "FoldCode": "Fold code",
     "ShowCode": "Show code",
     "SearchPackage": "Search package",
-    "SearchSuggestionsEnabled": "Suggestions on search"
+    "SearchSuggestionsEnabled": "Suggestions on search",
+    "ViewReadmeFile": "View readme file"
 }

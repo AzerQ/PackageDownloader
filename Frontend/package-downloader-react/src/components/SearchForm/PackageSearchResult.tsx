@@ -1,13 +1,14 @@
-import { Card, CardContent, Typography, Chip, Link, CardActions, Button, CardHeader, Avatar, Stack, Select, MenuItem, FormControl, Box } from "@mui/material";
+import { Card, CardContent, Typography, Chip, Link, CardActions, Button, CardHeader, Avatar, Stack, Select, MenuItem, FormControl, Box, IconButton } from "@mui/material";
 import { PackageInfo } from "../../services/apiClient";
 import { observer } from "mobx-react-lite";
 import { cartStore } from "../../stores/CartStore";
 import DownloadIcon from '@mui/icons-material/Download'; // Импортируем иконку загрузки
-import { Add, GitHub, Public } from "@mui/icons-material";
+import { Add, GitHub, LibraryBooks, Public } from "@mui/icons-material";
 import { packagesSearchStore } from "../../stores/PackagesStore";
 import { compareVersions } from "../../utils/versionsComparer";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { packageInfoStore } from "../../stores/PackageInfoStore";
 
 interface PackageSearchResultsProps {
     packageInfo: PackageInfo;
@@ -32,14 +33,14 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = observer(({ pac
                     />
                 }
                 title={packageInfo.id}
-                subheader={t("LatestVersion", {version: packageInfo.currentVersion})}
+                subheader={t("LatestVersion", { version: packageInfo.currentVersion })}
             />
 
             {/* Блок с количеством скачиваний */}
             <Stack direction="row" alignItems="center" spacing={1} sx={{ px: 2, pt: 1 }}>
                 <DownloadIcon color="primary" fontSize="small" /> {/* Иконка загрузки */}
                 <Typography variant="subtitle2" color="text.secondary">
-                    {t("Downloads", {num: packageInfo.downloadsCount.toLocaleString()})}  {/* Форматированное число */}
+                    {t("Downloads", { num: packageInfo.downloadsCount.toLocaleString() })}  {/* Форматированное число */}
                 </Typography>
             </Stack>
 
@@ -49,7 +50,7 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = observer(({ pac
                     {packageInfo.description}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                    {t("Author",{authorInfo: packageInfo.authorInfo})}
+                    {t("Author", { authorInfo: packageInfo.authorInfo })}
                 </Typography>
                 <div>
                     {packageInfo.tags?.map((tag) => (
@@ -57,18 +58,25 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = observer(({ pac
                     ))}
                 </div>
                 {packageInfo.repositoryUrl && (
-                    <Stack direction="row" alignItems="center" spacing={1} sx={{ px: 2, pt: 1 }}>
-                        <GitHub color="primary" fontSize="small" /> {/* Иконка загрузки */}
-                        <Link href={packageInfo.repositoryUrl} target="_blank" rel="noopener">
-                            {t("ViewSourceRepository")}
-                        </Link>
-                    </Stack>
+                    <>
+                        <Stack direction="row" alignItems="center" spacing={1} sx={{ px: 2, pt: 1 }}>
+                            <Button size="small" startIcon={<LibraryBooks />}
+                                onClick={async () => await packageInfoStore.fetchReadmeContent(packageInfo.repositoryUrl ?? '')}>
+                                {t("ViewReadmeFile")}
+                            </Button>
+                            <GitHub color="primary" fontSize="small" />
+                            <Link href={packageInfo.repositoryUrl} target="_blank" rel="noopener">
+                                {t("ViewSourceRepository")}
+                            </Link>
+                        </Stack>
+
+                    </>
                 )}
                 {packageInfo.packageUrl && (
                     <Stack direction="row" alignItems="center" spacing={1} sx={{ px: 2, pt: 1 }}>
-                        <Public color="primary" fontSize="small" /> {/* Иконка загрузки */}
+                        <Public color="primary" fontSize="small" />
                         <Link href={packageInfo.packageUrl} target="_blank" rel="noopener">
-                            {t("ViewOnPackageRepositorySite", {repositoryType: packagesSearchStore.repositoryType})}
+                            {t("ViewOnPackageRepositorySite", { repositoryType: packagesSearchStore.repositoryType })}
                         </Link>
                     </Stack>
                 )}

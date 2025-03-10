@@ -95,7 +95,7 @@ const SearchForm: React.FC = observer(() => {
           renderInput={(params) => (
             <TextField
               {...params}
-              sx={{ mt: 2, ml: 2, mb: 3, flex: 1, width: 1000 }}
+              sx={{ mt: 2, ml: 2, mb: 3, flex: 1, width: 400 }}
               label={t("SearchForPackagesLabel")}
               variant="standard"
               fullWidth

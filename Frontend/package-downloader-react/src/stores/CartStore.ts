@@ -14,7 +14,7 @@ class CartStore {
     }
 
     addCartItem = (packageDetail: PackageDetails) => {
-        let itemAlreadyAddedInCart = packagesSearchStore.getFullPackageItem(packageDetail.packageID)?.isAddedInCart;
+        const itemAlreadyAddedInCart = packagesSearchStore.getFullPackageItem(packageDetail.packageID)?.isAddedInCart;
         if (itemAlreadyAddedInCart)
             return;
 
@@ -23,7 +23,7 @@ class CartStore {
     }
 
     removeCartItem = (packageDetail: PackageDetails) => {
-        let newCartItems: PackageDetails[] = [];
+        const newCartItems: PackageDetails[] = [];
         for (const cartItem of this.cartItems) {
 
             if (!objectsAreEqual(cartItem, packageDetail))
@@ -40,7 +40,7 @@ class CartStore {
     }
 
     getAvailableSdkVersions = (): string[] => {
-        let packageType: PackageType = packagesSearchStore.repositoryType;
+        const packageType: PackageType = packagesSearchStore.repositoryType;
         switch (packageType) {
             
             case PackageType.Nuget:

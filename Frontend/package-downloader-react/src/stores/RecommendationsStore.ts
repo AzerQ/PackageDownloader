@@ -21,10 +21,10 @@ class RecommendationsStore {
 
     getPackagesRecommendations = async () => {
 
-        let repositoryType = packagesSearchStore.repositoryType;
+        const repositoryType = packagesSearchStore.repositoryType;
 
         try {
-            let packageApiClient = await getPackageApiClient();
+            const packageApiClient = await getPackageApiClient();
             this.isRecommendationsLoading = true;
             const results = await packageApiClient.getRecommendations(repositoryType, this.userPrompt, i18n.language);
 

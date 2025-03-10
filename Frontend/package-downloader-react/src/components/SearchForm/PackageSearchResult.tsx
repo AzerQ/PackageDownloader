@@ -1,4 +1,4 @@
-import { Card, CardContent, Typography, Chip, Link, CardActions, Button, CardHeader, Avatar, Stack, Select, MenuItem, FormControl, Box, IconButton } from "@mui/material";
+import { Card, CardContent, Typography, Chip, Link, CardActions, Button, CardHeader, Avatar, Stack, Select, MenuItem, FormControl, Box } from "@mui/material";
 import { PackageInfo } from "../../services/apiClient";
 import { observer } from "mobx-react-lite";
 import { cartStore } from "../../stores/CartStore";
@@ -18,11 +18,11 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = observer(({ pac
 
     const { t } = useTranslation();
 
-    let [selectedVersion, setSelectedVersion] = useState<string>(packageInfo.currentVersion);
+    const [selectedVersion, setSelectedVersion] = useState<string>(packageInfo.currentVersion);
 
     return (
         <Card variant="outlined">
-            {/* Заголовок карточки */}
+
             <CardHeader
                 avatar={
                     <Avatar
@@ -36,7 +36,7 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = observer(({ pac
                 subheader={t("LatestVersion", { version: packageInfo.currentVersion })}
             />
 
-            {/* Блок с количеством скачиваний */}
+
             <Stack direction="row" alignItems="center" spacing={1} sx={{ px: 2, pt: 1 }}>
                 <DownloadIcon color="primary" fontSize="small" /> {/* Иконка загрузки */}
                 <Typography variant="subtitle2" color="text.secondary">
@@ -44,7 +44,7 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = observer(({ pac
                 </Typography>
             </Stack>
 
-            {/* Основное содержимое карточки */}
+
             <CardContent>
                 <Typography variant="body1" gutterBottom>
                     {packageInfo.description}
@@ -82,7 +82,7 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = observer(({ pac
                 )}
             </CardContent>
 
-            {/* Действия с карточкой */}
+
             <CardActions>
                 <Typography variant="overline" gutterBottom sx={{ display: 'block', mb: 0.5 }}>
                     {t("ChoseVersion")}

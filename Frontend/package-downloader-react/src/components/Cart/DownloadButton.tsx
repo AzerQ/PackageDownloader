@@ -18,39 +18,39 @@ import { useTranslation } from 'react-i18next';
 
 
 const DownloadPackagesButton: React.FC = observer(() => {
-  const [open, setOpen] = useState(false); // Открыто ли модальное окно
-  const [loading, setLoading] = useState(false); // Состояние загрузки
-  const [success, setSuccess] = useState(false); // Успешная загрузка
-  const [error, setError] = useState<string | null>(null); // Ошибка
+  const [open, setOpen] = useState(false); 
+  const [loading, setLoading] = useState(false); 
+  const [success, setSuccess] = useState(false); 
+  const [error, setError] = useState<string | null>(null);
   const [downloadLink, setDownloadLink] = useState<string>('');
 
   const { t } = useTranslation();
 
   const handleDownload = async () => {
-    setOpen(true); // Открываем модальное окно
-    setLoading(true); // Начинаем загрузку
-    setSuccess(false); // Сбрасываем флаг успеха
-    setError(null); // Сбрасываем ошибку
+    setOpen(true); 
+    setLoading(true); 
+    setSuccess(false);
+    setError(null);
 
     try {
-    let downloadLink =  await (await getPackageApiClient()).preparePackagesDownloadLink({
+    const downloadLink =  await (await getPackageApiClient()).preparePackagesDownloadLink({
         packagesDetails: cartStore.cartItems,
         packageType: packagesSearchStore.repositoryType,
         sdkVersion: cartStore.getSdkVersion()
       });
-      setLoading(false); // Завершаем загрузку
-      setSuccess(true); // Устанавливаем флаг успеха
+      setLoading(false);
+      setSuccess(true);
       setDownloadLink(downloadLink);
     } catch (err: any) {
-      setLoading(false); // Завершаем загрузку
-      setError(err.message || t("ErrorOccurred")); // Устанавливаем ошибку
+      setLoading(false);
+      setError(err.message || t("ErrorOccurred"));
     }
   };
 
   const handleClose = () => {
-    setOpen(false); // Закрываем модальное окно
-    setSuccess(false); // Сбрасываем флаг успеха
-    setError(null); // Сбрасываем ошибку
+    setOpen(false);
+    setSuccess(false);
+    setError(null);
   };
 
   return (
@@ -69,7 +69,7 @@ const DownloadPackagesButton: React.FC = observer(() => {
       <Modal open={open} onClose={handleClose}>
         <Box
           sx={{
-            position: 'absolute' as 'absolute',
+            position: 'absolute' as const,
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',

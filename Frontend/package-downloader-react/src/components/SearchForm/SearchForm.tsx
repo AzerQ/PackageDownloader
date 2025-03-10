@@ -36,7 +36,7 @@ const SearchForm: React.FC = observer(() => {
     setSearchSuggestionEnabledFlag
   } = packagesSearchStore;
 
-  // Используем эффект для вызова API при изменении inputValue
+
   useEffect(() => {
     if (searchQuery.length > 2) {
       getSearchSuggestions();
@@ -77,19 +77,19 @@ const SearchForm: React.FC = observer(() => {
         <Autocomplete
           freeSolo
           value={searchQuery}
-          options={searchSuggestions} // Предложения, полученные от API
+          options={searchSuggestions}
           loading={isSearchSuggestionsLoading}
           onInputChange={(_event, value) => setSearchQuery(value)} // Обновляем значение при вводе
           onChange={async (_, value) => {
             if (value !== null) {
               setSearchQuery(value as string);
-              await handleSearch(); // Выполняем поиск при выборе подсказки
+              await handleSearch();
             }
           }}
           onKeyDown={async (e) => {
             if (e.key === 'Enter') {
-              e.preventDefault(); // Предотвращаем стандартное поведение
-              await handleSearch(); // Выполняем поиск при нажатии Enter
+              e.preventDefault();
+              await handleSearch();
             }
           }}
           renderInput={(params) => (

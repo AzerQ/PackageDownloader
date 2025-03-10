@@ -5,11 +5,8 @@ import { observer } from 'mobx-react-lite';
 import { packagesSearchStore } from '../../stores/PackagesStore';
 import { useTranslation } from 'react-i18next';
 
-interface SearchResultsListProps {
 
-}
-
-const SearchResults: React.FC<SearchResultsListProps> = observer(() => {
+const SearchResults: React.FC = observer(() => {
 
     const { t } = useTranslation();
 

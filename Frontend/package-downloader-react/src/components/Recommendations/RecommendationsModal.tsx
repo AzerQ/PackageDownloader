@@ -23,15 +23,15 @@ const RecommendationsModal: React.FC = observer(() => {
     recommendationsStore.isRecommendationsFormEnabled = false;
   };
 
-  // Обработчик отправки запроса на получение рекомендаций
+
   const handleSubmit = async () => {
-    if (recommendationsStore.userPrompt.trim() === "") return; // Проверяем, что введен текст
+    if (recommendationsStore.userPrompt.trim() === "") return;
     await recommendationsStore.getPackagesRecommendations();
   };
 
   // Стиль для содержимого модального окна
   const modalStyle = {
-    position: "absolute" as "absolute",
+    position: "absolute",
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
@@ -41,15 +41,15 @@ const RecommendationsModal: React.FC = observer(() => {
     boxShadow: 24,
     p: 4,
     display: "flex",
-    flexDirection: "column", // Добавляем flex-direction: column для правильного расположения элементов
-    maxHeight: "95vh", // Ограничиваем максимальную высоту модального окна
+    flexDirection: "column",
+    maxHeight: "95vh",
   };
 
-  // Стиль для прокручиваемого контейнера
+
   const scrollableContentStyle = {
-    flexGrow: 1, // Занимает всё доступное место
-    overflowY: "auto", // Добавляем вертикальную прокрутку
-    maxHeight: "300px", // Ограничиваем высоту прокручиваемого контента
+    flexGrow: 1,
+    overflowY: "auto",
+    maxHeight: "300px",
   };
 
   return (
@@ -57,7 +57,7 @@ const RecommendationsModal: React.FC = observer(() => {
       {/* Модальное окно */}
       <Modal open={recommendationsStore.isRecommendationsFormEnabled} onClose={handleClose}>
         <Box sx={modalStyle}>
-          {/* Шапка модального окна с кнопкой закрытия */}
+
           <Box
             sx={{
               display: "flex",
@@ -68,11 +68,11 @@ const RecommendationsModal: React.FC = observer(() => {
           >
             <Typography variant="h6">{t("RecommendationsRequestLabel")}</Typography>
             <IconButton onClick={handleClose} aria-label="close">
-              <Close /> {/* Кнопка закрытия */}
+              <Close />
             </IconButton>
           </Box>
 
-          {/* Поле ввода для запроса пользователя */}
+
           <TextField
             fullWidth
             label={t("YourRequest")}
@@ -82,7 +82,7 @@ const RecommendationsModal: React.FC = observer(() => {
             margin="normal"
           />
 
-          {/* Кнопка отправки запроса */}
+
           <Button
             variant="contained"
             color="primary"
@@ -101,7 +101,7 @@ const RecommendationsModal: React.FC = observer(() => {
             }
           </Button>
 
-          {/* Прокручиваемый контейнер для списка рекомендаций */}
+
           <Box sx={scrollableContentStyle}>
             <RecommendationsList />
           </Box>

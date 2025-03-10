@@ -1,11 +1,11 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import RecommendationCard from './RecommendationCard'; // Предполагается, что у нас уже есть компонент RecommendationCard
-import { CircularProgress } from '@mui/material'; // Компонент loader из Material-UI
+import RecommendationCard from './RecommendationCard';
+import { CircularProgress } from '@mui/material';
 import { recommendationsStore } from '../../stores/RecommendationsStore';
 import { useTranslation } from 'react-i18next';
 
-// Компонент для отображения списка рекомендаций
+
 const RecommendationsList: React.FC = observer(() => {
 
     const { t } = useTranslation();
@@ -14,7 +14,6 @@ const RecommendationsList: React.FC = observer(() => {
         <div>
             <h2>{t("RecommendationsList")}</h2>
 
-            {/* Показываем loader если isLoading === true */}
             {recommendationsStore.isRecommendationsLoading ? (
                 <CircularProgress />
             ) : recommendationsStore.packagesRecommendations.length > 0 ? (

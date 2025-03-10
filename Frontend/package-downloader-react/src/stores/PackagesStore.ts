@@ -41,7 +41,7 @@ class PackagesSearchStore {
     getSearchResults = async () => {
         
         try {
-            let packageApiClient = await getPackageApiClient();
+            const packageApiClient = await getPackageApiClient();
             this.isSearchResultsLoading = true;
             const results = await packageApiClient.getSearchResults(this.repositoryType, this.searchQuery);
 
@@ -63,7 +63,7 @@ class PackagesSearchStore {
             return;
 
         try {
-            let packageApiClient = await getPackageApiClient();
+            const packageApiClient = await getPackageApiClient();
             this.isSearchSuggestionsLoading = true;
             const results = await packageApiClient.getSearchSuggestions(this.repositoryType, this.searchQuery);
 
@@ -95,14 +95,14 @@ class PackagesSearchStore {
 
     private setIsInCartItemFlag = (packageId: string, isInCartItem: boolean) => {
        
-        let packageIndex = this.fondedPackages.findIndex(packageItem => packageItem.id === packageId);
+        const packageIndex = this.fondedPackages.findIndex(packageItem => packageItem.id === packageId);
 
         const NOT_FOUND = -1;
         if (packageIndex === NOT_FOUND)
             return;
         
-        let originalPackage = this.getFullPackageItem(packageId);
-        let packageItem = cloneObject(originalPackage);
+        const originalPackage = this.getFullPackageItem(packageId);
+        const packageItem = cloneObject(originalPackage);
 
         if (packageItem) {
             packageItem.isAddedInCart = isInCartItem;

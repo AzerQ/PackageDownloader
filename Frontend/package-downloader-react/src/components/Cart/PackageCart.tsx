@@ -9,11 +9,8 @@ import { packagesSearchStore } from '../../stores/PackagesStore';
 import { useTranslation } from 'react-i18next';
 
 
-interface PackageCartProps {
 
-}
-
-const PackageCart: React.FC<PackageCartProps> = observer(({ }) => {
+const PackageCart: React.FC = observer( () => {
   
   const { t } = useTranslation();
 
@@ -22,18 +19,18 @@ const PackageCart: React.FC<PackageCartProps> = observer(({ }) => {
   if (cartItems.length === 0)
     return <></>
 
-  let availableSdks = cartStore.getAvailableSdkVersions();
+  const availableSdks = cartStore.getAvailableSdkVersions();
 
   return (
     <Box
       sx={{
         position: 'fixed',
-        bottom: 0, // Зафиксировать внизу
-        right: 0,  // Зафиксировать вправо
-        width: '400px', // Ширина корзины
-        zIndex: 1000, // Обеспечивает, что корзина выше других элементов
-        backgroundColor: 'white', // Цвет фона, чтобы выделить элемент
-        boxShadow: 3, // Добавить тень для эффекта
+        bottom: 0,
+        right: 0,
+        width: '400px',
+        zIndex: 1000,
+        backgroundColor: 'white',
+        boxShadow: 3,
         padding: 2,
       }}
     >

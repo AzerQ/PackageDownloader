@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Container, Grid, Typography } from '@mui/material';
+import { Container, Grid, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import PackageCart from '../components/Cart/PackageCart';
 import NotificationBanner from '../components/Notification/Notification';

@@ -3,7 +3,7 @@ import React from 'react';
 import { Box, Typography, LinearProgress } from '@mui/material';
 import MarkdownPreview from '@uiw/react-markdown-preview';
 import { observer } from 'mobx-react-lite';
-import { packageInfoStore } from '../stores/PackageInfoStore';
+import { packageInfoStore } from '../../stores/PackageInfoStore.ts';
 
 
 const PreviewReadme: React.FC = observer(() => {

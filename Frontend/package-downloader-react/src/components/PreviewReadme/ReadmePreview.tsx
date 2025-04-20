@@ -4,27 +4,28 @@ import { Box, Typography, LinearProgress } from '@mui/material';
 import MarkdownPreview from '@uiw/react-markdown-preview';
 import { observer } from 'mobx-react-lite';
 import { packageInfoStore } from '../../stores/PackageInfoStore.ts';
+import {showError} from "../../stores/NotificationStore.ts";
 
 
 const PreviewReadme: React.FC = observer(() => {
 
-    const { repositoryUrl, readmeContent, isReadmeLoading } = packageInfoStore;
+    const {repositoryUrl, readmeContent} = packageInfoStore;
 
-    return (
-        <Box sx={{ width: '100%', maxWidth: 800, mx: 'auto', p: 2 }}>
-            <Typography variant="h5" gutterBottom>
-                {repositoryUrl}
-            </Typography>
+    if (!readmeContent)
+        return <></>
 
-            {isReadmeLoading && <LinearProgress />}
 
-            {!isReadmeLoading && readmeContent && (
-                <MarkdownPreview source={readmeContent} style={{ padding: 16 }}
-                />
-            )}
-
-        </Box>
-    );
+    return readmeContent?.case({
+        fulfilled: readmeContent =>
+            <Box sx={{width: '100%', maxWidth: 800, mx: 'auto', p: 2}}>
+                <Typography variant="h5" gutterBottom>
+                    {repositoryUrl}
+                </Typography>
+                <MarkdownPreview source={readmeContent} style={{padding: 16}}/>
+            </Box>,
+        pending: () => <LinearProgress/>,
+        rejected: err => <>{showError(err)}</>
+    });
 });
 
 export default PreviewReadme;

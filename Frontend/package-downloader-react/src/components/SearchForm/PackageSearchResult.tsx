@@ -1,24 +1,57 @@
-import { Card, CardContent, Typography, Chip, Link, CardActions, Button, CardHeader, Avatar, Stack, Select, MenuItem, FormControl, Box } from "@mui/material";
-import { PackageInfo } from "../../services/apiClient";
-import { observer } from "mobx-react-lite";
-import { cartStore } from "../../stores/CartStore";
+import {
+    Card,
+    CardContent,
+    Typography,
+    Chip,
+    Link,
+    CardActions,
+    Button,
+    CardHeader,
+    Avatar,
+    Stack,
+    Select,
+    MenuItem,
+    FormControl,
+    Box
+} from "@mui/material";
+import {PackageInfo} from "../../services/apiClient";
+import {cartStore} from "../../stores/CartStore";
 import DownloadIcon from '@mui/icons-material/Download'; // Импортируем иконку загрузки
-import { Add, GitHub, LibraryBooks, Public } from "@mui/icons-material";
-import { packagesSearchStore } from "../../stores/PackagesStore";
-import { compareVersions } from "../../utils/versionsComparer";
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
-import { packageInfoStore } from "../../stores/PackageInfoStore";
+import {Add, GitHub, LibraryBooks, Public} from "@mui/icons-material";
+import {packagesSearchStore} from "../../stores/PackagesStore";
+import {compareVersions} from "../../utils/versionsComparer";
+import {useState} from "react";
+import {useTranslation} from "react-i18next";
+import {packageInfoStore} from "../../stores/PackageInfoStore.ts";
 
 interface PackageSearchResultsProps {
     packageInfo: PackageInfo;
 }
 
-const PackageSearchResult: React.FC<PackageSearchResultsProps> = observer(({ packageInfo }) => {
+const PackageSearchResult: React.FC<PackageSearchResultsProps> = ({
+                                                                      packageInfo: {
+                                                                          currentVersion,
+                                                                          getPackageIconOrStockImage,
+                                                                          id,
+                                                                          downloadsCount,
+                                                                          description,
+                                                                          authorInfo,
+                                                                          tags,
+                                                                          repositoryUrl,
+                                                                          packageUrl,
+                                                                          otherVersions,
+                                                                          isAddedInCart,
+                                                                          getLastVersion
+                                                                      }
+                                                                  }) => {
 
-    const { t } = useTranslation();
+    const {t} = useTranslation();
 
-    const [selectedVersion, setSelectedVersion] = useState<string>(packageInfo.currentVersion);
+    const [selectedVersion, setSelectedVersion] = useState<string>(getLastVersion());
+
+    const {fetchReadmeContent} = packageInfoStore;
+
+    const {repositoryType} = packagesSearchStore;
 
     return (
         <Card variant="outlined">
@@ -26,57 +59,57 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = observer(({ pac
             <CardHeader
                 avatar={
                     <Avatar
-                        sx={{ width: 64, height: 64 }}
+                        sx={{width: 64, height: 64}}
                         alt="Package icon"
-                        src={packageInfo.getPackageIconOrStockImage()}
+                        src={getPackageIconOrStockImage()}
                         variant="square"
                     />
                 }
-                title={packageInfo.id}
-                subheader={t("LatestVersion", { version: packageInfo.currentVersion })}
+                title={id}
+                subheader={t("LatestVersion", {version: currentVersion})}
             />
 
 
-            <Stack direction="row" alignItems="center" spacing={1} sx={{ px: 2, pt: 1 }}>
-                <DownloadIcon color="primary" fontSize="small" /> {/* Иконка загрузки */}
+            <Stack direction="row" alignItems="center" spacing={1} sx={{px: 2, pt: 1}}>
+                <DownloadIcon color="primary" fontSize="small"/> {/* Иконка загрузки */}
                 <Typography variant="subtitle2" color="text.secondary">
-                    {t("Downloads", { num: packageInfo.downloadsCount.toLocaleString() })}  {/* Форматированное число */}
+                    {t("Downloads", {num: downloadsCount.toLocaleString()})} {/* Форматированное число */}
                 </Typography>
             </Stack>
 
 
             <CardContent>
                 <Typography variant="body1" gutterBottom>
-                    {packageInfo.description}
+                    {description}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                    {t("Author", { authorInfo: packageInfo.authorInfo })}
+                    {t("Author", {authorInfo})}
                 </Typography>
                 <div>
-                    {packageInfo.tags?.map((tag) => (
-                        <Chip key={packageInfo.id + tag} label={tag} style={{ margin: '4px' }} />
+                    {tags?.map((tag) => (
+                        <Chip key={id + tag} label={tag} style={{margin: '4px'}}/>
                     ))}
                 </div>
-                {packageInfo.repositoryUrl && (
+                {repositoryUrl && (
                     <>
-                        <Stack direction="row" alignItems="center" spacing={1} sx={{ px: 2, pt: 1 }}>
-                            <Button size="small" startIcon={<LibraryBooks />}
-                                onClick={async () => await packageInfoStore.fetchReadmeContent(packageInfo.repositoryUrl ?? '')}>
+                        <Stack direction="row" alignItems="center" spacing={1} sx={{px: 2, pt: 1}}>
+                            <Button size="small" startIcon={<LibraryBooks/>}
+                                    onClick={async () => await fetchReadmeContent(repositoryUrl ?? '')}>
                                 {t("ViewReadmeFile")}
                             </Button>
-                            <GitHub color="primary" fontSize="small" />
-                            <Link href={packageInfo.repositoryUrl} target="_blank" rel="noopener">
+                            <GitHub color="primary" fontSize="small"/>
+                            <Link href={repositoryUrl} target="_blank" rel="noopener">
                                 {t("ViewSourceRepository")}
                             </Link>
                         </Stack>
 
                     </>
                 )}
-                {packageInfo.packageUrl && (
-                    <Stack direction="row" alignItems="center" spacing={1} sx={{ px: 2, pt: 1 }}>
-                        <Public color="primary" fontSize="small" />
-                        <Link href={packageInfo.packageUrl} target="_blank" rel="noopener">
-                            {t("ViewOnPackageRepositorySite", { repositoryType: packagesSearchStore.repositoryType })}
+                {packageUrl && (
+                    <Stack direction="row" alignItems="center" spacing={1} sx={{px: 2, pt: 1}}>
+                        <Public color="primary" fontSize="small"/>
+                        <Link href={packageUrl} target="_blank" rel="noopener">
+                            {t("ViewOnPackageRepositorySite", {repositoryType})}
                         </Link>
                     </Stack>
                 )}
@@ -84,37 +117,41 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = observer(({ pac
 
 
             <CardActions>
-                <Typography variant="overline" gutterBottom sx={{ display: 'block', mb: 0.5 }}>
+                <Typography variant="overline" gutterBottom sx={{display: 'block', mb: 0.5}}>
                     {t("ChoseVersion")}
                 </Typography>
-                {packageInfo.otherVersions?.length && (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}> {/* Используем Box для создания гибкого контейнера */}
-                        <FormControl sx={{ m: 0, minWidth: 120 }} size="small">
+                {otherVersions?.length && (
+                    <Box sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1
+                    }}>
+                        <FormControl sx={{m: 0, minWidth: 120}} size="small">
                             <Select
                                 value={selectedVersion}
                                 onChange={(e) => setSelectedVersion(e.target.value)}
                             >
-                                {packageInfo.otherVersions
+                                {otherVersions
                                     .sort((a, b) => compareVersions(a, b, "DESC"))
                                     .map((ver) => (
-                                        <MenuItem key={packageInfo.id + ver} value={ver}>
+                                        <MenuItem key={id + ver} value={ver}>
                                             {ver}
                                         </MenuItem>
                                     ))}
                             </Select>
                         </FormControl>
                         {
-                            !packageInfo.isAddedInCart &&
+                            !isAddedInCart &&
                             (<Button
-                                startIcon={<Add />}
-                                sx={{ m: 0 }}
+                                startIcon={<Add/>}
+                                sx={{m: 0}}
                                 color="primary"
                                 onClick={() => {
                                     cartStore.addCartItem(
                                         {
-                                            packageID: packageInfo.id,
+                                            packageID: id,
                                             packageVersion: selectedVersion,
-                                            packageIconUrl: packageInfo.getPackageIconOrStockImage()
+                                            packageIconUrl: getPackageIconOrStockImage()
                                         }
                                     )
                                 }
@@ -129,6 +166,6 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = observer(({ pac
             </CardActions>
         </Card>
     );
-});
+};
 
 export default PackageSearchResult;

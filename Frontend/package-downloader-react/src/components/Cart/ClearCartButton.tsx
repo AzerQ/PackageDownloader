@@ -5,8 +5,6 @@ import { cartStore } from '../../stores/CartStore';
 import { ShoppingCart } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 
-
-
 const ClearCartButton: React.FC = observer(() => {
 
   const { t } = useTranslation();

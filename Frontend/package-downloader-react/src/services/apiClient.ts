@@ -6,6 +6,7 @@
 
 import { notificationStore } from "../stores/NotificationStore";
 import { cloneObject } from "../utils/objectsTools";
+import {compareVersions} from "../utils/versionsComparer.ts";
 
 
 /* tslint:disable */
@@ -15,7 +16,7 @@ import { cloneObject } from "../utils/objectsTools";
 
 export class PackagesAPIClient {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
-    private baseUrl: string;
+    private readonly baseUrl: string;
     protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
 
     constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
@@ -28,7 +29,7 @@ export class PackagesAPIClient {
      * @param namePart (optional) 
      * @return Success
      */
-    async getSearchResults(packageType: PackageType | undefined, namePart: string | undefined): Promise<PackageInfo[]> {
+    getSearchResults = async (packageType: PackageType | undefined, namePart: string | undefined): Promise<PackageInfo[]> => {
         let url_ = this.baseUrl + "/api/PackageInfo/GetSearchResults?";
         if (packageType === null)
             throw new Error("The parameter 'packageType' cannot be null.");
@@ -50,9 +51,9 @@ export class PackagesAPIClient {
         let response = await this.http.fetch(url_, options_);
         let results = await this.processGetSearchResults(response);
         return results.map(item => cloneObject(item, new PackageInfo()));
-    }
+    };
 
-    protected async processGetSearchResults(response: Response): Promise<IPackageInfo[]> {
+    protected processGetSearchResults = async (response: Response): Promise<IPackageInfo[]> => {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
@@ -67,14 +68,14 @@ export class PackagesAPIClient {
             });
         }
         return Promise.resolve<PackageInfo[]>(null as any);
-    }
+    };
 
     /**
-     * @param packageType (optional) 
-     * @param namePart (optional) 
+     * @param packageType (optional)
+     * @param namePart (optional)
      * @return Success
      */
-    getSearchSuggestions(packageType: PackageType | undefined, namePart: string | undefined): Promise<string[]> {
+    getSearchSuggestions = async (packageType: PackageType | undefined, namePart: string | undefined): Promise<string[]> => {
         let url_ = this.baseUrl + "/api/PackageInfo/GetSearchSuggestions?";
         if (packageType === null)
             throw new Error("The parameter 'packageType' cannot be null.");
@@ -93,33 +94,33 @@ export class PackagesAPIClient {
             }
         };
 
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processGetSearchSuggestions(_response);
-        });
-    }
+        let _response = await this.http.fetch(url_, options_);
+        return this.processGetSearchSuggestions(_response);
+    };
 
-    protected processGetSearchSuggestions(response: Response): Promise<string[]> {
+    protected processGetSearchSuggestions = async (response: Response): Promise<string[]> => {
         const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        let _headers: any = {};
+        if (response.headers && response.headers.forEach) {
+            response.headers.forEach((v: any, k: any) => _headers[k] = v);
+        }
         if (status === 200) {
-            return response.text().then((_responseText) => {
-                let result200: any = null;
-                result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as string[];
-                return result200;
-            });
+            let _responseText = await response.text();
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as string[];
+            return result200;
         } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-                return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
+            let _responseText1 = await response.text();
+            return throwException("An unexpected server error occurred.", status, _responseText1, _headers);
         }
         return Promise.resolve<string[]>(null as any);
-    }
+    };
 
     /**
-     * @param body (optional) 
+     * @param body (optional)
      * @return Success
      */
-    preparePackagesDownloadLink(body: PackageRequest | undefined): Promise<string> {
+    preparePackagesDownloadLink = async (body: PackageRequest | undefined): Promise<string> => {
         let url_ = this.baseUrl + "/api/Packages/PreparePackagesDownloadLink";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -133,12 +134,11 @@ export class PackagesAPIClient {
             }
         };
 
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processPreparePackagesDownloadLink(_response);
-        });
-    }
+        let _response = await this.http.fetch(url_, options_);
+        return this.processPreparePackagesDownloadLink(_response);
+    };
 
-    protected async processPreparePackagesDownloadLink(response: Response): Promise<string> {
+    protected processPreparePackagesDownloadLink = async (response: Response): Promise<string> => {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
@@ -149,14 +149,14 @@ export class PackagesAPIClient {
             });
         }
         return Promise.reject<string>(null as any);
-    }
+    };
 
     /**
-     * @param packageType (optional) 
-     * @param userPrompt (optional) 
+     * @param packageType (optional)
+     * @param userPrompt (optional)
      * @return Success
      */
-    getRecommendations(packageType: PackageType | undefined, userPrompt: string | undefined, langCode : string | undefined): Promise<PackageRecommendation[]> {
+    getRecommendations = async (packageType: PackageType | undefined, userPrompt: string | undefined, langCode: string | undefined): Promise<PackageRecommendation[]> => {
         let url_ = this.baseUrl + "/api/Recommendations/GetRecommendations?";
         if (packageType === null)
             throw new Error("The parameter 'packageType' cannot be null.");
@@ -166,7 +166,7 @@ export class PackagesAPIClient {
             throw new Error("The parameter 'userPrompt' cannot be null.");
         else if (userPrompt !== undefined)
             url_ += "userPrompt=" + encodeURIComponent("" + userPrompt) + "&";
-       
+
         if (langCode)
             url_ += "langCode=" + encodeURIComponent("" + langCode) + "&";
         url_ = url_.replace(/[?&]$/, "");
@@ -178,27 +178,27 @@ export class PackagesAPIClient {
             }
         };
 
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processGetRecommendations(_response);
-        });
-    }
+        let _response = await this.http.fetch(url_, options_);
+        return this.processGetRecommendations(_response);
+    };
 
-    protected processGetRecommendations(response: Response): Promise<PackageRecommendation[]> {
+    protected processGetRecommendations = async (response: Response): Promise<PackageRecommendation[]> => {
         const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        let _headers: any = {};
+        if (response.headers && response.headers.forEach) {
+            response.headers.forEach((v: any, k: any) => _headers[k] = v);
+        }
         if (status === 200) {
-            return response.text().then((_responseText) => {
-                let result200: any = null;
-                result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as PackageRecommendation[];
-                return result200;
-            });
+            let _responseText = await response.text();
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as PackageRecommendation[];
+            return result200;
         } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-                return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
+            let _responseText1 = await response.text();
+            return throwException("An unexpected server error occurred.", status, _responseText1, _headers);
         }
         return Promise.resolve<PackageRecommendation[]>(null as any);
-    }
+    };
 }
 
 export interface PackageDetails {
@@ -234,9 +234,11 @@ export class PackageInfo implements IPackageInfo {
     packageUrl!: string | null;
     downloadsCount!: number;
     isAddedInCart: boolean = false;
-    getPackageIconOrStockImage(): string {
-        return this.iconUrl ? this.iconUrl : "https://img.icons8.com/isometric/64/box.png";
-    }
+    getPackageIconOrStockImage = () => this.iconUrl ?? "https://img.icons8.com/isometric/64/box.png";
+    getLastVersion = () =>
+        this.otherVersions?.
+        sort((version, versionNext) => compareVersions(version, versionNext, 'DESC'))
+            .at(0) ?? this.currentVersion;
 }
 
 

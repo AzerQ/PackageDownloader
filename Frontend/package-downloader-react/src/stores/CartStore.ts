@@ -1,7 +1,8 @@
 import { makeAutoObservable } from "mobx";
-import { PackageDetails, PackageType } from "../services/apiClient";
+import {getPackageApiClient, PackageDetails, PackageType} from "../services/apiClient";
 import { packagesSearchStore } from "./PackagesStore";
 import { objectsAreEqual } from "../utils/objectsTools";
+import {fromPromise, IPromiseBasedObservable} from "mobx-utils";
 
 class CartStore {
 
@@ -9,39 +10,52 @@ class CartStore {
 
     cartItems: PackageDetails[] = [];
 
+    packagesDownloadLink?: IPromiseBasedObservable<string>;
+
     constructor() {
         makeAutoObservable(this);
     }
 
     addCartItem = (packageDetail: PackageDetails) => {
-        const itemAlreadyAddedInCart = packagesSearchStore.getFullPackageItem(packageDetail.packageID)?.isAddedInCart;
+
+        const {getFullPackageItem, markAsAddedCartItem} = packagesSearchStore;
+
+        const itemAlreadyAddedInCart = getFullPackageItem(packageDetail.packageID)?.isAddedInCart;
+
         if (itemAlreadyAddedInCart)
             return;
 
         this.cartItems = [...this.cartItems, packageDetail];
-        packagesSearchStore.markAsAddedCartItem(packageDetail.packageID);
+        markAsAddedCartItem(packageDetail.packageID);
     }
 
     removeCartItem = (packageDetail: PackageDetails) => {
+
+        const { markAsRemovedCartItem } = packagesSearchStore;
+
         const newCartItems: PackageDetails[] = [];
+
         for (const cartItem of this.cartItems) {
 
             if (!objectsAreEqual(cartItem, packageDetail))
                 newCartItems.push(cartItem);
             else
-                packagesSearchStore.markAsRemovedCartItem(packageDetail.packageID);
+                markAsRemovedCartItem(packageDetail.packageID);
         }
         this.cartItems = newCartItems
     }
 
     clearCartItems = () => {
-        this.cartItems.forEach(({ packageID }) => packagesSearchStore.markAsRemovedCartItem(packageID));
+
+        const { markAsRemovedCartItem } = packagesSearchStore;
+
+        this.cartItems.forEach(({ packageID }) => markAsRemovedCartItem(packageID));
         this.cartItems = [];
     }
 
     getAvailableSdkVersions = (): string[] => {
-        const packageType: PackageType = packagesSearchStore.repositoryType;
-        switch (packageType) {
+        const { repositoryType } = packagesSearchStore;
+        switch (repositoryType) {
             
             case PackageType.Nuget:
                 {
@@ -50,7 +64,8 @@ class CartStore {
                         "netstandard2.1",
                         "net6.0",
                         "net7.0",
-                        "net8.0"
+                        "net8.0",
+                        "net9.0"
                     ];
                 }
             
@@ -63,6 +78,19 @@ class CartStore {
     }
 
     getSdkVersion = (): string | null => this.sdkVersion;
+
+
+    getPackagesDownloadLink = async () => {
+
+        const { preparePackagesDownloadLink } = await getPackageApiClient();
+        const { repositoryType } = packagesSearchStore;
+
+        this.packagesDownloadLink = fromPromise(preparePackagesDownloadLink({
+            packageType: repositoryType,
+            packagesDetails: this.cartItems,
+            sdkVersion: this.getSdkVersion()
+        }))
+    }
 
 
 }

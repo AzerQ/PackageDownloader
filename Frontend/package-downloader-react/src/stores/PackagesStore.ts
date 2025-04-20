@@ -1,20 +1,17 @@
-import { makeAutoObservable, runInAction } from "mobx";
-import { getPackageApiClient, PackageInfo, PackageType } from "../services/apiClient";
-import { cartStore } from "./CartStore";
-import { cloneObject } from "../utils/objectsTools";
-import { notificationStore } from "./NotificationStore";
-import { packageInfoStore } from "./PackageInfoStore";
+import {makeAutoObservable} from "mobx";
+import {getPackageApiClient, PackageInfo, PackageType} from "../services/apiClient";
+import {cartStore} from "./CartStore";
+import {cloneObject} from "../utils/objectsTools";
+import {packageInfoStore} from "./PackageInfoStore";
+import {fromPromise, IPromiseBasedObservable} from "mobx-utils";
 
 class PackagesSearchStore {
 
-    fondedPackages: PackageInfo[] = [];
+    fondedPackages?: IPromiseBasedObservable<PackageInfo[]>;
     repositoryType: PackageType = PackageType.Npm;
 
-    searchSuggestions: string[] = [];
+    searchSuggestions?: IPromiseBasedObservable<string[]>;
     searchQuery: string = '';
-
-    isSearchSuggestionsLoading: boolean = false;
-    isSearchResultsLoading: boolean = false;
 
     isSearchSuggestionsEnabled: boolean = false;
 
@@ -27,7 +24,7 @@ class PackagesSearchStore {
     }
 
     clearSuggestions = () => {
-        this.searchSuggestions = [];
+        this.searchSuggestions = undefined;
     }
 
     clearSearchQuery = () => {
@@ -35,53 +32,23 @@ class PackagesSearchStore {
     }
 
     clearSearchResults = () => {
-        this.fondedPackages = [];
+        this.fondedPackages = undefined;
     }
 
     getSearchResults = async () => {
-        
-        try {
-            const packageApiClient = await getPackageApiClient();
-            this.isSearchResultsLoading = true;
-            const results = await packageApiClient.getSearchResults(this.repositoryType, this.searchQuery);
-
-            runInAction(() => {
-                this.fondedPackages = results;
-                this.isSearchResultsLoading = false;
-            });
-
-        }
-        catch (error) {
-            this.isSearchResultsLoading = false;
-            notificationStore.addError( `Error fetching search results (query='${this.searchQuery}) : ${error}'`);
-        }
+        const {getSearchResults} = await getPackageApiClient();
+        this.fondedPackages = fromPromise(getSearchResults(this.repositoryType, this.searchQuery));
     }
 
     getSearchSuggestions = async () => {
-
         if (!this.isSearchSuggestionsEnabled)
             return;
 
-        try {
-            const packageApiClient = await getPackageApiClient();
-            this.isSearchSuggestionsLoading = true;
-            const results = await packageApiClient.getSearchSuggestions(this.repositoryType, this.searchQuery);
-
-            runInAction(() => {
-                this.searchSuggestions = results;
-                this.isSearchSuggestionsLoading = false;
-            });
-
-        }
-        catch (error) {
-            this.isSearchSuggestionsLoading = false;
-            notificationStore.addError(`Error fetching suggestions (query='${this.searchQuery})': ${error}`);
-        }
-
+        const {getSearchSuggestions} = await getPackageApiClient();
+        this.searchSuggestions = fromPromise(getSearchSuggestions(this.repositoryType, this.searchQuery));
     }
 
-    setRepositoryType = (packageType: PackageType) => {
-
+    changeRepositoryType = (packageType: PackageType) => {
         this.repositoryType = packageType;
         this.clearSuggestions();
         this.clearSearchResults();
@@ -91,25 +58,33 @@ class PackagesSearchStore {
     }
 
     getFullPackageItem = (packageId: string) =>
-        this.fondedPackages.find(packageItem => packageItem.id === packageId)
+        this.fondedPackages?.case(
+            {
+                fulfilled: data => data.find(packageItem => packageItem.id === packageId),
+                pending: () => undefined,
+                rejected: () => undefined
+            }
+        );
+
 
     private setIsInCartItemFlag = (packageId: string, isInCartItem: boolean) => {
-       
-        const packageIndex = this.fondedPackages.findIndex(packageItem => packageItem.id === packageId);
 
         const NOT_FOUND = -1;
-        if (packageIndex === NOT_FOUND)
-            return;
-        
-        const originalPackage = this.getFullPackageItem(packageId);
-        const packageItem = cloneObject(originalPackage);
 
-        if (packageItem) {
-            packageItem.isAddedInCart = isInCartItem;
-            this.fondedPackages[packageIndex] = packageItem;
-        }
+        this.fondedPackages?.case({
 
+           fulfilled:  data => {
 
+               const packageIndex = data.findIndex(packageItem => packageItem.id === packageId);
+
+               if (packageIndex !== NOT_FOUND) {
+                   const newPackageItem = cloneObject(this.getFullPackageItem(packageId)!);
+                   newPackageItem.isAddedInCart = isInCartItem;
+                   data[packageIndex] = newPackageItem;
+               }
+
+           }
+        });
     }
 
     markAsAddedCartItem = (packageId: string) => this.setIsInCartItemFlag(packageId, true);
@@ -117,8 +92,8 @@ class PackagesSearchStore {
     markAsRemovedCartItem = (packageId: string) => this.setIsInCartItemFlag(packageId, false);
 
     setSearchSuggestionEnabledFlag = (flagValue: boolean) => {
-         this.isSearchSuggestionsEnabled = flagValue;
-         if (!flagValue)
+        this.isSearchSuggestionsEnabled = flagValue;
+        if (!flagValue)
             this.clearSuggestions();
     }
 

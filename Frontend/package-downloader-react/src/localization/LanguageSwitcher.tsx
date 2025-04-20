@@ -1,4 +1,3 @@
-// src/components/LanguageSwitcher.tsx
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Avatar, Menu, MenuItem, ListItemIcon, ListItemText } from '@mui/material';

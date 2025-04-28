@@ -55,7 +55,7 @@ const SideNavigationLayout: React.FC<SideNavigationLayoutProps> = ({
         if (!isResizing && typeof sidebarWidth === 'number') {
             setCurrentSidebarWidth(Math.max(minSidebarWidth, Math.min(maxSidebarWidth, sidebarWidth)));
         }
-    }, [sidebarWidth, minSidebarWidth, maxSidebarWidth, isResizing]);
+    }, [sidebarWidth, minSidebarWidth, maxSidebarWidth]);
 
 
     const activeItem = useMemo(() => {

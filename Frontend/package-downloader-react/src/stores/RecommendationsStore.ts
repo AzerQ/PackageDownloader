@@ -45,11 +45,6 @@ class RecommendationsStore {
 
     openRecommendationsForm = () => this.isRecommendationsFormEnabled = true;
 
-    closeRecommendationsForm = () => {
-         this.isRecommendationsFormEnabled = false;
-         this.clearRecommendations();
-         this.clearUserPrompt();
-    }
 }
 
 export const recommendationsStore = new RecommendationsStore(); 

@@ -4,8 +4,7 @@ import {
     Button,
     TextField,
     Box,
-    Typography,
-    CircularProgress
+    Typography
 } from "@mui/material";
 import {useTranslation} from "react-i18next";
 import {recommendationsStore} from "../../stores/RecommendationsStore";
@@ -71,16 +70,13 @@ const AIRecommendations: React.FC = observer(() => {
                     }
                     style={{marginTop: "16px"}}
                 >
-                    {isRecommendationsLoading ?
-                        (
-                            <CircularProgress size={20}/>
-                        ) :
-                        t("GetRecommendations")
-                    }
+
+                    {t("GetRecommendations")}
+
                 </Button>
 
 
-                <Box sx={scrollableContentStyle}>
+                <Box sx={isRecommendationsLoading ? null : scrollableContentStyle}>
                     <RecommendationsList isRecommendationsLoading={isRecommendationsLoading}
                                          packagesRecommendations={packagesRecommendations}/>
                 </Box>

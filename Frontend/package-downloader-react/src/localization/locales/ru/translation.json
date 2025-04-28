@@ -32,5 +32,6 @@
     "ShowCode": "Показать код",
     "SearchPackage": "Поиск пакета",
     "SearchSuggestionsEnabled": "Подсказки при поиске",
-    "ViewReadmeFile": "Посмотреть файл readme"
+    "ViewReadmeFile": "Посмотреть файл readme",
+    "PackagesRepositoryType": "Тип репозитория пакетов"
 }

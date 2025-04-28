@@ -22,6 +22,8 @@ const PackageCart: React.FC = observer(() => {
 
     const availableSdks = cartStore.getAvailableSdkVersions();
 
+    cartStore.setSdkVersion(availableSdks[0]);
+
     return (
         <Box
             sx={{

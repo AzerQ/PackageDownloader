@@ -2,12 +2,13 @@
 import {cartStore} from "../../stores/CartStore.ts";
 import React from "react";
 import {useTranslation} from "react-i18next";
+import {observer} from "mobx-react-lite";
 
 export interface  ISdkSelectorProps {
     availableSdks: string[];
 }
 
-const SdkVersionSelector: React.FC<ISdkSelectorProps> = ({availableSdks}) => {
+const SdkVersionSelector: React.FC<ISdkSelectorProps> = observer(({availableSdks}) => {
 
     const { t } = useTranslation();
 
@@ -36,6 +37,6 @@ const SdkVersionSelector: React.FC<ISdkSelectorProps> = ({availableSdks}) => {
             </Select>
         </FormControl>
     );
-}
+})
 
 export default SdkVersionSelector;

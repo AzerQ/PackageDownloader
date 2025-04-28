@@ -32,5 +32,6 @@
     "ShowCode": "Show code",
     "SearchPackage": "Search package",
     "SearchSuggestionsEnabled": "Suggestions on search",
-    "ViewReadmeFile": "View readme file"
+    "ViewReadmeFile": "View readme file",
+    "PackagesRepositoryType": "Packages repository type"
 }

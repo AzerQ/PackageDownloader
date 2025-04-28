@@ -5,6 +5,8 @@ import {observer} from "mobx-react-lite";
 
 export const PackagesDownloadModal: React.FC = observer(() => {
 
+    const {t} = useTranslation();
+
     const handleClose = () => {
         cartStore.packagesDownloadLink = undefined;
     };
@@ -13,8 +15,6 @@ export const PackagesDownloadModal: React.FC = observer(() => {
 
     if (!packagesDownloadLink)
         return <></>
-
-    const {t} = useTranslation();
 
     const InnerContent = packagesDownloadLink.case({
 

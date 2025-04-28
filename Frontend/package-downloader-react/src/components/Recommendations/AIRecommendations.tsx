@@ -3,56 +3,31 @@ import {observer} from "mobx-react-lite";
 import {
     Button,
     TextField,
-    Modal,
     Box,
     Typography,
-    CircularProgress,
-    IconButton
+    CircularProgress
 } from "@mui/material";
-import {Close} from "@mui/icons-material";
 import {useTranslation} from "react-i18next";
 import {recommendationsStore} from "../../stores/RecommendationsStore";
 import RecommendationsList from "./RecommendationsList.tsx";
 
-const RecommendationsModal: React.FC = observer(() => {
+const AIRecommendations: React.FC = observer(() => {
 
     const {t} = useTranslation();
 
     const {
         isRecommendationsLoading,
-        isRecommendationsFormEnabled,
         packagesRecommendations,
         userPrompt,
         setUserPrompt,
-        clearUserPrompt,
-        clearRecommendations,
         getPackagesRecommendations
     } = recommendationsStore;
 
-    const handleClose = () => {
-        clearUserPrompt();
-        clearRecommendations();
-        recommendationsStore.isRecommendationsFormEnabled = false;
-    };
+
 
     const handleSubmit = async () => {
         if (userPrompt.trim() === "") return;
         await getPackagesRecommendations();
-    };
-
-    const modalStyle = {
-        position: "absolute",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
-        width: 600,
-        bgcolor: "background.paper",
-        border: "2px solid #000",
-        boxShadow: 24,
-        p: 4,
-        display: "flex",
-        flexDirection: "column",
-        maxHeight: "95vh",
     };
 
 
@@ -64,8 +39,7 @@ const RecommendationsModal: React.FC = observer(() => {
 
 
     return (
-        <Modal open={isRecommendationsFormEnabled} onClose={handleClose}>
-            <Box sx={modalStyle}>
+            <Box>
 
                 <Box
                     sx={{
@@ -76,9 +50,6 @@ const RecommendationsModal: React.FC = observer(() => {
                     }}
                 >
                     <Typography variant="h6">{t("RecommendationsRequestLabel")}</Typography>
-                    <IconButton onClick={handleClose} aria-label="close">
-                        <Close/>
-                    </IconButton>
                 </Box>
 
 
@@ -87,7 +58,6 @@ const RecommendationsModal: React.FC = observer(() => {
                     label={t("YourRequest")}
                     value={userPrompt}
                     onChange={(e) => setUserPrompt(e.target.value)}
-                    disabled={!isRecommendationsFormEnabled}
                     margin="normal"
                 />
 
@@ -97,7 +67,7 @@ const RecommendationsModal: React.FC = observer(() => {
                     color="primary"
                     onClick={handleSubmit}
                     disabled={
-                        !isRecommendationsFormEnabled || isRecommendationsLoading
+                        isRecommendationsLoading
                     }
                     style={{marginTop: "16px"}}
                 >
@@ -115,8 +85,7 @@ const RecommendationsModal: React.FC = observer(() => {
                                          packagesRecommendations={packagesRecommendations}/>
                 </Box>
             </Box>
-        </Modal>
     );
 });
 
-export default RecommendationsModal;
+export default AIRecommendations;

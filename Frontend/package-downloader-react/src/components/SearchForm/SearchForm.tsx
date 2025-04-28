@@ -1,24 +1,21 @@
 import React, {useEffect} from 'react';
 import {
-    Tabs,
-    Tab,
-    TextField,
     Box,
-    CircularProgress,
-    Autocomplete,
     IconButton,
     Paper,
     Tooltip,
     FormControlLabel,
     Switch,
 } from '@mui/material';
-import {PackageInfo, PackageType} from '../../services/apiClient';
+import {PackageInfo} from '../../services/apiClient';
 import {observer} from 'mobx-react-lite';
 import {packagesSearchStore} from '../../stores/PackagesStore';
 import {Search, SmartToy} from '@mui/icons-material';
 import SearchResults from './SearchResultsList';
 import {useTranslation} from 'react-i18next';
 import {recommendationsStore} from "../../stores/RecommendationsStore.ts";
+import SearchBar from "./SearchBar.tsx";
+import PackageTypeSelector from "./PackageTypeSelector.tsx";
 
 const SearchForm: React.FC = observer(() => {
 
@@ -26,15 +23,11 @@ const SearchForm: React.FC = observer(() => {
 
     const {
         searchQuery,
-        setSearchQuery,
         getSearchSuggestions,
-        changeRepositoryType,
-        repositoryType,
         getSearchResults,
         setSearchSuggestionEnabledFlag,
         isSearchSuggestionsEnabled,
-        fondedPackages,
-        searchSuggestions
+        fondedPackages
     } = packagesSearchStore;
 
 
@@ -44,8 +37,8 @@ const SearchForm: React.FC = observer(() => {
         }
     }, [searchQuery]);
 
-    const onRepositoryTypeChange = (_e: React.SyntheticEvent, newValue: PackageType) =>
-        changeRepositoryType(newValue);
+
+    const {openRecommendationsForm} = recommendationsStore;
 
     const handleSearch = async () => {
         if (searchQuery.trim() !== '') {
@@ -53,20 +46,12 @@ const SearchForm: React.FC = observer(() => {
         }
     };
 
-    const {openRecommendationsForm} = recommendationsStore;
-
-    const suggestionsOptions = {
-        options: searchSuggestions?.state === "fulfilled" ? searchSuggestions?.value : [],
-        loading: searchSuggestions?.state === "pending"
-    }
 
     return (
         <Box sx={{mb: 3}}>
-            <Tabs value={repositoryType} onChange={onRepositoryTypeChange} centered>
-                <Tab label="NPM" value={PackageType.Npm}/>
-                <Tab label="NuGet" value={PackageType.Nuget}/>
-                <Tab label="VsCode" value={PackageType.VsCode}/>
-            </Tabs>
+
+
+
             <Paper component="div" sx={{p: '2px 4px', display: 'flex', alignItems: 'center'}}>
 
                 <Tooltip title={t("StartSearchTooltip")} aria-label="search">
@@ -81,44 +66,11 @@ const SearchForm: React.FC = observer(() => {
                     </IconButton>
                 </Tooltip>
 
-                <Autocomplete
-                    freeSolo
-                    value={searchQuery}
-                    {...suggestionsOptions}
-                    onInputChange={(_event, value) => setSearchQuery(value)} // Обновляем значение при вводе
-                    onChange={async (_, value) => {
-                        if (value !== null) {
-                            setSearchQuery(value as string);
-                            await handleSearch();
-                        }
-                    }}
-                    onKeyDown={async (e) => {
-                        if (e.key === 'Enter') {
-                            e.preventDefault();
-                            await handleSearch();
-                        }
-                    }}
-                    renderInput={(params) => (
-                        <TextField
-                            {...params}
-                            sx={{mt: 2, ml: 2, mb: 3, flex: 1, width: 400}}
-                            label={t("SearchForPackagesLabel")}
-                            variant="standard"
-                            fullWidth
-                            InputProps={{
-                                ...params.InputProps,
-                                endAdornment: (
-                                    <>
-                                        {suggestionsOptions.loading ? (
-                                            <CircularProgress color="inherit" size={20}/>
-                                        ) : null}
-                                        {params.InputProps.endAdornment}
-                                    </>
-                                ),
-                            }}
-                        />
-                    )}
-                />
+
+                <SearchBar handleSearch={handleSearch} />
+
+                <PackageTypeSelector/>
+
                 <FormControlLabel sx={{marginLeft: 3}}
                                   control={<Switch checked={isSearchSuggestionsEnabled}
                                                    onChange={(_, checked) => setSearchSuggestionEnabledFlag(checked)}/>}

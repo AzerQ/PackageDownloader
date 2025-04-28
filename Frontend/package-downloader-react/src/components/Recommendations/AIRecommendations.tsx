@@ -34,7 +34,7 @@ const AIRecommendations: React.FC = observer(() => {
     const scrollableContentStyle = {
         flexGrow: 1,
         overflowY: "auto",
-        maxHeight: "300px",
+        maxHeight: "90%",
     };
 
 

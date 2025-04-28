@@ -1,19 +1,11 @@
 import React, {useEffect} from 'react';
-import {
-    Box,
-    IconButton,
-    Paper,
-    Tooltip,
-    FormControlLabel,
-    Switch,
-} from '@mui/material';
+import {Box, FormControlLabel, IconButton, Paper, Switch, Tooltip,} from '@mui/material';
 import {PackageInfo} from '../../services/apiClient';
 import {observer} from 'mobx-react-lite';
 import {packagesSearchStore} from '../../stores/PackagesStore';
-import {Search, SmartToy} from '@mui/icons-material';
+import {Search} from '@mui/icons-material';
 import SearchResults from './SearchResultsList';
 import {useTranslation} from 'react-i18next';
-import {recommendationsStore} from "../../stores/RecommendationsStore.ts";
 import SearchBar from "./SearchBar.tsx";
 import PackageTypeSelector from "./PackageTypeSelector.tsx";
 
@@ -37,9 +29,6 @@ const SearchForm: React.FC = observer(() => {
         }
     }, [searchQuery]);
 
-
-    const {openRecommendationsForm} = recommendationsStore;
-
     const handleSearch = async () => {
         if (searchQuery.trim() !== '') {
             await getSearchResults();
@@ -59,13 +48,6 @@ const SearchForm: React.FC = observer(() => {
                         <Search/>
                     </IconButton>
                 </Tooltip>
-
-                <Tooltip title={t("RecommendPackagesTooltip")} aria-label="aiRecommendations">
-                    <IconButton color="primary" aria-label="ai recommendations" onClick={openRecommendationsForm}>
-                        <SmartToy/>
-                    </IconButton>
-                </Tooltip>
-
 
                 <SearchBar handleSearch={handleSearch} />
 

@@ -9,7 +9,6 @@ class RecommendationsStore {
     packagesRecommendations: PackageRecommendation[] = [];
     userPrompt: string = '';
     isRecommendationsLoading: boolean = false;
-    isRecommendationsFormEnabled: boolean = false;
 
     constructor() {
         makeAutoObservable(this);
@@ -42,8 +41,6 @@ class RecommendationsStore {
     }
 
     clearRecommendations = () => this.packagesRecommendations = [];
-
-    openRecommendationsForm = () => this.isRecommendationsFormEnabled = true;
 
 }
 

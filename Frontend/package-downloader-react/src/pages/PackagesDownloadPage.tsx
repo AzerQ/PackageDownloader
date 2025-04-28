@@ -42,7 +42,6 @@ const PackagesDownloadPage: React.FC = () => {
             <CssBaseline/>
             <SideNavigationLayout
                 items={packageDownloaderItems}
-                initialActiveItemId={AdditionalTab.AI}
                 initialSidebarOpen={true}
                 activityBarWidth={50}
                 sidebarWidth={500}

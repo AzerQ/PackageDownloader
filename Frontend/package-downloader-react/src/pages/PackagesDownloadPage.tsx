@@ -12,21 +12,18 @@ import NotificationBanner from "../components/Notification/Notification.tsx";
 import SearchForm from "../components/SearchForm/SearchForm.tsx";
 import {useTranslation} from "react-i18next";
 
+import {AdditionalPanel} from "../components/SideNavigationLayout/PanelsContext/additionalPanel.tsx";
 
-export enum AdditionalTab {
-   Readme= 'Readme',
-   AI= 'AIConsultant'
-};
 
 const packageDownloaderItems: SideNavigationItem[] = [
     {
-        id: AdditionalTab.Readme,
+        id: AdditionalPanel.Readme,
         icon: <DescriptionIcon/>,
         label: 'README',
         content: <PreviewReadme/>,
     },
     {
-        id: AdditionalTab.AI,
+        id: AdditionalPanel.AI,
         icon: <AutoAwesomeIcon/>,
         label: 'AI',
         content: <AIRecommendations/>

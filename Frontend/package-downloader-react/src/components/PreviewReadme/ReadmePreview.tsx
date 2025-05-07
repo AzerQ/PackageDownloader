@@ -1,10 +1,9 @@
 import React from 'react';
 
-import { Box, Typography, LinearProgress } from '@mui/material';
+import {Box, Typography, LinearProgress, Alert} from '@mui/material';
 import MarkdownPreview from '@uiw/react-markdown-preview';
 import { observer } from 'mobx-react-lite';
 import { packageInfoStore } from '../../stores/PackageInfoStore.ts';
-import {showError} from "../../stores/NotificationStore.ts";
 
 
 const PreviewReadme: React.FC = observer(() => {
@@ -24,7 +23,8 @@ const PreviewReadme: React.FC = observer(() => {
                 <MarkdownPreview source={readmeContent} style={{padding: 16}}/>
             </Box>,
         pending: () => <LinearProgress/>,
-        rejected: err => <>{showError(err)}</>
+        rejected: err => <Alert severity="error">Readme loading error: {err.toString()}</Alert>
+
     });
 });
 

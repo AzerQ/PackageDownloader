@@ -12,4 +12,4 @@ docker stop packagedownloader_app
 docker rm packagedownloader_app
 
 # Run container
-docker run -d -p 80:80 --name packagedownloader_app  --env AI__API_KEY=$1 packagedownloader:latest
+docker run -d -p 5000:80 --name packagedownloader_app  --env AI__API_KEY=$1 packagedownloader:latest

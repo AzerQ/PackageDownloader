@@ -9,7 +9,6 @@ class RecommendationsStore {
     packagesRecommendations: PackageRecommendation[] = [];
     userPrompt: string = '';
     isRecommendationsLoading: boolean = false;
-    isRecommendationsFormEnabled: boolean = false;
 
     constructor() {
         makeAutoObservable(this);
@@ -21,10 +20,10 @@ class RecommendationsStore {
 
     getPackagesRecommendations = async () => {
 
-        let repositoryType = packagesSearchStore.repositoryType;
+        const repositoryType = packagesSearchStore.repositoryType;
 
         try {
-            let packageApiClient = await getPackageApiClient();
+            const packageApiClient = await getPackageApiClient();
             this.isRecommendationsLoading = true;
             const results = await packageApiClient.getRecommendations(repositoryType, this.userPrompt, i18n.language);
 
@@ -43,13 +42,6 @@ class RecommendationsStore {
 
     clearRecommendations = () => this.packagesRecommendations = [];
 
-    openRecommendationsForm = () => this.isRecommendationsFormEnabled = true;
-
-    closeRecommendationsForm = () => {
-         this.isRecommendationsFormEnabled = false;
-         this.clearRecommendations();
-         this.clearUserPrompt();
-    }
 }
 
 export const recommendationsStore = new RecommendationsStore(); 

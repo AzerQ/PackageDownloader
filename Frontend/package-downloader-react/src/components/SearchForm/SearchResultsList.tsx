@@ -1,29 +1,30 @@
-import React from 'react';
-import { Card, CardContent, CircularProgress, Grid, Typography } from '@mui/material';
+import React, {memo} from 'react';
+import {Card, CardContent, CircularProgress, Grid, Typography} from '@mui/material';
 import PackageSearchResult from './PackageSearchResult';
-import { observer } from 'mobx-react-lite';
-import { packagesSearchStore } from '../../stores/PackagesStore';
-import { useTranslation } from 'react-i18next';
+import {useTranslation} from 'react-i18next';
+import {PackageInfo} from "../../services/apiClient.ts";
 
-interface SearchResultsListProps {
-
+export interface ISearchResultsProps {
+    fondedPackages: PackageInfo[],
+    isSearchResultsLoading: boolean
 }
 
-const SearchResults: React.FC<SearchResultsListProps> = observer(() => {
+const SearchResults: React.FC<ISearchResultsProps> = memo(({fondedPackages, isSearchResultsLoading}) => {
 
-    const { t } = useTranslation();
+    const {t} = useTranslation();
 
-    const { fondedPackages, isSearchResultsLoading } = packagesSearchStore;
+    if (!fondedPackages || fondedPackages.length === 0)
+        return <></>
 
     if (isSearchResultsLoading)
         return (
-        <>
-        <CircularProgress title={t("LoadingData")} color="secondary" size="3rem" />
-        </>);
+            <>
+                <CircularProgress title={t("LoadingData")} color="secondary" size="3rem"/>
+            </>);
 
     return (
         <>
-            <Typography sx={{ mt: 2 }} variant="h6" gutterBottom>
+            <Typography sx={{mt: 2}} variant="h6" gutterBottom>
                 {t("SearchResults")}
             </Typography>
 
@@ -32,7 +33,7 @@ const SearchResults: React.FC<SearchResultsListProps> = observer(() => {
                     <Grid item xs={12} sm={6} md={4} key={index}>
                         <Card variant="outlined">
                             <CardContent>
-                                <PackageSearchResult packageInfo={packageInfo} />
+                                <PackageSearchResult packageInfo={packageInfo}/>
                             </CardContent>
                         </Card>
                     </Grid>

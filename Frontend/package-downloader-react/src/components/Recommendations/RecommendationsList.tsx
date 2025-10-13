@@ -1,12 +1,15 @@
 import React from 'react';
-import { observer } from 'mobx-react-lite';
-import RecommendationCard from './RecommendationCard'; // Предполагается, что у нас уже есть компонент RecommendationCard
-import { CircularProgress } from '@mui/material'; // Компонент loader из Material-UI
-import { recommendationsStore } from '../../stores/RecommendationsStore';
+import RecommendationCard from './RecommendationCard';
+import { CircularProgress } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import {PackageRecommendation} from "../../services/apiClient.ts";
 
-// Компонент для отображения списка рекомендаций
-const RecommendationsList: React.FC = observer(() => {
+export interface IRecommendationsListProps {
+    isRecommendationsLoading: boolean,
+    packagesRecommendations: PackageRecommendation[]
+}
+
+const RecommendationsList: React.FC<IRecommendationsListProps> = ({isRecommendationsLoading, packagesRecommendations}) => {
 
     const { t } = useTranslation();
 
@@ -14,11 +17,10 @@ const RecommendationsList: React.FC = observer(() => {
         <div>
             <h2>{t("RecommendationsList")}</h2>
 
-            {/* Показываем loader если isLoading === true */}
-            {recommendationsStore.isRecommendationsLoading ? (
+            {isRecommendationsLoading ? (
                 <CircularProgress />
-            ) : recommendationsStore.packagesRecommendations.length > 0 ? (
-                recommendationsStore.packagesRecommendations.map((recommendation) => (
+            ) : packagesRecommendations.length > 0 ? (
+                packagesRecommendations.map((recommendation) => (
                     <RecommendationCard key={recommendation.id} data={recommendation} />
                 ))
             ) : (
@@ -26,6 +28,6 @@ const RecommendationsList: React.FC = observer(() => {
             )}
         </div>
     );
-});
+};
 
-export { RecommendationsList, recommendationsStore };
+export default RecommendationsList;

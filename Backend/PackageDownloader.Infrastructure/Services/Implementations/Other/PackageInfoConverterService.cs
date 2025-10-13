@@ -10,29 +10,61 @@ namespace PackageDownloader.Infrastructure.Services.Implementations.Other
     {
         private PackageInfo NpmConverter(JsonElement element)
         {
+            // Обрабатываем новый формат от NPM Registry API
+            // Структура: {"package": {...}, "downloads": {...}, ...}
+            var packageElement = element.TryGetProperty("package", out var pkg) ? pkg : element;
 
-            var repositoryElement = element.GetJsonElement("links.repository");
-            var repositoryUrl = repositoryElement.GetStringOrDefault();
-            repositoryUrl = repositoryUrl.StartsWith("git+")
-                ? repositoryUrl.Substring(4, repositoryUrl.Length - 4)
-                : repositoryUrl;
+            var repositoryUrl = "";
+            if (packageElement.TryGetProperty("links", out var links) && links.TryGetProperty("repository", out var repo))
+            {
+                repositoryUrl = repo.GetStringOrDefault();
+                repositoryUrl = repositoryUrl.StartsWith("git+") 
+                    ? repositoryUrl.Substring(4, repositoryUrl.Length - 4) 
+                    : repositoryUrl;
+            }
              
-            var npmUrl = element.GetJsonElement("links.npm").GetStringOrDefault();
+            var npmUrl = "";
+            if (packageElement.TryGetProperty("links", out var linksForNpm) && linksForNpm.TryGetProperty("npm", out var npmLink))
+            {
+                npmUrl = npmLink.GetStringOrDefault();
+            }
+            else
+            {
+                var name = packageElement.GetProperty("name").GetStringOrDefault();
+                npmUrl = $"https://www.npmjs.com/package/{name}";
+            }
             
-            string authors = string.Join(",", element.GetStrings("maintainers", itemField: "username"));
-            string packageLastVersion = element.GetProperty("version").GetStringOrDefault();
+            string authors = "";
+            if (packageElement.TryGetProperty("maintainers", out var maintainers))
+            {
+                authors = string.Join(",", maintainers.EnumerateArray().Select(m => 
+                    m.TryGetProperty("username", out var username) ? username.GetString() ?? "" : ""));
+            }
+            else if (packageElement.TryGetProperty("publisher", out var publisher) && 
+                     publisher.TryGetProperty("username", out var publisherUsername))
+            {
+                authors = publisherUsername.GetStringOrDefault();
+            }
+            
+            string packageLastVersion = packageElement.GetProperty("version").GetStringOrDefault();
+            
+            long downloadsCount = 0;
+            if (element.TryGetProperty("downloads", out var downloads) && downloads.TryGetProperty("monthly", out var monthly))
+            {
+                downloadsCount = monthly.GetInt64();
+            }
             
             PackageInfo packageInfo = new()
             {
-                Id = element.GetProperty("name").GetStringOrDefault(),
+                Id = packageElement.GetProperty("name").GetStringOrDefault(),
                 CurrentVersion = packageLastVersion,
-                Description = element.GetProperty("description").GetStringOrDefault(),
+                Description = packageElement.GetProperty("description").GetStringOrDefault(),
                 AuthorInfo = authors,
                 RepositoryUrl = repositoryUrl,
                 PackageUrl = npmUrl,
-                Tags = element.GetStrings(arrayFieldName: "keywords"),
+                Tags = packageElement.TryGetProperty("keywords", out var keywords) ? keywords.GetStrings() : [],
                 OtherVersions = [packageLastVersion],
-                DownloadsCount = element.GetJsonElement("downloads.monthly").GetInt64()
+                DownloadsCount = downloadsCount
             };
 
             return packageInfo;
@@ -119,7 +151,8 @@ namespace PackageDownloader.Infrastructure.Services.Implementations.Other
 
         public IEnumerable<PackageInfo> ConvertNpmJsonToPackageInfo(JsonDocument json)
         {
-            return ConvertModelFromJson(json, NpmConverter);
+            // NPM Registry API возвращает: {"objects": [{"package": {...}, "downloads": {...}}, ...]}
+            return ConvertModelFromJson(json, NpmConverter, arrayJsonPath: "$.objects");
         }
 
         public IEnumerable<PackageInfo> ConvertVsCodeJsonToPackageInfo(JsonDocument json)
@@ -132,8 +165,20 @@ namespace PackageDownloader.Infrastructure.Services.Implementations.Other
             return ConvertModelFromJson(json, NugetConverter, arrayJsonPath: "$.data");
         }
 
-        public IEnumerable<string> ConvertNpmJsonToSuggestionsList(JsonDocument json) =>
-           json.RootElement.GetStrings(itemField: "name");
+        public IEnumerable<string> ConvertNpmJsonToSuggestionsList(JsonDocument json)
+        {
+            // NPM Registry API возвращает: {"objects": [{"package": {"name": "..."}, ...}, ...]}
+            var objects = jPath.GetAllNodes(json.RootElement, "$.objects");
+            return objects.Select(obj => 
+            {
+                if (obj.TryGetProperty("package", out var package) && 
+                    package.TryGetProperty("name", out var name))
+                {
+                    return name.GetString() ?? "";
+                }
+                return "";
+            }).Where(name => !string.IsNullOrEmpty(name));
+        }
 
         public IEnumerable<string> ConvertNugetJsonToSuggestionsList(JsonDocument json) =>
            json.RootElement.GetStrings(arrayFieldName: "data");

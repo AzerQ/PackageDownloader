@@ -110,7 +110,7 @@ namespace PackageDownloader.Application
                     throw new NullReferenceException("Can't load API key for AI provider ");
                 
                 string apiUrl = configuration["AI:API_URL"] ?? "https://openrouter.ai/api/v1/";
-                string aiModel = configuration["AI:MODEL"] ?? "google/gemini-2.0-flash-lite-preview-02-05:free";
+                string aiModel = configuration["AI:MODEL"] ?? "deepseek/deepseek-chat-v3.1:free";
 
                 return new OpenRouterClient(apiUrl, apiKey, aiModel);
             });

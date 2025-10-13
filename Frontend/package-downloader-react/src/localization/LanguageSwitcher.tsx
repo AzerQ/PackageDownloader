@@ -1,4 +1,3 @@
-// src/components/LanguageSwitcher.tsx
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Avatar, Menu, MenuItem, ListItemIcon, ListItemText } from '@mui/material';
@@ -41,7 +40,7 @@ const LanguageSwitcher: React.FC = () => {
     <div>
       <FlagAvatar onClick={handleOpen}>
         <CountryFlag 
-          countryCode={getCountryCode(i18n.language) ?? "GB"} 
+          countryCode={getCountryCode(i18n.language) ?? "RU"}
           svg 
           style={{ width: '24px', height: '24px' }} 
         />

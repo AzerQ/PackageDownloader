@@ -16,7 +16,16 @@ namespace PackageDownloader.Infrastructure.Extensions
             MaxConnectionsPerServer = MaxConnectionsPerServer
         };
         
-        private static readonly HttpClient HttpClient = new(SocketsHandler);
+        private static readonly HttpClient HttpClient = CreateHttpClient();
+
+        private static HttpClient CreateHttpClient()
+        {
+            var client = new HttpClient(SocketsHandler);
+            client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+            client.DefaultRequestHeaders.Add("Accept", "application/json, text/plain, */*");
+            client.DefaultRequestHeaders.Add("Accept-Language", "en-US,en;q=0.9");
+            return client;
+        }
 
         
         public static async Task<JsonDocument> GetJsonContentAsync(this Uri url)

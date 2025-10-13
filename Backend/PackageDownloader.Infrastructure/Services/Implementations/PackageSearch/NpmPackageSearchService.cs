@@ -7,18 +7,16 @@ namespace PackageDownloader.Infrastructure.Services.Implementations.PackageSearc
 
 public class NpmPackageSearchService(IPackageInfoConverterService packageInfoConverter) : IPackageSearchService
 {
-
-    const string SearchPackageRequestUrl = "https://www.npmjs.com/search/suggestions?q={0}";
+    // Используем официальное NPM Registry API вместо веб-интерфейса
+    const string SearchPackageRequestUrl = "https://registry.npmjs.org/-/v1/search?text={0}&size=20";
 
     public async Task<IEnumerable<string>> GetPackagesNamesSuggestions(string namePart)
     {
-
         string url = string.Format(SearchPackageRequestUrl, namePart);
 
         var content = await new Uri(url).GetJsonContentAsync();
 
         return packageInfoConverter.ConvertNpmJsonToSuggestionsList(content);  
-
     }
 
     public async Task<IEnumerable<PackageInfo>> SearchPackagesByName(string name)
@@ -28,7 +26,6 @@ public class NpmPackageSearchService(IPackageInfoConverterService packageInfoCon
         var content = await new Uri(url).GetJsonContentAsync();
 
         return packageInfoConverter.ConvertNpmJsonToPackageInfo(content);
-
     }
 }
 

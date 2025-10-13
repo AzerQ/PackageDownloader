@@ -7,5 +7,6 @@ public enum PackageType
 {
     Npm,
     Nuget,
-    VsCode
+    VsCode,
+    Docker
 }

@@ -12,7 +12,7 @@ import NotificationBanner from "../components/Notification/Notification.tsx";
 import SearchForm from "../components/SearchForm/SearchForm.tsx";
 import {useTranslation} from "react-i18next";
 
-import {AdditionalPanel} from "../components/SideNavigationLayout/PanelsContext/additionalPanel.tsx";
+import {AdditionalPanel} from "../components/SideNavigationLayout/PanelsContext/additionalPanel";
 
 
 const packageDownloaderItems: SideNavigationItem[] = [

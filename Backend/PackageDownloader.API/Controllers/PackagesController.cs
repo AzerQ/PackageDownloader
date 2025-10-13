@@ -24,8 +24,10 @@ namespace PackageDownloader.API.Controllers
             string packageFilePath = packageDownloader.DownloadPackagesAsArchive(packageRequest);
             Guid packagesArchiveId = packagesStorageService.SetPackagesArchivePath(packageFilePath);
             
+            bool isDevMode = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
+
             string packagesDownloadUrl = Url.Action(nameof(GetPackagesAsArchive), 
-                ControllerName(nameof(PackagesController)), new { packagesArchiveId }, Request.Scheme) ?? 
+                ControllerName(nameof(PackagesController)), new { packagesArchiveId }, isDevMode ? Request.Scheme : null) ?? 
                                          throw new InvalidOperationException("Can't resolve package download link");
             
             return packagesDownloadUrl;

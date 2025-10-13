@@ -1,0 +1,140 @@
+### Docker Hub Search API Tests - Fast Performance
+
+# Search for Docker images (FAST - no additional API calls)
+GET {{host}}/api/Docker/search?query=mysql&page=1&pageSize=10
+Accept: application/json
+
+###
+
+# Search Docker packages using unified interface (FAST - optimized)
+GET {{host}}/api/Docker/packages/search?namePart=mysql
+Accept: application/json
+
+###
+
+# Get detailed package info with all tags (slower but complete)
+GET {{host}}/api/Docker/packages/details/mysql
+Accept: application/json
+
+###
+
+# Get only tags for a specific package
+GET {{host}}/api/Docker/packages/tags/mysql?page=1&pageSize=50
+Accept: application/json
+
+###
+
+# Get tags for nginx image (original method)
+GET {{host}}/api/Docker/tags/nginx?page=1&pageSize=20
+Accept: application/json
+
+###
+
+# Get tags for library/ubuntu image
+GET {{host}}/api/Docker/tags/library%2Fubuntu?page=1&pageSize=10
+Accept: application/json
+
+###
+
+# Get manifest for nginx:latest
+GET {{host}}/api/Docker/manifest/nginx/latest
+Accept: application/json
+
+###
+
+# Search Docker packages using unified interface
+GET {{host}}/api/Docker/packages/search?namePart=redis
+Accept: application/json
+
+###
+
+# Get Docker package suggestions
+GET {{host}}/api/Docker/packages/suggestions?namePart=node
+Accept: application/json
+
+###
+
+# Prepare Docker images download
+# NOTE: Downloads COMPLETE Docker images with all layers (can be GB in size!)
+# Start with small images like hello-world or alpine for testing
+POST {{host}}/api/Docker/packages/download/prepare
+Content-Type: application/json
+
+{
+  "packageType": "Docker",
+  "packagesDetails": [
+    {
+      "packageID": "hello-world",
+      "packageVersion": "latest"
+    }
+  ]
+}
+
+###
+
+# Prepare multiple small Docker images for testing
+POST {{host}}/api/Docker/packages/download/prepare
+Content-Type: application/json
+
+{
+  "packageType": "Docker",
+  "packagesDetails": [
+    {
+      "packageID": "alpine",
+      "packageVersion": "latest"
+    },
+    {
+      "packageID": "busybox",
+      "packageVersion": "latest"
+    }
+  ]
+}
+
+###
+
+# Prepare larger images (nginx, redis) - will take longer!
+POST {{host}}/api/Docker/packages/download/prepare
+Content-Type: application/json
+
+{
+  "packageType": "Docker",
+  "packagesDetails": [
+    {
+      "packageID": "nginx",
+      "packageVersion": "alpine"
+    },
+    {
+      "packageID": "redis",
+      "packageVersion": "7-alpine"
+    }
+  ]
+}
+
+###
+
+# Test using unified PackageInfo endpoint (OPTIMIZED - top 10 with versions, rest without)
+GET {{host}}/api/PackageInfo/GetSearchResults?packageType=Docker&namePart=mysql
+Accept: application/json
+
+###
+
+# Test using unified Package suggestions endpoint  
+GET {{host}}/api/PackageInfo/GetSearchSuggestions?packageType=Docker&namePart=node
+Accept: application/json
+
+###
+
+# Performance comparison tests
+# Compare these two calls to see the performance difference:
+
+# FAST: Basic search (no additional API calls)
+GET {{host}}/api/Docker/search?query=redis&pageSize=25
+Accept: application/json
+
+###
+
+# BALANCED: Optimized unified search (top 10 get versions, others don't)  
+GET {{host}}/api/PackageInfo/GetSearchResults?packageType=Docker&namePart=redis
+Accept: application/json
+
+@host = https://localhost:7104

@@ -40,14 +40,13 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = ({
                                                                           repositoryUrl,
                                                                           packageUrl,
                                                                           otherVersions,
-                                                                          isAddedInCart,
-                                                                          getLastVersion
+                                                                          isAddedInCart
                                                                       }
                                                                   }) => {
 
     const {t} = useTranslation();
 
-    const [selectedVersion, setSelectedVersion] = useState<string>(getLastVersion());
+    const [selectedVersion, setSelectedVersion] = useState<string>(currentVersion);
 
     const {fetchReadmeContent} = packageInfoStore;
 
@@ -117,10 +116,11 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = ({
 
 
             <CardActions>
+                <>
                 <Typography variant="overline" gutterBottom sx={{display: 'block', mb: 0.5}}>
                     {t("ChoseVersion")}
                 </Typography>
-                {otherVersions?.length && (
+
                     <Box sx={{
                         display: 'flex',
                         alignItems: 'center',
@@ -131,13 +131,22 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = ({
                                 value={selectedVersion}
                                 onChange={(e) => setSelectedVersion(e.target.value)}
                             >
-                                {otherVersions
-                                    .sort((a, b) => compareVersions(a, b, "DESC"))
-                                    .map((ver) => (
-                                        <MenuItem key={id + ver} value={ver}>
-                                            {ver}
-                                        </MenuItem>
-                                    ))}
+                                {/* Always show current version first */}
+                                <MenuItem key={id + currentVersion} value={currentVersion}>
+                                    {currentVersion}
+                                </MenuItem>
+                                
+                                {/* Show other versions if available */}
+                                {otherVersions && otherVersions.length > 0 && 
+                                    otherVersions
+                                        .filter(ver => ver !== currentVersion) // Avoid duplicates
+                                        .sort((a, b) => compareVersions(a, b, "DESC"))
+                                        .map((ver) => (
+                                            <MenuItem key={id + ver} value={ver}>
+                                                {ver}
+                                            </MenuItem>
+                                        ))
+                                }
                             </Select>
                         </FormControl>
                         {
@@ -162,7 +171,7 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = ({
                             </Button>)
                         }
                     </Box>
-                )}
+                </>
             </CardActions>
         </Card>
     );

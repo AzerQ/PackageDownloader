@@ -5,6 +5,7 @@ using PackageDownloader.Core.Models;
 using PackageDownloader.Core.Services.Abstractions;
 using PackageDownloader.Infrastructure.Services.Abstractions;
 using PackageDownloader.Infrastructure.Services.Implementations;
+using PackageDownloader.Infrastructure.Services.Implementations.Docker;
 using PackageDownloader.Infrastructure.Services.Implementations.Other;
 using PackageDownloader.Infrastructure.Services.Implementations.PackageDownloader;
 using PackageDownloader.Infrastructure.Services.Implementations.PackageSearch;
@@ -24,6 +25,7 @@ namespace PackageDownloader.Application
                 PackageType.Npm => serviceProvider.GetRequiredService<NpmPackageDownloaderService>(),
                 PackageType.Nuget => serviceProvider.GetRequiredService<NugetPackageDownloaderService>(),
                 PackageType.VsCode => serviceProvider.GetRequiredService<HttpPackageDownloaderService>(),
+                PackageType.Docker => serviceProvider.GetRequiredService<DockerPackageDownloaderService>(),
                 _ => throw new InvalidOperationException()
             };
         }
@@ -36,6 +38,7 @@ namespace PackageDownloader.Application
                 PackageType.Npm => serviceProvider.GetRequiredService<NpmPackageSearchService>(),
                 PackageType.Nuget => serviceProvider.GetRequiredService<NugetPackageSearchService>(),
                 PackageType.VsCode => serviceProvider.GetRequiredService<VsCodePackageSearchService>(),
+                PackageType.Docker => serviceProvider.GetRequiredService<DockerPackageSearchService>(),
                 _ => throw new InvalidOperationException()
             };
         }
@@ -78,11 +81,17 @@ namespace PackageDownloader.Application
             services.AddTransient<IPackagesDirectoryCreator, PackagesDirectoryCreator>();
             services.AddTransient<IShellCommandService, ShellCommandService>();
             services.AddTransient<IPackageInfoConverterService, PackageInfoConverterService>();
+            
+            // Docker services
+            services.AddTransient<IDockerHubHttpClient>(provider => 
+                new DockerHubHttpClient(new HttpClient()));
+            services.AddTransient<IDockerPackageService, DockerPackageService>();
 
             // Package download services
 
             services.AddTransient<NugetPackageDownloaderService>();
             services.AddTransient<NpmPackageDownloaderService>();
+            services.AddTransient<DockerPackageDownloaderService>();
 
             services.AddTransient<Func<PackageType, PackageDetails, Uri>>(_ => PackageDownloadUriResolver);
             services.AddTransient<Func<PackageType, PackageDetails, string>>(_ => PackageFileNameResolver);
@@ -98,6 +107,7 @@ namespace PackageDownloader.Application
             services.AddTransient<NugetPackageSearchService>();
             services.AddTransient<NpmPackageSearchService>();
             services.AddTransient<VsCodePackageSearchService>();
+            services.AddTransient<DockerPackageSearchService>();
 
             services.AddTransient<Func<PackageType, IPackageSearchService>>(serviceProvider => packageType => PackageSearchFactory(serviceProvider, packageType));
 

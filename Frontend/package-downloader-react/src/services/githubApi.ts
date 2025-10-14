@@ -18,15 +18,12 @@ export class GitHubApi implements IGithubAPI {
 
         const owner = match[1];
         const repo = match[2];
-        const branch = 'main';
 
-        const readmeNameVariants = ['README.md', 'Readme.md', 'readme.md'];
-        const urlLinksVariants = readmeNameVariants.map( variant => `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${variant}`);
-        urlLinksVariants.push(`https://raw.githubusercontent.com/${owner}/${repo}/master/README.md`)
+        const url = `https://api.github.com/repos/${owner}/${repo}/readme`;
+        const response = await axios.get<{ content: string }>(url);
+        const readmeContent = atob(response.data.content);
 
-        const response = await Promise.any(urlLinksVariants.map(link => axios.get(link)));
-
-        return response.data;
+        return readmeContent;
     }
 
 }

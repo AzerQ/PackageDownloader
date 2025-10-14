@@ -3,13 +3,6 @@
 {
 	"name": "C# (.NET) and React (Node.js)",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/dotnet:1-8.0",
-	"features": {
-		"ghcr.io/davzucky/devcontainers-features-wolfi/node:1": {
-			"installNpm": true,
-			"nodeVersion": "24"
-		}
-	},
 	"customizations": {
     "vscode": {
       "extensions": [

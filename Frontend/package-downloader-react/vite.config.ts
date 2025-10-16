@@ -11,5 +11,11 @@ export default defineConfig({
     supported: {
       'top-level-await': true //browsers can handle top-level-await features
     }
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/test/setup.ts',
+    css: true,
   }
 })

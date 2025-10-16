@@ -23,6 +23,7 @@ const SearchBar: React.FC<{handleSearch: () => Promise<unknown>}> = observer(({h
     const {t} = useTranslation();
 
     return  (<Autocomplete
+        data-testid="search-bar-autocomplete"
         freeSolo
         value={searchQuery}
         {...suggestionsOptions}
@@ -42,6 +43,7 @@ const SearchBar: React.FC<{handleSearch: () => Promise<unknown>}> = observer(({h
         renderInput={(params) => (
             <TextField
                 {...params}
+                data-testid="search-bar-input"
                 sx={{mt: 2, ml: 2, mb: 3, flex: 1, width: 400}}
                 label={t("SearchForPackagesLabel")}
                 variant="standard"
@@ -51,7 +53,7 @@ const SearchBar: React.FC<{handleSearch: () => Promise<unknown>}> = observer(({h
                     endAdornment: (
                         <>
                             {suggestionsOptions.loading ? (
-                                <CircularProgress color="inherit" size={20}/>
+                                <CircularProgress color="inherit" size={20} data-testid="search-bar-loading"/>
                             ) : null}
                             {params.InputProps.endAdornment}
                         </>

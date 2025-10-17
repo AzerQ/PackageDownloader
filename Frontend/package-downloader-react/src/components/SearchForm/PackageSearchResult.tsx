@@ -42,7 +42,8 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = ({
                                                                           repositoryUrl,
                                                                           packageUrl,
                                                                           otherVersions,
-                                                                          isAddedInCart
+                                                                          isAddedInCart,
+                                                                          defaultIcon
                                                                       }
                                                                   }) => {
 
@@ -64,7 +65,9 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = ({
                         alt="Package icon"
                         src={getPackageIconOrStockImage()}
                         variant="square"
-                    />
+                    >
+                        <img alt="package icon not loaded" style={{background: 'white'}} src={defaultIcon}/>
+                    </Avatar>
                 }
                 title={id}
                 subheader={t("LatestVersion", {version: currentVersion})}

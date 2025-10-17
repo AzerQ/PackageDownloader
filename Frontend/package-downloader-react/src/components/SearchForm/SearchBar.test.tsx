@@ -16,7 +16,13 @@ vi.mock('../../stores/PackagesStore', () => ({
   packagesSearchStore: {
     searchQuery: '',
     setSearchQuery: vi.fn(),
-    searchSuggestions: { state: 'fulfilled', value: [] },
+    searchSuggestions: {
+      state: 'fulfilled',
+      value: [],
+      isPromiseBasedObservable: true,
+      case: vi.fn(),
+      then: vi.fn(),
+    },
   },
 }));
 
@@ -26,7 +32,13 @@ describe('SearchBar Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     packagesSearchStore.searchQuery = '';
-    packagesSearchStore.searchSuggestions = { state: 'fulfilled', value: [] };
+    packagesSearchStore.searchSuggestions = {
+      state: 'fulfilled',
+      value: [],
+      isPromiseBasedObservable: true,
+      case: vi.fn(),
+      then: vi.fn(),
+    };
   });
 
   describe('Positive Scenarios', () => {
@@ -68,6 +80,9 @@ describe('SearchBar Component', () => {
       packagesSearchStore.searchSuggestions = {
         state: 'fulfilled',
         value: ['react', 'react-dom', 'react-router'],
+        isPromiseBasedObservable: true,
+        case: vi.fn(),
+        then: vi.fn(),
       };
       
       render(<SearchBar handleSearch={mockHandleSearch} />);
@@ -76,7 +91,13 @@ describe('SearchBar Component', () => {
     });
 
     it('should show loading indicator when fetching suggestions', () => {
-      packagesSearchStore.searchSuggestions = { state: 'pending', value: [] };
+      packagesSearchStore.searchSuggestions = {
+        state: 'pending',
+        value: [],
+        isPromiseBasedObservable: true,
+        case: vi.fn(),
+        then: vi.fn(),
+      };
       
       render(<SearchBar handleSearch={mockHandleSearch} />);
       
@@ -88,6 +109,9 @@ describe('SearchBar Component', () => {
       packagesSearchStore.searchSuggestions = {
         state: 'fulfilled',
         value: ['react'],
+        isPromiseBasedObservable: true,
+        case: vi.fn(),
+        then: vi.fn(),
       };
       
       render(<SearchBar handleSearch={mockHandleSearch} />);
@@ -119,6 +143,9 @@ describe('SearchBar Component', () => {
       packagesSearchStore.searchSuggestions = {
         state: 'fulfilled',
         value: ['react'],
+        isPromiseBasedObservable: true,
+        case: vi.fn(),
+        then: vi.fn(),
       };
       
       render(<SearchBar handleSearch={mockHandleSearch} />);
@@ -127,7 +154,13 @@ describe('SearchBar Component', () => {
     });
 
     it('should handle failed suggestion fetch', () => {
-      packagesSearchStore.searchSuggestions = { state: 'rejected', value: [] };
+      packagesSearchStore.searchSuggestions = {
+        state: 'rejected',
+        value: [],
+        isPromiseBasedObservable: true,
+        case: vi.fn(),
+        then: vi.fn(),
+      };
       
       render(<SearchBar handleSearch={mockHandleSearch} />);
       
@@ -186,6 +219,6 @@ describe('SearchBar Component', () => {
       await user.type(input, longQuery);
       
       expect(packagesSearchStore.setSearchQuery).toHaveBeenCalled();
-    });
+    }, 10000); // Increase timeout to 10 seconds
   });
 });

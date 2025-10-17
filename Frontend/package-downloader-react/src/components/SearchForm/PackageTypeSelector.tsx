@@ -27,7 +27,7 @@ const PackageTypeSelector: React.FC = observer(() => {
 
     const itemVariants = Object.keys(PackageType);
 
-    return (<FormControl sx={{minWidth: 150, flex: 1}}>
+    return (<FormControl sx={{minWidth: 150, flex: 0.5}}>
         <Typography variant="subtitle2" gutterBottom>
             {t("PackagesRepositoryType")}
         </Typography>

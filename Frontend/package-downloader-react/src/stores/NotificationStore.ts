@@ -59,8 +59,13 @@ class NotificationStore {
 
 export const notificationStore = new NotificationStore();
 
-// @ts-ignore
-export const showError = (error: unknown) => notificationStore.addError(error.toString());
+export const showError = (error: unknown) => {
+    if (error instanceof Error) {
+        notificationStore.addError(error.message);
+    } else {
+        notificationStore.addError(String(error));
+    }
+};
 
 export const showWarning = (warnMessage: string) => notificationStore.addWarn(warnMessage);
 

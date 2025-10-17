@@ -58,7 +58,12 @@ export class PackagesAPIClient {
      */
     preparePackagesDownloadLink = async (body: PackageRequest | undefined): Promise<string> => {
         const response: AxiosResponse<string> = await this.http.post("/api/Packages/PreparePackagesDownloadLink", body);
-        const downloadLinkUrl = new URL(response.data);
+        const link = response.data;
+        const isFullUrl = link.startsWith('http');
+        if (!isFullUrl)
+            return link;
+
+        const downloadLinkUrl = new URL(link);
 
         const isLocalHost = ["127.0.0.1", "localhost"].includes(downloadLinkUrl.hostname);
         if (!isLocalHost && downloadLinkUrl.protocol === "http:") {

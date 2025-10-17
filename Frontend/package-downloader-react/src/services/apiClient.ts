@@ -357,5 +357,3 @@ export const getPackageApiClient = async () => {
         throw error;
     }
 };
-
-console.log('Test CI CD');

@@ -4,13 +4,16 @@ import {PackageType} from "../../services/apiClient.ts";
 import React from "react";
 import {packagesSearchStore} from "../../stores/PackagesStore.ts";
 import {useTranslation} from "react-i18next";
+import CodeIcon from '@mui/icons-material/Code';
+import {FileDownload, ViewInAr} from "@mui/icons-material";
+import DeveloperBoardIcon from '@mui/icons-material/DeveloperBoard';
 
 
 const iconsMap: Map<PackageType, React.ReactNode> = new Map<PackageType, React.ReactNode>([
-    [PackageType.VsCode, <img width="24" height="24" src="https://img.icons8.com/color/24/visual-studio-code-2019.png" alt="visual-studio-code-2019"/>],
-    [PackageType.Npm, <img width="24" height="24" src="https://img.icons8.com/color/24/npm.png" alt="npm"/>],
-    [PackageType.Nuget, <img width="24" height="24" src="https://img.icons8.com/external-tal-revivo-color-tal-revivo/24/external-nuget-a-free-and-open-source-package-manager-designed-for-the-microsoft-development-platform-logo-color-tal-revivo.png" alt="nuget"/>],
-    [PackageType.Docker, <img width="24" height="24" src="https://img.icons8.com/color/24/docker.png" alt="docker"/>]
+    [PackageType.VsCode, <CodeIcon sx={{ color: '#007ACC' }}/>],
+    [PackageType.Npm, <FileDownload sx={{ color: '#CB3837' }}/>],
+    [PackageType.Nuget, <DeveloperBoardIcon sx={{ color: '#004880' }}/>],
+    [PackageType.Docker, <ViewInAr sx={{ color: '#2496ED' }}/>]
 ])
 
 const PackageTypeSelector: React.FC = observer(() => {

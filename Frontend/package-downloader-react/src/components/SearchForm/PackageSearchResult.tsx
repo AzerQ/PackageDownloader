@@ -23,6 +23,8 @@ import {compareVersions} from "../../utils/versionsComparer";
 import {useState} from "react";
 import {useTranslation} from "react-i18next";
 import {packageInfoStore} from "../../stores/PackageInfoStore.ts";
+import {sideNavigationStore} from "../../stores/SideNavigationStore.ts";
+import {AdditionalPanel} from "../SideNavigationLayout/PanelsContext/additionalPanel.ts";
 
 interface PackageSearchResultsProps {
     packageInfo: PackageInfo;
@@ -93,7 +95,10 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = ({
                     <>
                         <Stack direction="row" alignItems="center" spacing={1} sx={{px: 2, pt: 1}}>
                             <Button size="small" startIcon={<LibraryBooks/>}
-                                    onClick={async () => await fetchReadmeContent(repositoryUrl ?? '')}>
+                                    onClick={async () => {
+                                        await fetchReadmeContent(repositoryUrl ?? '');
+                                        sideNavigationStore.openPanel(AdditionalPanel.Readme);
+                                    }}>
                                 {t("ViewReadmeFile")}
                             </Button>
                             <GitHub color="primary" fontSize="small"/>

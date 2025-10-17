@@ -3,6 +3,7 @@ import {getPackageApiClient, PackageDetails, PackageType} from "../services/apiC
 import { packagesSearchStore } from "./PackagesStore";
 import { objectsAreEqual } from "../utils/objectsTools";
 import {fromPromise, IPromiseBasedObservable} from "mobx-utils";
+import { downloadHistoryStore } from "./DownloadHistoryStore";
 
 class CartStore {
 
@@ -85,11 +86,23 @@ class CartStore {
         const { preparePackagesDownloadLink } = await getPackageApiClient();
         const { repositoryType } = packagesSearchStore;
 
-        this.packagesDownloadLink = fromPromise(preparePackagesDownloadLink({
+        const downloadLinkPromise = preparePackagesDownloadLink({
             packageType: repositoryType,
             packagesDetails: this.cartItems,
             sdkVersion: this.getSdkVersion()
-        }))
+        });
+
+        this.packagesDownloadLink = fromPromise(downloadLinkPromise);
+
+        // Save to history when download link is successfully created
+        downloadLinkPromise.then(() => {
+            downloadHistoryStore.addToHistory({
+                packages: [...this.cartItems],
+                packageType: repositoryType
+            });
+        }).catch(() => {
+            // Ignore errors - we don't want to save failed downloads
+        });
     }
 
 

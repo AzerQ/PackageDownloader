@@ -32,6 +32,8 @@ const SideNavigationLayout: React.FC<SideNavigationLayoutProps> = ({
                                                                        children,
                                                                        initialActiveItemId = null,
                                                                        initialSidebarOpen = true,
+                                                                       onItemClick,
+                                                                       onCloseSidebar,
                                                                        activityBarWidth = 60,
                                                                        sidebarWidth = 300,
                                                                        minSidebarWidth = 200,
@@ -43,6 +45,14 @@ const SideNavigationLayout: React.FC<SideNavigationLayoutProps> = ({
     const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(
         () => initialActiveItemId !== null && initialSidebarOpen
     );
+
+    // Sync with external state when initialActiveItemId or initialSidebarOpen changes
+    useEffect(() => {
+        if (onItemClick) {
+            setActiveItemId(initialActiveItemId);
+            setIsSidebarOpen(initialSidebarOpen);
+        }
+    }, [initialActiveItemId, initialSidebarOpen, onItemClick]);
 
     const [currentSidebarWidth, setCurrentSidebarWidth] = useState<number>(
         typeof sidebarWidth === 'number' ? sidebarWidth : 300
@@ -63,19 +73,27 @@ const SideNavigationLayout: React.FC<SideNavigationLayoutProps> = ({
     }, [items, activeItemId]);
 
     const handleItemClick = useCallback((id: string | number) => {
-        if (id === activeItemId && isSidebarOpen) {
-            setIsSidebarOpen(false);
+        if (onItemClick) {
+            onItemClick(id);
         } else {
-            setActiveItemId(id);
-            if (!isSidebarOpen || id !== activeItemId) {
-                setIsSidebarOpen(true);
+            if (id === activeItemId && isSidebarOpen) {
+                setIsSidebarOpen(false);
+            } else {
+                setActiveItemId(id);
+                if (!isSidebarOpen || id !== activeItemId) {
+                    setIsSidebarOpen(true);
+                }
             }
         }
-    }, [activeItemId, isSidebarOpen]);
+    }, [activeItemId, isSidebarOpen, onItemClick]);
 
     const handleCloseSidebar = useCallback(() => {
-        setIsSidebarOpen(false);
-    }, []);
+        if (onCloseSidebar) {
+            onCloseSidebar();
+        } else {
+            setIsSidebarOpen(false);
+        }
+    }, [onCloseSidebar]);
 
     const handleMouseDownOnResizeHandle = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         e.preventDefault();

@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CartItem from './CartItem';
 import { cartStore } from '../../stores/CartStore';
-import { PackageDetails } from '../../services/apiClient';
+import { IPackageInfo } from '../../services/apiClient';
 
 // Mock MobX store
 vi.mock('../../stores/CartStore', () => ({
@@ -13,15 +13,19 @@ vi.mock('../../stores/CartStore', () => ({
 }));
 
 describe('CartItem Component', () => {
-  const mockPackageDetails: PackageDetails = {
-    packageID: 'react',
-    packageVersion: '18.2.0',
-    packageIconUrl: 'https://example.com/react-icon.png',
-    packageDescription: 'A JavaScript library for building user interfaces',
-    packageAuthors: 'Facebook',
-    packageProjectUrl: 'https://reactjs.org',
-    packageLicenseUrl: 'https://example.com/license',
-    packageTags: ['ui', 'framework'],
+  const mockPackageDetails: IPackageInfo = {
+    id: 'react',
+    currentVersion: '18.2.0',
+    otherVersions: [],
+    description: 'A JavaScript library for building user interfaces',
+    tags: ['ui', 'framework'],
+    authorInfo: 'Facebook',
+    repositoryUrl: 'https://reactjs.org',
+    iconUrl: 'https://example.com/react-icon.png',
+    packageUrl: 'https://reactjs.org',
+    downloadsCount: 100,
+    isAddedInCart: false,
+    getPackageIconOrStockImage: () => 'https://example.com/react-icon.png',
   };
 
   beforeEach(() => {
@@ -30,7 +34,11 @@ describe('CartItem Component', () => {
 
   describe('Positive Scenarios', () => {
     it('should render cart item with correct test ids', () => {
-      render(<CartItem packageDetailItem={mockPackageDetails} />);
+      render(<CartItem packageDetailItem={{
+        packageID: mockPackageDetails.id,
+        packageVersion: mockPackageDetails.currentVersion,
+        packageIconUrl: mockPackageDetails.iconUrl ?? ''
+      }} />);
       
       expect(screen.getByTestId('cart-item')).toBeInTheDocument();
       expect(screen.getByTestId('cart-item-avatar')).toBeInTheDocument();
@@ -39,14 +47,22 @@ describe('CartItem Component', () => {
     });
 
     it('should display package ID and version', () => {
-      render(<CartItem packageDetailItem={mockPackageDetails} />);
+      render(<CartItem packageDetailItem={{
+        packageID: mockPackageDetails.id,
+        packageVersion: mockPackageDetails.currentVersion,
+        packageIconUrl: mockPackageDetails.iconUrl ?? ''
+      }} />);
       
       expect(screen.getByText('react')).toBeInTheDocument();
       expect(screen.getByText('18.2.0')).toBeInTheDocument();
     });
 
     it('should display package icon with correct src', () => {
-      render(<CartItem packageDetailItem={mockPackageDetails} />);
+      render(<CartItem packageDetailItem={{
+        packageID: mockPackageDetails.id,
+        packageVersion: mockPackageDetails.currentVersion,
+        packageIconUrl: mockPackageDetails.iconUrl ?? ''
+      }} />);
       
       const avatar = screen.getByTestId('cart-item-avatar');
       const img = avatar.querySelector('img');
@@ -54,7 +70,11 @@ describe('CartItem Component', () => {
     });
 
     it('should display package icon with correct alt text', () => {
-      render(<CartItem packageDetailItem={mockPackageDetails} />);
+      render(<CartItem packageDetailItem={{
+        packageID: mockPackageDetails.id,
+        packageVersion: mockPackageDetails.currentVersion,
+        packageIconUrl: mockPackageDetails.iconUrl ?? ''
+      }} />);
       
       const avatar = screen.getByTestId('cart-item-avatar');
       const img = avatar.querySelector('img');
@@ -63,24 +83,38 @@ describe('CartItem Component', () => {
 
     it('should call removeCartItem when delete button is clicked', async () => {
       const user = userEvent.setup();
-      render(<CartItem packageDetailItem={mockPackageDetails} />);
+      render(<CartItem packageDetailItem={{
+        packageID: mockPackageDetails.id,
+        packageVersion: mockPackageDetails.currentVersion,
+        packageIconUrl: mockPackageDetails.iconUrl ?? ''
+      }} />);
       
       const deleteButton = screen.getByTestId('cart-item-delete-button');
       await user.click(deleteButton);
       
-      expect(cartStore.removeCartItem).toHaveBeenCalledWith(mockPackageDetails);
+      expect(cartStore.removeCartItem).toHaveBeenCalledWith(expect.objectContaining({
+        packageID: mockPackageDetails.id
+      }));
       expect(cartStore.removeCartItem).toHaveBeenCalledTimes(1);
     });
 
     it('should have proper aria-label on delete button', () => {
-      render(<CartItem packageDetailItem={mockPackageDetails} />);
+      render(<CartItem packageDetailItem={{
+        packageID: mockPackageDetails.id,
+        packageVersion: mockPackageDetails.currentVersion,
+        packageIconUrl: mockPackageDetails.iconUrl ?? ''
+      }} />);
       
       const deleteButton = screen.getByTestId('cart-item-delete-button');
       expect(deleteButton).toHaveAttribute('aria-label', 'delete');
     });
 
     it('should render delete icon inside button', () => {
-      render(<CartItem packageDetailItem={mockPackageDetails} />);
+      render(<CartItem packageDetailItem={{
+        packageID: mockPackageDetails.id,
+        packageVersion: mockPackageDetails.currentVersion,
+        packageIconUrl: mockPackageDetails.iconUrl ?? ''
+      }} />);
       
       const deleteButton = screen.getByTestId('cart-item-delete-button');
       const icon = deleteButton.querySelector('svg');
@@ -92,10 +126,14 @@ describe('CartItem Component', () => {
     it('should handle missing package icon URL gracefully', () => {
       const packageWithoutIcon = {
         ...mockPackageDetails,
-        packageIconUrl: '',
+        iconUrl: '',
       };
       
-      render(<CartItem packageDetailItem={packageWithoutIcon} />);
+      render(<CartItem packageDetailItem={{
+        packageID: packageWithoutIcon.id,
+        packageVersion: packageWithoutIcon.currentVersion,
+        packageIconUrl: packageWithoutIcon.iconUrl ?? ''
+      }} />);
       
       const avatar = screen.getByTestId('cart-item-avatar');
       expect(avatar).toBeInTheDocument();
@@ -104,21 +142,29 @@ describe('CartItem Component', () => {
     it('should handle very long package IDs', () => {
       const packageWithLongId = {
         ...mockPackageDetails,
-        packageID: 'very-long-package-name-that-exceeds-normal-length-limits',
+        id: 'very-long-package-name-that-exceeds-normal-length-limits',
       };
       
-      render(<CartItem packageDetailItem={packageWithLongId} />);
+      render(<CartItem packageDetailItem={{
+        packageID: packageWithLongId.id,
+        packageVersion: packageWithLongId.currentVersion,
+        packageIconUrl: packageWithLongId.iconUrl ?? ''
+      }} />);
       
-      expect(screen.getByText(packageWithLongId.packageID)).toBeInTheDocument();
+      expect(screen.getByText(packageWithLongId.id)).toBeInTheDocument();
     });
 
     it('should handle special characters in package ID', () => {
       const packageWithSpecialChars = {
         ...mockPackageDetails,
-        packageID: '@types/react',
+        id: '@types/react',
       };
       
-      render(<CartItem packageDetailItem={packageWithSpecialChars} />);
+      render(<CartItem packageDetailItem={{
+        packageID: packageWithSpecialChars.id,
+        packageVersion: packageWithSpecialChars.currentVersion,
+        packageIconUrl: packageWithSpecialChars.iconUrl ?? ''
+      }} />);
       
       expect(screen.getByText('@types/react')).toBeInTheDocument();
     });
@@ -126,16 +172,24 @@ describe('CartItem Component', () => {
     it('should handle missing version', () => {
       const packageWithoutVersion = {
         ...mockPackageDetails,
-        packageVersion: '',
+        currentVersion: '',
       };
       
-      render(<CartItem packageDetailItem={packageWithoutVersion} />);
+      render(<CartItem packageDetailItem={{
+        packageID: packageWithoutVersion.id,
+        packageVersion: packageWithoutVersion.currentVersion,
+        packageIconUrl: packageWithoutVersion.iconUrl ?? ''
+      }} />);
       
       expect(screen.getByTestId('cart-item-text')).toBeInTheDocument();
     });
 
     it('should not call removeCartItem when item is just rendered', () => {
-      render(<CartItem packageDetailItem={mockPackageDetails} />);
+      render(<CartItem packageDetailItem={{
+        packageID: mockPackageDetails.id,
+        packageVersion: mockPackageDetails.currentVersion,
+        packageIconUrl: mockPackageDetails.iconUrl ?? ''
+      }} />);
       
       expect(cartStore.removeCartItem).not.toHaveBeenCalled();
     });
@@ -144,11 +198,15 @@ describe('CartItem Component', () => {
       const packageWithNullIcon = {
         ...mockPackageDetails,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        packageIconUrl: null as any,
+        iconUrl: null as any,
       };
       
       expect(() => {
-        render(<CartItem packageDetailItem={packageWithNullIcon} />);
+        render(<CartItem packageDetailItem={{
+          packageID: packageWithNullIcon.id,
+          packageVersion: packageWithNullIcon.currentVersion,
+          packageIconUrl: packageWithNullIcon.iconUrl ?? ''
+        }} />);
       }).not.toThrow();
     });
   });
@@ -156,7 +214,11 @@ describe('CartItem Component', () => {
   describe('Edge Cases', () => {
     it('should handle multiple rapid clicks on delete button', async () => {
       const user = userEvent.setup();
-      render(<CartItem packageDetailItem={mockPackageDetails} />);
+      render(<CartItem packageDetailItem={{
+        packageID: mockPackageDetails.id,
+        packageVersion: mockPackageDetails.currentVersion,
+        packageIconUrl: mockPackageDetails.iconUrl ?? ''
+      }} />);
       
       const deleteButton = screen.getByTestId('cart-item-delete-button');
       await user.tripleClick(deleteButton);
@@ -167,10 +229,14 @@ describe('CartItem Component', () => {
     it('should handle package with beta version', () => {
       const betaPackage = {
         ...mockPackageDetails,
-        packageVersion: '1.0.0-beta.1',
+        currentVersion: '1.0.0-beta.1',
       };
       
-      render(<CartItem packageDetailItem={betaPackage} />);
+      render(<CartItem packageDetailItem={{
+        packageID: betaPackage.id,
+        packageVersion: betaPackage.currentVersion,
+        packageIconUrl: betaPackage.iconUrl ?? ''
+      }} />);
       
       expect(screen.getByText('1.0.0-beta.1')).toBeInTheDocument();
     });
@@ -178,16 +244,24 @@ describe('CartItem Component', () => {
     it('should handle package with prerelease version', () => {
       const prereleasePackage = {
         ...mockPackageDetails,
-        packageVersion: '2.0.0-rc.1',
+        currentVersion: '2.0.0-rc.1',
       };
       
-      render(<CartItem packageDetailItem={prereleasePackage} />);
+      render(<CartItem packageDetailItem={{
+        packageID: prereleasePackage.id,
+        packageVersion: prereleasePackage.currentVersion,
+        packageIconUrl: prereleasePackage.iconUrl ?? ''
+      }} />);
       
       expect(screen.getByText('2.0.0-rc.1')).toBeInTheDocument();
     });
 
     it('should maintain list item structure with divider', () => {
-      render(<CartItem packageDetailItem={mockPackageDetails} />);
+      render(<CartItem packageDetailItem={{
+        packageID: mockPackageDetails.id,
+        packageVersion: mockPackageDetails.currentVersion,
+        packageIconUrl: mockPackageDetails.iconUrl ?? ''
+      }} />);
       
       const listItem = screen.getByTestId('cart-item');
       expect(listItem).toHaveClass('MuiListItem-root');

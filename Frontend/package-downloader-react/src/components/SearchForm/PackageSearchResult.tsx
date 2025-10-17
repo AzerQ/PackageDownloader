@@ -12,7 +12,6 @@ import {
     Select,
     MenuItem,
     FormControl,
-    Box
 } from "@mui/material";
 import {PackageInfo} from "../../services/apiClient";
 import {cartStore} from "../../stores/CartStore";

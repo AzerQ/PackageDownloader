@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import SearchForm from './SearchForm';
 import { packagesSearchStore } from '../../stores/PackagesStore';
+import { PackageInfo } from '../../services/apiClient';
 
 // Mock the translation hook
 vi.mock('react-i18next', () => ({
@@ -49,7 +50,13 @@ describe('SearchForm Component', () => {
     vi.clearAllMocks();
     packagesSearchStore.searchQuery = '';
     packagesSearchStore.isSearchSuggestionsEnabled = true;
-    packagesSearchStore.fondedPackages = { state: 'fulfilled', value: [] };
+    packagesSearchStore.fondedPackages = {
+      state: 'fulfilled',
+      value: [],
+      isPromiseBasedObservable: true,
+      case: vi.fn(),
+      then: vi.fn(),
+    };
   });
 
   describe('Positive Scenarios', () => {
@@ -191,7 +198,13 @@ describe('SearchForm Component', () => {
 
     it('should handle undefined fondedPackages value', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      packagesSearchStore.fondedPackages = { state: 'fulfilled', value: undefined as any };
+      packagesSearchStore.fondedPackages = {
+        state: 'fulfilled',
+        value: undefined as any,
+        isPromiseBasedObservable: true,
+        case: vi.fn(),
+        then: vi.fn(),
+      };
       
       expect(() => {
         render(<SearchForm />);
@@ -272,7 +285,13 @@ describe('SearchForm Component', () => {
     });
 
     it('should handle pending search results state', () => {
-      packagesSearchStore.fondedPackages = { state: 'pending', value: [] };
+      packagesSearchStore.fondedPackages = {
+        state: 'pending',
+        value: [],
+        isPromiseBasedObservable: true,
+        case: vi.fn(),
+        then: vi.fn(),
+      };
       
       render(<SearchForm />);
       
@@ -280,7 +299,13 @@ describe('SearchForm Component', () => {
     });
 
     it('should handle rejected search results state', () => {
-      packagesSearchStore.fondedPackages = { state: 'rejected', value: [] };
+      packagesSearchStore.fondedPackages = {
+        state: 'rejected',
+        value: [],
+        isPromiseBasedObservable: true,
+        case: vi.fn(),
+        then: vi.fn(),
+      };
       
       render(<SearchForm />);
       
@@ -333,7 +358,15 @@ describe('SearchForm Component', () => {
     });
 
     it('should pass search results to SearchResults component', () => {
-      packagesSearchStore.fondedPackages = { state: 'fulfilled', value: [{ id: 1, name: 'react' }] };
+      const mockPackage: PackageInfo = new PackageInfo();
+      mockPackage.id = 'react';
+      packagesSearchStore.fondedPackages = {
+        state: 'fulfilled',
+        value: [mockPackage],
+        isPromiseBasedObservable: true,
+        case: vi.fn(),
+        then: vi.fn(),
+      };
       
       render(<SearchForm />);
       
@@ -358,7 +391,13 @@ describe('SearchForm Component', () => {
     });
 
     it('should react to fondedPackages changes', () => {
-      packagesSearchStore.fondedPackages = { state: 'pending', value: [] };
+      packagesSearchStore.fondedPackages = {
+        state: 'pending',
+        value: [],
+        isPromiseBasedObservable: true,
+        case: vi.fn(),
+        then: vi.fn(),
+      };
       
       render(<SearchForm />);
       

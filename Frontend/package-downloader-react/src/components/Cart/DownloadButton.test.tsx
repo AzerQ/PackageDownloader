@@ -163,7 +163,7 @@ describe('DownloadPackagesButton Component', () => {
     it('should handle async getPackagesDownloadLink', async () => {
       const user = userEvent.setup();
       cartStore.getPackagesDownloadLink = vi.fn(
-        () => new Promise((resolve) => setTimeout(resolve, 100))
+        () => new Promise<void>((resolve) => setTimeout(resolve, 100))
       );
       
       render(<DownloadPackagesButton />);

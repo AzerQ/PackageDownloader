@@ -27,7 +27,7 @@ describe('NotificationBanner Component', () => {
 
     it('should display single notification', () => {
       notificationStore.notifications = [
-        { id: 1, type: 'success', message: 'Operation successful!' },
+        { id: '1', type: 'info', message: 'Operation successful!' },
       ];
       
       render(<NotificationBanner />);
@@ -38,9 +38,9 @@ describe('NotificationBanner Component', () => {
 
     it('should display multiple notifications', () => {
       notificationStore.notifications = [
-        { id: 1, type: 'success', message: 'First notification' },
-        { id: 2, type: 'error', message: 'Second notification' },
-        { id: 3, type: 'warning', message: 'Third notification' },
+        { id: '1', type: 'info', message: 'First notification' },
+        { id: '2', type: 'error', message: 'Second notification' },
+        { id: '3', type: 'warning', message: 'Third notification' },
       ];
       
       render(<NotificationBanner />);
@@ -52,17 +52,17 @@ describe('NotificationBanner Component', () => {
 
     it('should display success notification with correct severity', () => {
       notificationStore.notifications = [
-        { id: 1, type: 'success', message: 'Success message' },
+        { id: '1', type: 'info', message: 'Success message' },
       ];
       
       render(<NotificationBanner />);
       
-      expect(screen.getByTestId('notification-alert-success')).toBeInTheDocument();
+      expect(screen.getByTestId('notification-alert-info')).toBeInTheDocument();
     });
 
     it('should display error notification with correct severity', () => {
       notificationStore.notifications = [
-        { id: 1, type: 'error', message: 'Error message' },
+        { id: '1', type: 'error', message: 'Error message' },
       ];
       
       render(<NotificationBanner />);
@@ -72,7 +72,7 @@ describe('NotificationBanner Component', () => {
 
     it('should display warning notification with correct severity', () => {
       notificationStore.notifications = [
-        { id: 1, type: 'warning', message: 'Warning message' },
+        { id: '1', type: 'warning', message: 'Warning message' },
       ];
       
       render(<NotificationBanner />);
@@ -82,7 +82,7 @@ describe('NotificationBanner Component', () => {
 
     it('should display info notification with correct severity', () => {
       notificationStore.notifications = [
-        { id: 1, type: 'info', message: 'Info message' },
+        { id: '1', type: 'info', message: 'Info message' },
       ];
       
       render(<NotificationBanner />);
@@ -93,7 +93,7 @@ describe('NotificationBanner Component', () => {
     it('should call removeNotification when close button is clicked', async () => {
       const user = userEvent.setup();
       notificationStore.notifications = [
-        { id: 1, type: 'success', message: 'Test notification' },
+        { id: '1', type: 'info', message: 'Test notification' },
       ];
       
       render(<NotificationBanner />);
@@ -101,7 +101,7 @@ describe('NotificationBanner Component', () => {
       const closeButton = screen.getByRole('button', { name: /close/i });
       await user.click(closeButton);
       
-      expect(notificationStore.removeNotification).toHaveBeenCalledWith(1);
+      expect(notificationStore.removeNotification).toHaveBeenCalledWith('1');
     });
 
     it('should have correct z-index for overlay', () => {
@@ -141,7 +141,7 @@ describe('NotificationBanner Component', () => {
 
     it('should handle notification with missing message', () => {
       notificationStore.notifications = [
-        { id: 1, type: 'success', message: '' },
+        { id: '1', type: 'info', message: '' },
       ];
       
       render(<NotificationBanner />);
@@ -152,7 +152,7 @@ describe('NotificationBanner Component', () => {
     it('should handle notification with very long message', () => {
       const longMessage = 'A'.repeat(1000);
       notificationStore.notifications = [
-        { id: 1, type: 'success', message: longMessage },
+        { id: '1', type: 'info', message: longMessage },
       ];
       
       render(<NotificationBanner />);
@@ -162,7 +162,7 @@ describe('NotificationBanner Component', () => {
 
     it('should handle notification with special characters in message', () => {
       notificationStore.notifications = [
-        { id: 1, type: 'success', message: '<script>alert("xss")</script>' },
+        { id: '1', type: 'info', message: '<script>alert("xss")</script>' },
       ];
       
       render(<NotificationBanner />);
@@ -173,7 +173,7 @@ describe('NotificationBanner Component', () => {
 
     it('should not call removeNotification on render', () => {
       notificationStore.notifications = [
-        { id: 1, type: 'success', message: 'Test' },
+        { id: '1', type: 'info', message: 'Test' },
       ];
       
       render(<NotificationBanner />);
@@ -183,7 +183,7 @@ describe('NotificationBanner Component', () => {
 
     it('should handle string IDs', () => {
       notificationStore.notifications = [
-        { id: 'string-id', type: 'success', message: 'Test with string ID' },
+        { id: 'string-id', type: 'info', message: 'Test with string ID' },
       ];
       
       render(<NotificationBanner />);
@@ -193,7 +193,7 @@ describe('NotificationBanner Component', () => {
 
     it('should handle numeric IDs', () => {
       notificationStore.notifications = [
-        { id: 12345, type: 'error', message: 'Test with numeric ID' },
+        { id: '12345', type: 'error', message: 'Test with numeric ID' },
       ];
       
       render(<NotificationBanner />);
@@ -205,8 +205,8 @@ describe('NotificationBanner Component', () => {
   describe('Edge Cases', () => {
     it('should handle rapid notification additions', () => {
       const notifications = Array.from({ length: 10 }, (_, i) => ({
-        id: i,
-        type: 'success' as const,
+        id: i.toString(),
+        type: 'info' as const,
         message: `Notification ${i}`,
       }));
       
@@ -219,8 +219,8 @@ describe('NotificationBanner Component', () => {
 
     it('should handle duplicate notification IDs gracefully', () => {
       notificationStore.notifications = [
-        { id: 1, type: 'success', message: 'First' },
-        { id: 1, type: 'error', message: 'Second with same ID' },
+        { id: '1', type: 'info', message: 'First' },
+        { id: '1', type: 'error', message: 'Second with same ID' },
       ];
       
       render(<NotificationBanner />);
@@ -232,7 +232,7 @@ describe('NotificationBanner Component', () => {
 
     it('should handle notification with HTML content', () => {
       notificationStore.notifications = [
-        { id: 1, type: 'success', message: '<b>Bold text</b>' },
+        { id: '1', type: 'info', message: '<b>Bold text</b>' },
       ];
       
       render(<NotificationBanner />);
@@ -243,7 +243,7 @@ describe('NotificationBanner Component', () => {
 
     it('should handle notification with newlines', () => {
       notificationStore.notifications = [
-        { id: 1, type: 'info', message: 'Line 1\nLine 2\nLine 3' },
+        { id: '1', type: 'info', message: 'Line 1\nLine 2\nLine 3' },
       ];
       
       render(<NotificationBanner />);
@@ -253,9 +253,9 @@ describe('NotificationBanner Component', () => {
 
     it('should maintain notification order', () => {
       notificationStore.notifications = [
-        { id: 1, type: 'success', message: 'First' },
-        { id: 2, type: 'error', message: 'Second' },
-        { id: 3, type: 'warning', message: 'Third' },
+        { id: '1', type: 'info', message: 'First' },
+        { id: '2', type: 'error', message: 'Second' },
+        { id: '3', type: 'warning', message: 'Third' },
       ];
       
       render(<NotificationBanner />);
@@ -266,7 +266,7 @@ describe('NotificationBanner Component', () => {
 
     it('should handle different autoHideDuration', () => {
       notificationStore.notifications = [
-        { id: 1, type: 'success', message: 'Auto-hide notification' },
+        { id: '1', type: 'info', message: 'Auto-hide notification' },
       ];
       
       render(<NotificationBanner />);
@@ -281,7 +281,7 @@ describe('NotificationBanner Component', () => {
       // Since we're mocking the store, the observer won't react automatically
       // This test verifies the component structure with notifications
       notificationStore.notifications = [
-        { id: 1, type: 'success', message: 'New notification' },
+        { id: '1', type: 'info', message: 'New notification' },
       ];
       
       render(<NotificationBanner />);

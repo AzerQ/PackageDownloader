@@ -4,6 +4,11 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  server: {
+    port: 5094,
+    host: true,
+    allowedHosts: ["dev-front.azerqtech.pw"]
+  },
   build: {
     chunkSizeWarningLimit: 1600
   },

@@ -124,62 +124,48 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = ({
 
 
             <CardActions>
-                <>
-                <Typography variant="overline" gutterBottom sx={{display: 'block', mb: 0.5}}>
-                    {t("ChoseVersion")}
-                </Typography>
-
-                    <Box sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1
-                    }}>
-                        <FormControl sx={{m: 0, minWidth: 120}} size="small">
+                <Stack spacing={1}>
+                    <Typography variant="overline" sx={{display: 'block'}}>
+                        {t("ChoseVersion")}
+                    </Typography>
+                    <Stack direction="row" spacing={1} alignItems="flex-start">
+                        <FormControl sx={{minWidth: 120}} size="small">
                             <Select
                                 value={selectedVersion}
                                 onChange={(e) => setSelectedVersion(e.target.value)}
                             >
-                                {/* Always show current version first */}
                                 <MenuItem key={id + currentVersion} value={currentVersion}>
                                     {currentVersion}
                                 </MenuItem>
-                                
-                                {/* Show other versions if available */}
-                                {otherVersions && otherVersions.length > 0 && 
+                                {otherVersions && otherVersions.length > 0 &&
                                     otherVersions
-                                        .filter(ver => ver !== currentVersion) // Avoid duplicates
+                                        .filter(ver => ver !== currentVersion)
                                         .sort((a, b) => compareVersions(a, b, "DESC"))
                                         .map((ver) => (
                                             <MenuItem key={id + ver} value={ver}>
                                                 {ver}
                                             </MenuItem>
-                                        ))
-                                }
+                                        ))}
                             </Select>
                         </FormControl>
-                        {
-                            !isAddedInCart &&
-                            (<Button
+                        {!isAddedInCart && (
+                            <Button
                                 startIcon={<Add/>}
-                                sx={{m: 0}}
                                 color="primary"
                                 onClick={() => {
-                                    cartStore.addCartItem(
-                                        {
-                                            packageID: id,
-                                            packageVersion: selectedVersion,
-                                            packageIconUrl: getPackageIconOrStockImage()
-                                        }
-                                    )
-                                }
-                                }
+                                    cartStore.addCartItem({
+                                        packageID: id,
+                                        packageVersion: selectedVersion,
+                                        packageIconUrl: getPackageIconOrStockImage()
+                                    });
+                                }}
                                 variant="contained"
                             >
                                 {t("Add")}
-                            </Button>)
-                        }
-                    </Box>
-                </>
+                            </Button>
+                        )}
+                    </Stack>
+                </Stack>
             </CardActions>
         </Card>
     );

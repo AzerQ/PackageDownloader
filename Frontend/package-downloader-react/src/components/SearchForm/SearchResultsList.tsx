@@ -13,14 +13,13 @@ const SearchResults: React.FC<ISearchResultsProps> = memo(({fondedPackages, isSe
 
     const {t} = useTranslation();
 
-    if (!fondedPackages || fondedPackages.length === 0)
-        return <></>
+    if (isSearchResultsLoading) {
+        return <CircularProgress title={t("LoadingData")} color="secondary" size="3rem"/>;
+    }
 
-    if (isSearchResultsLoading)
-        return (
-            <>
-                <CircularProgress title={t("LoadingData")} color="secondary" size="3rem"/>
-            </>);
+    if (!fondedPackages || fondedPackages.length === 0) {
+        return null;
+    }
 
     return (
         <>

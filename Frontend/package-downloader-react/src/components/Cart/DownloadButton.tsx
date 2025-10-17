@@ -22,6 +22,7 @@ const DownloadPackagesButton: React.FC = observer(() => {
                 color="primary"
                 onClick={getPackagesDownloadLink}
                 sx={{mr: 1}}
+                data-testid="download-button"
             >
                 {t("Download")}
             </Button>

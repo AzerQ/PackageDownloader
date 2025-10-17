@@ -37,14 +37,19 @@ const SearchForm: React.FC = observer(() => {
 
 
     return (
-        <Box sx={{mb: 3}}>
+        <Box sx={{mb: 3}} data-testid="search-form">
 
 
 
-            <Paper component="div" sx={{p: '2px 4px', display: 'flex', alignItems: 'center'}}>
+            <Paper component="div" sx={{p: '2px 4px', display: 'flex', alignItems: 'center'}} data-testid="search-form-paper">
 
                 <Tooltip title={t("StartSearchTooltip")} aria-label="search">
-                    <IconButton color="primary" aria-label="search packages" onClick={handleSearch}>
+                    <IconButton 
+                        color="primary" 
+                        aria-label="search packages" 
+                        onClick={handleSearch}
+                        data-testid="search-form-button"
+                    >
                         <Search/>
                     </IconButton>
                 </Tooltip>
@@ -53,10 +58,16 @@ const SearchForm: React.FC = observer(() => {
 
                 <PackageTypeSelector/>
 
-                <FormControlLabel sx={{marginLeft: 3}}
-                                  control={<Switch checked={isSearchSuggestionsEnabled}
-                                                   onChange={(_, checked) => setSearchSuggestionEnabledFlag(checked)}/>}
-                                  label={t("SearchSuggestionsEnabled")}/>
+                <FormControlLabel 
+                    sx={{marginLeft: 3}}
+                    control={<Switch 
+                        checked={isSearchSuggestionsEnabled}
+                        onChange={(_, checked) => setSearchSuggestionEnabledFlag(checked)}
+                        data-testid="search-suggestions-switch"
+                    />}
+                    label={t("SearchSuggestionsEnabled")}
+                    data-testid="search-suggestions-label"
+                />
             </Paper>
             <SearchResults isSearchResultsLoading={fondedPackages?.state === "pending"} fondedPackages={fondedPackages?.value as PackageInfo[]}/>
         </Box>

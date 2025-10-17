@@ -135,7 +135,14 @@ export class PackagesAPIClient {
         };
 
         let _response = await this.http.fetch(url_, options_);
-        return this.processPreparePackagesDownloadLink(_response);
+        const downloadLinkUrl = new URL(await this.processPreparePackagesDownloadLink(_response));
+        
+        const isLocalHost = ["127.0.0.1", "localhost"].includes(downloadLinkUrl.hostname);
+        if (!isLocalHost && downloadLinkUrl.protocol === "http:") {
+            downloadLinkUrl.protocol = "https:";
+        }
+
+        return downloadLinkUrl.toString();
     };
 
     protected processPreparePackagesDownloadLink = async (response: Response): Promise<string> => {
@@ -313,10 +320,16 @@ export async function isHeartbeatExists(baseUrl: string) {
 
 async function getApiUrl(): Promise<string> {
 
-    const FRONTEND_PORT_DEV = '5173';
-    const BACKEND_PORT_DEV = '5026';
+    const FRONTEND_PORT_DEV = '5094';
+    const BACKEND_PORT_DEV = '5093';
 
     let UrlMain = location.origin;
+    
+    // Special case for dev server
+    if (UrlMain === 'https://dev-front.azerqtech.pw') {
+        return 'https://dev-api.azerqtech.pw';
+    }
+    
     let UrlDev = UrlMain.replace(FRONTEND_PORT_DEV, BACKEND_PORT_DEV);
 
     let UrlBaseVariants = [UrlMain, UrlDev];
@@ -344,5 +357,3 @@ export const getPackageApiClient = async () => {
         throw error;
     }
 };
-
-console.log('Test CI CD');

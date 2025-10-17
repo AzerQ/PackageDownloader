@@ -12,6 +12,8 @@ export interface SideNavigationLayoutProps {
     children: React.ReactNode;
     initialActiveItemId?: string | number | null;
     initialSidebarOpen?: boolean;
+    onItemClick?: (id: string | number) => void;
+    onCloseSidebar?: () => void;
     activityBarWidth?: number | string;
     sidebarWidth?: number | string;
     backgroundColor?: string;

@@ -241,7 +241,8 @@ export class PackageInfo implements IPackageInfo {
     packageUrl!: string | null;
     downloadsCount!: number;
     isAddedInCart: boolean = false;
-    getPackageIconOrStockImage = () => this.iconUrl ?? "https://img.icons8.com/isometric/64/box.png";
+    defaultIcon: string = "/icons/box.svg";
+    getPackageIconOrStockImage = () => this.iconUrl ?? this.defaultIcon;
     getLastVersion = () =>
         this.otherVersions?.
         sort((version, versionNext) => compareVersions(version, versionNext, 'DESC'))

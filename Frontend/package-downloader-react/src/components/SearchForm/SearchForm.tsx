@@ -41,12 +41,18 @@ const SearchForm: React.FC = observer(() => {
 
 
 
-            <Paper component="div" sx={{p: '2px 4px', display: 'flex', alignItems: 'center'}} data-testid="search-form-paper">
+            <Paper component="div" sx={{
+                p: '2px 4px',
+                display: 'flex',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: 1
+            }} data-testid="search-form-paper">
 
                 <Tooltip title={t("StartSearchTooltip")} aria-label="search">
-                    <IconButton 
-                        color="primary" 
-                        aria-label="search packages" 
+                    <IconButton
+                        color="primary"
+                        aria-label="search packages"
                         onClick={handleSearch}
                         data-testid="search-form-button"
                     >
@@ -54,13 +60,12 @@ const SearchForm: React.FC = observer(() => {
                     </IconButton>
                 </Tooltip>
 
-                <SearchBar handleSearch={handleSearch} />
+                <SearchBar handleSearch={handleSearch}/>
 
                 <PackageTypeSelector/>
 
-                <FormControlLabel 
-                    sx={{marginLeft: 3}}
-                    control={<Switch 
+                <FormControlLabel
+                    control={<Switch
                         checked={isSearchSuggestionsEnabled}
                         onChange={(_, checked) => setSearchSuggestionEnabledFlag(checked)}
                         data-testid="search-suggestions-switch"

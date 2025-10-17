@@ -1,4 +1,5 @@
 export enum AdditionalPanel {
     Readme = 'Readme',
-    AI = 'AIConsultant'
+    AI = 'AIConsultant',
+    History = 'DownloadHistory'
 }

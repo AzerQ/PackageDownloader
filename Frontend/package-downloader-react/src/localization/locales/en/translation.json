@@ -33,5 +33,8 @@
     "SearchPackage": "Search package",
     "SearchSuggestionsEnabled": "Suggestions on search",
     "ViewReadmeFile": "View readme file",
-    "PackagesRepositoryType": "Packages repository type"
+    "PackagesRepositoryType": "Packages repository type",
+    "DownloadHistory": "Download History",
+    "NoDownloadHistory": "No download history yet",
+    "ClearAll": "Clear All"
 }

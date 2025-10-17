@@ -13,14 +13,13 @@ const SearchResults: React.FC<ISearchResultsProps> = memo(({fondedPackages, isSe
 
     const {t} = useTranslation();
 
-    if (!fondedPackages || fondedPackages.length === 0)
-        return <></>
+    if (isSearchResultsLoading) {
+        return <CircularProgress title={t("LoadingData")} color="secondary" size="3rem"/>;
+    }
 
-    if (isSearchResultsLoading)
-        return (
-            <>
-                <CircularProgress title={t("LoadingData")} color="secondary" size="3rem"/>
-            </>);
+    if (!fondedPackages || fondedPackages.length === 0) {
+        return null;
+    }
 
     return (
         <>
@@ -28,9 +27,13 @@ const SearchResults: React.FC<ISearchResultsProps> = memo(({fondedPackages, isSe
                 {t("SearchResults")}
             </Typography>
 
-            <Grid container spacing={2}>
+            <Grid container spacing={2} sx={{ 
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
+                gap: 2
+            }}>
                 {fondedPackages.map((packageInfo, index) => (
-                    <Grid item xs={12} sm={6} md={4} key={index}>
+                    <Grid item key={index}>
                         <Card variant="outlined">
                             <CardContent>
                                 <PackageSearchResult packageInfo={packageInfo}/>

@@ -35,7 +35,7 @@ export const PackagesDownloadModal: React.FC = observer(() => {
         fulfilled: (value) =>
             <>
                 <img
-                    src="https://img.icons8.com/color/96/000000/checkmark.png"
+                    src="/icons/checkmark.svg"
                     alt="Success"
                     style={{width: '80px', height: '80px', marginBottom: '16px'}}
                 />

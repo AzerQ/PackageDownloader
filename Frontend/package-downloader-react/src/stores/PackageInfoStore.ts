@@ -15,6 +15,7 @@ export class PackageInfoStore {
         if (!repositoryUrl)
             return;
 
+        this.repositoryUrl = repositoryUrl;
         this.readmeContent = fromPromise(githubApiClient.getReadmeContent(repositoryUrl));
     }
 

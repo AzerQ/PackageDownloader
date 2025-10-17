@@ -4,6 +4,7 @@ import { packagesSearchStore } from "./PackagesStore";
 import { objectsAreEqual } from "../utils/objectsTools";
 import {fromPromise, IPromiseBasedObservable} from "mobx-utils";
 import { downloadHistoryStore } from "./DownloadHistoryStore";
+import { showError } from "./NotificationStore";
 
 class CartStore {
 
@@ -82,7 +83,6 @@ class CartStore {
 
 
     getPackagesDownloadLink = async () => {
-
         const { preparePackagesDownloadLink } = await getPackageApiClient();
         const { repositoryType } = packagesSearchStore;
 
@@ -100,9 +100,8 @@ class CartStore {
                 packages: [...this.cartItems],
                 packageType: repositoryType
             });
-        }).catch(() => {
-            // Ignore errors - we don't want to save failed downloads
-        });
+        })
+        .catch(err => showError(err, "On packages link create step exception occured: "));
     }
 
 

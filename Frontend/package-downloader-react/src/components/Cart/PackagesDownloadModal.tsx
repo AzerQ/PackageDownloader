@@ -2,6 +2,7 @@
 import {Alert, AlertTitle, Box, Button, LinearProgress, Link, Modal, Typography} from "@mui/material";
 import {useTranslation} from "react-i18next";
 import {observer} from "mobx-react-lite";
+import { getErrorDescription } from "../../stores/NotificationStore.ts";
 
 export const PackagesDownloadModal: React.FC = observer(() => {
 
@@ -29,7 +30,7 @@ export const PackagesDownloadModal: React.FC = observer(() => {
         rejected: (err) =>
             <Alert severity="error">
                 <AlertTitle>{t("Error")}</AlertTitle>
-                {err}
+                {getErrorDescription(err, "Package download link prepare error: ")}
             </Alert>,
 
         fulfilled: (value) =>

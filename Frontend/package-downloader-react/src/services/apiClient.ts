@@ -6,68 +6,36 @@
 
 import { notificationStore } from "../stores/NotificationStore";
 import { cloneObject } from "../utils/objectsTools";
-import {compareVersions} from "../utils/versionsComparer.ts";
-
+import { compareVersions } from "../utils/versionsComparer.ts";
+import axios, { AxiosInstance, AxiosResponse } from 'axios';
 
 /* tslint:disable */
 /* eslint-disable */
 // ReSharper disable InconsistentNaming
 
-
 export class PackagesAPIClient {
-    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private http: AxiosInstance;
     private readonly baseUrl: string;
-    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
 
-    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
-        this.http = http ? http : window as any;
+    constructor(baseUrl?: string) {
         this.baseUrl = baseUrl ?? "";
+        this.http = axios.create({
+            baseURL: this.baseUrl,
+        });
     }
 
     /**
-     * @param packageType (optional) 
-     * @param namePart (optional) 
+     * @param packageType (optional)
+     * @param namePart (optional)
      * @return Success
      */
     getSearchResults = async (packageType: PackageType | undefined, namePart: string | undefined): Promise<PackageInfo[]> => {
-        let url_ = this.baseUrl + "/api/PackageInfo/GetSearchResults?";
-        if (packageType === null)
-            throw new Error("The parameter 'packageType' cannot be null.");
-        else if (packageType !== undefined)
-            url_ += "packageType=" + encodeURIComponent("" + packageType) + "&";
-        if (namePart === null)
-            throw new Error("The parameter 'namePart' cannot be null.");
-        else if (namePart !== undefined)
-            url_ += "namePart=" + encodeURIComponent("" + namePart) + "&";
-        url_ = url_.replace(/[?&]$/, "");
+        const params = new URLSearchParams();
+        if (packageType) params.append('packageType', packageType);
+        if (namePart) params.append('namePart', namePart);
 
-        let options_: RequestInit = {
-            method: "GET",
-            headers: {
-                "Accept": "application/json"
-            }
-        };
-
-        let response = await this.http.fetch(url_, options_);
-        let results = await this.processGetSearchResults(response);
-        return results.map(item => cloneObject(item, new PackageInfo()));
-    };
-
-    protected processGetSearchResults = async (response: Response): Promise<IPackageInfo[]> => {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-                let result200: any = null;
-                result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as IPackageInfo[];
-                return result200;
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-                return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<PackageInfo[]>(null as any);
+        const response: AxiosResponse<IPackageInfo[]> = await this.http.get("/api/PackageInfo/GetSearchResults", { params });
+        return response.data.map(item => cloneObject(item, new PackageInfo()));
     };
 
     /**
@@ -76,44 +44,12 @@ export class PackagesAPIClient {
      * @return Success
      */
     getSearchSuggestions = async (packageType: PackageType | undefined, namePart: string | undefined): Promise<string[]> => {
-        let url_ = this.baseUrl + "/api/PackageInfo/GetSearchSuggestions?";
-        if (packageType === null)
-            throw new Error("The parameter 'packageType' cannot be null.");
-        else if (packageType !== undefined)
-            url_ += "packageType=" + encodeURIComponent("" + packageType) + "&";
-        if (namePart === null)
-            throw new Error("The parameter 'namePart' cannot be null.");
-        else if (namePart !== undefined)
-            url_ += "namePart=" + encodeURIComponent("" + namePart) + "&";
-        url_ = url_.replace(/[?&]$/, "");
+        const params = new URLSearchParams();
+        if (packageType) params.append('packageType', packageType);
+        if (namePart) params.append('namePart', namePart);
 
-        let options_: RequestInit = {
-            method: "GET",
-            headers: {
-                "Accept": "application/json"
-            }
-        };
-
-        let _response = await this.http.fetch(url_, options_);
-        return this.processGetSearchSuggestions(_response);
-    };
-
-    protected processGetSearchSuggestions = async (response: Response): Promise<string[]> => {
-        const status = response.status;
-        let _headers: any = {};
-        if (response.headers && response.headers.forEach) {
-            response.headers.forEach((v: any, k: any) => _headers[k] = v);
-        }
-        if (status === 200) {
-            let _responseText = await response.text();
-            let result200: any = null;
-            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as string[];
-            return result200;
-        } else if (status !== 200 && status !== 204) {
-            let _responseText1 = await response.text();
-            return throwException("An unexpected server error occurred.", status, _responseText1, _headers);
-        }
-        return Promise.resolve<string[]>(null as any);
+        const response: AxiosResponse<string[]> = await this.http.get("/api/PackageInfo/GetSearchSuggestions", { params });
+        return response.data;
     };
 
     /**
@@ -121,22 +57,9 @@ export class PackagesAPIClient {
      * @return Success
      */
     preparePackagesDownloadLink = async (body: PackageRequest | undefined): Promise<string> => {
-        let url_ = this.baseUrl + "/api/Packages/PreparePackagesDownloadLink";
-        url_ = url_.replace(/[?&]$/, "");
+        const response: AxiosResponse<string> = await this.http.post("/api/Packages/PreparePackagesDownloadLink", body);
+        const downloadLinkUrl = new URL(response.data);
 
-        const content_ = JSON.stringify(body);
-
-        let options_: RequestInit = {
-            body: content_,
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            }
-        };
-
-        let _response = await this.http.fetch(url_, options_);
-        const downloadLinkUrl = new URL(await this.processPreparePackagesDownloadLink(_response));
-        
         const isLocalHost = ["127.0.0.1", "localhost"].includes(downloadLinkUrl.hostname);
         if (!isLocalHost && downloadLinkUrl.protocol === "http:") {
             downloadLinkUrl.protocol = "https:";
@@ -145,66 +68,19 @@ export class PackagesAPIClient {
         return downloadLinkUrl.toString();
     };
 
-    protected processPreparePackagesDownloadLink = async (response: Response): Promise<string> => {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return await response.text();
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-                return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.reject<string>(null as any);
-    };
-
     /**
      * @param packageType (optional)
      * @param userPrompt (optional)
      * @return Success
      */
     getRecommendations = async (packageType: PackageType | undefined, userPrompt: string | undefined, langCode: string | undefined): Promise<PackageRecommendation[]> => {
-        let url_ = this.baseUrl + "/api/Recommendations/GetRecommendations?";
-        if (packageType === null)
-            throw new Error("The parameter 'packageType' cannot be null.");
-        else if (packageType !== undefined)
-            url_ += "packageType=" + encodeURIComponent("" + packageType) + "&";
-        if (userPrompt === null)
-            throw new Error("The parameter 'userPrompt' cannot be null.");
-        else if (userPrompt !== undefined)
-            url_ += "userPrompt=" + encodeURIComponent("" + userPrompt) + "&";
+        const params = new URLSearchParams();
+        if (packageType) params.append('packageType', packageType);
+        if (userPrompt) params.append('userPrompt', userPrompt);
+        if (langCode) params.append('langCode', langCode);
 
-        if (langCode)
-            url_ += "langCode=" + encodeURIComponent("" + langCode) + "&";
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: RequestInit = {
-            method: "GET",
-            headers: {
-                "Accept": "application/json"
-            }
-        };
-
-        let _response = await this.http.fetch(url_, options_);
-        return this.processGetRecommendations(_response);
-    };
-
-    protected processGetRecommendations = async (response: Response): Promise<PackageRecommendation[]> => {
-        const status = response.status;
-        let _headers: any = {};
-        if (response.headers && response.headers.forEach) {
-            response.headers.forEach((v: any, k: any) => _headers[k] = v);
-        }
-        if (status === 200) {
-            let _responseText = await response.text();
-            let result200: any = null;
-            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as PackageRecommendation[];
-            return result200;
-        } else if (status !== 200 && status !== 204) {
-            let _responseText1 = await response.text();
-            return throwException("An unexpected server error occurred.", status, _responseText1, _headers);
-        }
-        return Promise.resolve<PackageRecommendation[]>(null as any);
+        const response: AxiosResponse<PackageRecommendation[]> = await this.http.get("/api/Recommendations/GetRecommendations", { params });
+        return response.data;
     };
 }
 
@@ -270,37 +146,6 @@ export enum PackageType {
     Docker = "Docker"
 }
 
-export class ApiException extends Error {
-    override message: string;
-    status: number;
-    response: string;
-    headers: { [key: string]: any; };
-    result: any;
-
-    constructor(message: string, status: number, response: string, headers: { [key: string]: any; }, result: any) {
-        super();
-
-        this.message = message;
-        this.status = status;
-        this.response = response;
-        this.headers = headers;
-        this.result = result;
-    }
-
-    protected isApiException = true;
-
-    static isApiException(obj: any): obj is ApiException {
-        return obj.isApiException === true;
-    }
-}
-
-function throwException(message: string, status: number, response: string, headers: { [key: string]: any; }, result?: any): any {
-    if (result !== null && result !== undefined)
-        throw result;
-    else
-        throw new ApiException(message, status, response, headers, null);
-}
-
 interface ApiHeartbeat {
     isAlive: boolean;
 }
@@ -308,11 +153,9 @@ interface ApiHeartbeat {
 const HEARTBEAT_ENDPOINT = '/api/Heartbeat/HeartbeatExists';
 
 export async function isHeartbeatExists(baseUrl: string) {
-
     try {
-        let response = await fetch(baseUrl + HEARTBEAT_ENDPOINT, { method: 'GET' });
-        let result = await response.json() as ApiHeartbeat;
-        return result.isAlive;
+        const response: AxiosResponse<ApiHeartbeat> = await axios.get(baseUrl + HEARTBEAT_ENDPOINT);
+        return response.data.isAlive;
     }
     catch (error) {
         return false;

@@ -59,13 +59,16 @@ class NotificationStore {
 
 export const notificationStore = new NotificationStore();
 
-export const showError = (error: unknown) => {
-    if (error instanceof Error) {
-        notificationStore.addError(error.message);
-    } else {
-        notificationStore.addError(String(error));
-    }
+export const showError = (error: unknown, initialMessage?: string) => {
+  notificationStore.addError(getErrorDescription(error, initialMessage));
+  console.error(error);
+  throw error;
 };
+
+export const getErrorDescription = (error: unknown, initialMessage?: string)  => {
+  let errorDescription = (error instanceof Error) ? error.message : JSON.stringify(error);
+  return (initialMessage ?? "Execption occured: ") + errorDescription;
+}
 
 export const showWarning = (warnMessage: string) => notificationStore.addWarn(warnMessage);
 

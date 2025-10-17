@@ -5,6 +5,7 @@ import {Download} from "@mui/icons-material";
 import MarkdownPreview from '@uiw/react-markdown-preview';
 import { observer } from 'mobx-react-lite';
 import { packageInfoStore } from '../../stores/PackageInfoStore.ts';
+import { getErrorDescription } from '../../stores/NotificationStore.ts';
 
 
 const PreviewReadme: React.FC = observer(() => {
@@ -47,7 +48,7 @@ const PreviewReadme: React.FC = observer(() => {
                 <MarkdownPreview source={readmeContentValue} style={{padding: 16}}/>
             </Box>,
         pending: () => <LinearProgress/>,
-        rejected: (err: Error) => <Alert severity="error">Readme loading error: {err.toString()}</Alert>
+        rejected: (err: Error) => <Alert severity="error">{getErrorDescription(err, "Readme loading error: ")}</Alert>
     });
 });
 

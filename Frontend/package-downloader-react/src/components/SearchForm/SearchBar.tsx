@@ -44,7 +44,7 @@ const SearchBar: React.FC<{handleSearch: () => Promise<unknown>}> = observer(({h
             <TextField
                 {...params}
                 data-testid="search-bar-input"
-                sx={{mt: 2, ml: 2, mb: 3, flex: 1, width: 400}}
+                sx={{flex: 1, minWidth: '200px'}}
                 label={t("SearchForPackagesLabel")}
                 variant="standard"
                 fullWidth

@@ -36,6 +36,8 @@ namespace PackageDownloader.API.Controllers
             string packagesDownloadUrl = Url.Action(nameof(GetPackagesAsArchive), 
                 ControllerName(nameof(PackagesController)), new { packagesArchiveId }, isDevMode ? Request.Scheme : null) ?? 
                                          throw new InvalidOperationException("Can't resolve package download link");
+
+            Response.Headers.Append("X-Packages-Id", packagesArchiveId.ToString());
             
             return packagesDownloadUrl;
         }

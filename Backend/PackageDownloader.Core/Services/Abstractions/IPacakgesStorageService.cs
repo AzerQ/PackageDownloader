@@ -1,8 +1,12 @@
+using System.Threading.Tasks;
+using PackageDownloader.Core.Models;
+
 namespace PackageDownloader.Core.Services.Abstractions;
 
 public interface IPackagesStorageService
 {
-    public string? GetPackagesArchivePath(Guid packageArchiveId);
+    public PackagesEntryFileMetaInfo? GetPackagesArchiveEntry(Guid packageEntryId);
     
-    Guid SetPackagesArchivePath(string packageArchivePath);
+    PackagesEntryFileMetaInfo CreatePackagesArchiveEntry(string packageArchivePath, PackageRequest packageRequest, Func<string, string> mimeTypeResolver);
 }
+

@@ -261,7 +261,7 @@ public class DockerController : ControllerBase
         {
             var downloadService = _downloadServiceAccessor(PackageType.Docker);
             string packageFilePath = downloadService.DownloadPackagesAsArchive(packageRequest);
-            Guid packagesArchiveId = _packagesStorageService.SetPackagesArchivePath(packageFilePath);
+            Guid packagesArchiveId = _packagesStorageService.CreatePackagesArchiveEntry(packageFilePath, packageRequest, PackagesController.ResolveMimeType).Id;
 
             string packagesDownloadUrl = Url.Action(nameof(DownloadPreparedArchive),
                 "Docker", new { packagesArchiveId }, Request.Scheme) ??
@@ -286,7 +286,7 @@ public class DockerController : ControllerBase
     {
         try
         {
-            string? packageFilePath = _packagesStorageService.GetPackagesArchivePath(packagesArchiveId);
+            string? packageFilePath = _packagesStorageService.GetPackagesArchiveEntry(packagesArchiveId)?.Path;
 
             if (string.IsNullOrEmpty(packageFilePath) || !System.IO.File.Exists(packageFilePath))
                 return NotFound("Archive not found or has expired");

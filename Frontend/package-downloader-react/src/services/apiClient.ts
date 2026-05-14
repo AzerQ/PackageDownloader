@@ -9,6 +9,9 @@ import { cloneObject } from "../utils/objectsTools";
 import { compareVersions } from "../utils/versionsComparer.ts";
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 
+const storedChunkSize = Number.parseInt(localStorage.getItem("DEFAULT_CHUNK_SIZE") ?? "");
+export const DEFAULT_CHUNK_SIZE = isNaN(storedChunkSize) ?  1024 * 70 : storedChunkSize;
+
 /* tslint:disable */
 /* eslint-disable */
 // ReSharper disable InconsistentNaming
@@ -56,12 +59,13 @@ export class PackagesAPIClient {
      * @param body (optional)
      * @return Success
      */
-    preparePackagesDownloadLink = async (body: PackageRequest | undefined): Promise<string> => {
+    preparePackagesDownloadLink = async (body: PackageRequest | undefined): Promise<{url: string, id: string}> => {
         const response: AxiosResponse<string> = await this.http.post("/api/Packages/PreparePackagesDownloadLink", body);
         const link = response.data;
+        const id = new URL(response.data).searchParams.get("packagesArchiveId") ?? "ID_NOT_FOUND";
         const isFullUrl = link.startsWith('http');
         if (!isFullUrl)
-            return link;
+            return {url: link, id};
 
         const downloadLinkUrl = new URL(link);
 
@@ -70,8 +74,30 @@ export class PackagesAPIClient {
             downloadLinkUrl.protocol = "https:";
         }
 
-        return downloadLinkUrl.toString();
+        return {url: downloadLinkUrl.toString(), id };
     };
+
+    getChunksInfo = async (packagesArchiveId: string, chunkSizeInBytes = DEFAULT_CHUNK_SIZE): Promise<PackagesEntryChunksInfo> => {
+        const params = new URLSearchParams({
+        packagesArchiveId,
+        chunkSizeInBytes: String(chunkSizeInBytes),
+        }); 
+        let response: AxiosResponse<PackagesEntryChunksInfo> = await this.http.get("/api/Packages/GetPackagesChunksInfo", {params});
+        return response.data;
+    }
+
+    getChunk = async (packagesArchiveId: string, chunkIndex: number, chunkSizeInBytes = DEFAULT_CHUNK_SIZE): Promise<ArrayBuffer> => {
+        let response: AxiosResponse<ArrayBuffer> = await this.http.get("/api/Packages/GetPackagesFileChunk", 
+            {
+                responseType: 'arraybuffer',
+                params: {
+                    packagesArchiveId,
+                    chunkIndex: String(chunkIndex),
+                    chunkSizeInBytes: String(chunkSizeInBytes),
+                }
+            });
+        return response.data;
+    }
 
     /**
      * @param packageType (optional)
@@ -150,6 +176,15 @@ export enum PackageType {
     VsCode = "VsCode",
     Docker = "Docker"
 }
+
+export interface PackagesEntryChunksInfo {
+  fileName: string;
+  totalSizeInBytes: number;
+  chunkSizeInBytes: number;
+  totalChunks: number;
+  mimeType: string;
+}
+
 
 interface ApiHeartbeat {
     isAlive: boolean;

@@ -62,8 +62,8 @@ export class PackagesAPIClient {
     preparePackagesDownloadLink = async (body: PackageRequest | undefined): Promise<{url: string, id: string}> => {
         const response: AxiosResponse<string> = await this.http.post("/api/Packages/PreparePackagesDownloadLink", body);
         const link = response.data;
-        const id = new URL(response.data).searchParams.get("packagesArchiveId") ?? "ID_NOT_FOUND";
         const isFullUrl = link.startsWith('http');
+        const id = new URL(response.data, !isFullUrl ? location.origin : undefined).searchParams.get("packagesArchiveId") ?? "ID_NOT_FOUND";
         if (!isFullUrl)
             return {url: link, id};
 

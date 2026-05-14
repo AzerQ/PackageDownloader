@@ -79,7 +79,8 @@ namespace PackageDownloader.API.Controllers
             if (packagesFileInfo is null || !System.IO.File.Exists(packagesFileInfo.Path))
                 return NotFound();
 
-            byte[] chunkData = await packagesFileInfo.ReadChunk(chunkIndex, chunkSizeInBytes);    
+            var resolvedChunkSizeInBytes = packagesFileInfo.ResolveChunkSizeInBytes(chunkSizeInBytes);
+            byte[] chunkData = await packagesFileInfo.ReadChunk(chunkIndex, resolvedChunkSizeInBytes);    
             return File(chunkData, "application/octet-stream");
         }
 

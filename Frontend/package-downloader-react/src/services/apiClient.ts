@@ -9,8 +9,7 @@ import { cloneObject } from "../utils/objectsTools";
 import { compareVersions } from "../utils/versionsComparer.ts";
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 
-const storedChunkSize = Number.parseInt(localStorage.getItem("DEFAULT_CHUNK_SIZE") ?? "");
-export const DEFAULT_CHUNK_SIZE = isNaN(storedChunkSize) ?  1024 * 70 : storedChunkSize;
+export const DEFAULT_CHUNK_SIZE = 1024 * 70;
 
 /* tslint:disable */
 /* eslint-disable */
@@ -79,17 +78,23 @@ export class PackagesAPIClient {
 
     getChunksInfo = async (packagesArchiveId: string, chunkSizeInBytes = DEFAULT_CHUNK_SIZE): Promise<PackagesEntryChunksInfo> => {
         const params = new URLSearchParams({
-        packagesArchiveId,
-        chunkSizeInBytes: String(chunkSizeInBytes),
-        }); 
+            packagesArchiveId,
+            chunkSizeInBytes: String(chunkSizeInBytes),
+        });
         let response: AxiosResponse<PackagesEntryChunksInfo> = await this.http.get("/api/Packages/GetPackagesChunksInfo", {params});
         return response.data;
     }
 
-    getChunk = async (packagesArchiveId: string, chunkIndex: number, chunkSizeInBytes = DEFAULT_CHUNK_SIZE): Promise<ArrayBuffer> => {
+    getChunk = async (
+        packagesArchiveId: string,
+        chunkIndex: number,
+        chunkSizeInBytes = DEFAULT_CHUNK_SIZE,
+        signal?: AbortSignal
+    ): Promise<ArrayBuffer> => {
         let response: AxiosResponse<ArrayBuffer> = await this.http.get("/api/Packages/GetPackagesFileChunk", 
             {
                 responseType: 'arraybuffer',
+                signal,
                 params: {
                     packagesArchiveId,
                     chunkIndex: String(chunkIndex),

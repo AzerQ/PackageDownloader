@@ -12,7 +12,7 @@ class CartStore {
 
     cartItems: PackageDetails[] = [];
 
-    packagesDownloadLink?: IPromiseBasedObservable<string>;
+    packagesDownloadLink?: IPromiseBasedObservable<{url: string, id: string}>;
 
     constructor() {
         makeAutoObservable(this);

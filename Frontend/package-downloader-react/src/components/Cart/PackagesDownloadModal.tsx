@@ -3,6 +3,7 @@ import {Alert, AlertTitle, Box, Button, LinearProgress, Link, Modal, Typography}
 import {useTranslation} from "react-i18next";
 import {observer} from "mobx-react-lite";
 import { getErrorDescription } from "../../stores/NotificationStore.ts";
+import { PackageDownloadAsChunksButton } from "../AlternativePackageDownloadButton/AlternativePackageDownloadButton.tsx";
 
 export const PackagesDownloadModal: React.FC = observer(() => {
 
@@ -44,7 +45,8 @@ export const PackagesDownloadModal: React.FC = observer(() => {
                     {t("PackagesLinkCreated")}
                 </Typography>
 
-                <Link href={value}>{t("DownloadPackages")}</Link>
+                <Link href={value.url}>{t("DownloadPackages")}</Link>
+                <PackageDownloadAsChunksButton packagesArchiveId={value.id} label={t("DownloadPackageAlternativeMethod")}/>
             </>
     });
 

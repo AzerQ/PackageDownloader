@@ -36,5 +36,6 @@
     "PackagesRepositoryType": "Тип репозитория пакетов",
     "DownloadHistory": "История загрузок",
     "NoDownloadHistory": "История загрузок пуста",
-    "ClearAll": "Очистить всё"
+    "ClearAll": "Очистить всё",
+    "DownloadPackageAlternativeMethod": "Альтернативное скачивание пакета"
 }

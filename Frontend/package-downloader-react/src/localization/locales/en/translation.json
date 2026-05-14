@@ -36,5 +36,6 @@
     "PackagesRepositoryType": "Packages repository type",
     "DownloadHistory": "Download History",
     "NoDownloadHistory": "No download history yet",
-    "ClearAll": "Clear All"
+    "ClearAll": "Clear All",
+    "DownloadPackageAlternativeMethod": "Download package alternative method"
 }

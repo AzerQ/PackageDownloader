@@ -9,7 +9,8 @@ import { cloneObject } from "../utils/objectsTools";
 import { compareVersions } from "../utils/versionsComparer.ts";
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 
-export const DEFAULT_CHUNK_SIZE = 1024 * 70; // 70 KB
+const storedChunkSize = Number.parseInt(localStorage.getItem("DEFAULT_CHUNK_SIZE") ?? "");
+export const DEFAULT_CHUNK_SIZE = isNaN(storedChunkSize) ?  1024 * 70 : storedChunkSize;
 
 /* tslint:disable */
 /* eslint-disable */

@@ -11,9 +11,16 @@ namespace PackageDownloader.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     public class PackagesController(Func<PackageType, IPackageDownloadService> serviceAccessor, 
-                                    IPackagesStorageService packagesStorageService) : ControllerBase
+                                    IPackagesStorageService packagesStorageService,
+                                    ILogger<PackagesController> logger) : ControllerBase
     {
         const string UnknownMime = "application/octet-stream";
+
+        public static string ResolveMimeType(string filePath) {
+            new FileExtensionContentTypeProvider()
+                .TryGetContentType(filePath, out string? contentType);
+            return contentType ?? UnknownMime;
+        }
 
         private string ControllerName(string controllerFullName) => controllerFullName.Replace("Controller","");
 
@@ -22,7 +29,7 @@ namespace PackageDownloader.API.Controllers
         {
             var packageDownloader = serviceAccessor(packageRequest.PackageType);
             string packageFilePath = packageDownloader.DownloadPackagesAsArchive(packageRequest);
-            Guid packagesArchiveId = packagesStorageService.SetPackagesArchivePath(packageFilePath);
+            Guid packagesArchiveId = packagesStorageService.CreatePackagesArchiveEntry(packageFilePath, packageRequest, ResolveMimeType).Id;
             
             bool isDevMode = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development";
 
@@ -37,17 +44,42 @@ namespace PackageDownloader.API.Controllers
         [Produces("application/zip")]
         public IActionResult GetPackagesAsArchive([FromQuery] Guid packagesArchiveId)
         {
-            string? packageFilePath = packagesStorageService.GetPackagesArchivePath(packagesArchiveId);
+            var packagesFileInfo = packagesStorageService.GetPackagesArchiveEntry(packagesArchiveId);
             
-            if (!System.IO.File.Exists(packageFilePath))
+            if (packagesFileInfo is null || !System.IO.File.Exists(packagesFileInfo.Path))
                 return NotFound();
-            
-            string fileName = Path.GetFileName(packageFilePath);
 
-            new FileExtensionContentTypeProvider()
-                .TryGetContentType(packageFilePath, out string? contentType);
+            logger.LogInformation("packagesFileInfo: @{packagesFileInfo}", new {packagesFileInfo.Path, packagesFileInfo.MimeType, packagesFileInfo.FileName});    
 
-            return PhysicalFile(packageFilePath, contentType ?? UnknownMime, fileName);
+            return PhysicalFile(packagesFileInfo.Path, packagesFileInfo.MimeType, packagesFileInfo.FileName);
         }
+
+        [HttpGet("[action]")]
+        [Produces("application/json")]
+        public ActionResult<PackagesEntryChunksInfo> GetPackagesChunksInfo([FromQuery] Guid packagesArchiveId, [FromQuery] int chunkSizeInBytes)
+        {
+            var packagesFileInfo = packagesStorageService.GetPackagesArchiveEntry(packagesArchiveId);
+            
+            if (packagesFileInfo is null || !System.IO.File.Exists(packagesFileInfo.Path))
+                return NotFound();
+
+            return packagesFileInfo.GetChunksInformation(chunkSizeInBytes);
+        }
+
+        // Скачать конкретный чанк
+        [HttpGet("[action]")]
+        [Produces("application/octet-stream")]
+        public async Task<IActionResult> GetPackagesFileChunk(Guid packagesArchiveId, [FromQuery] int chunkIndex, [FromQuery] int chunkSizeInBytes)
+        {
+
+            var packagesFileInfo = packagesStorageService.GetPackagesArchiveEntry(packagesArchiveId);
+            
+            if (packagesFileInfo is null || !System.IO.File.Exists(packagesFileInfo.Path))
+                return NotFound();
+
+            byte[] chunkData = await packagesFileInfo.ReadChunk(chunkIndex, chunkSizeInBytes);    
+            return File(chunkData, "application/octet-stream");
+        }
+
     }
 }

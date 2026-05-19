@@ -1,35 +1,107 @@
-// components/PackageDownloadButton/PackageDownloadButton.tsx
-import React, { FC } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 import {
+  Alert,
   Box,
   Button,
   CircularProgress,
-  LinearProgress,
-  Typography,
-  Alert,
-  Stack,
-  Tooltip,
-  IconButton,
-  Paper,
   Collapse,
+  FormControlLabel,
+  IconButton,
+  LinearProgress,
+  Modal,
+  Paper,
+  Stack,
+  Switch,
+  TextField,
+  Tooltip,
+  ToggleButton,
+  ToggleButtonGroup,
+  Typography,
 } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
-import FolderOpenIcon from '@mui/icons-material/FolderOpen';
+import SettingsIcon from '@mui/icons-material/Settings';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ReplayIcon from '@mui/icons-material/Replay';
+import SaveAltIcon from '@mui/icons-material/SaveAlt';
+import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import { useChunkedDownload } from './useChunkedDownload';
+import {
+  AUTO_CHUNK_SIZE_SENTINEL,
+  ChunkedDownloadSaveMethod,
+  ChunkedDownloadSettings,
+  DEFAULT_CHUNKED_DOWNLOAD_SETTINGS,
+  loadChunkedDownloadSettings,
+  saveChunkedDownloadSettings,
+  sanitizeChunkedDownloadSettings,
+} from './chunkedDownloadSettings';
+import { getPackageApiClient, PackagesEntryChunksInfo } from '../../services/apiClient';
 
 interface PackageDownloadAsChunksButtonProps {
   packagesArchiveId: string;
   label?: string;
 }
 
+const MODAL_BOX_SX = {
+  position: 'absolute' as const,
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: { xs: 'calc(100% - 32px)', sm: 460 },
+  bgcolor: 'background.paper',
+  boxShadow: 24,
+  borderRadius: 2,
+  p: 3,
+};
+
 const formatBytes = (bytes: number): string => {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 ** 2) return `${(bytes / 1024).toFixed(1)} KB`;
   if (bytes < 1024 ** 3) return `${(bytes / 1024 ** 2).toFixed(1)} MB`;
   return `${(bytes / 1024 ** 3).toFixed(1)} GB`;
+};
+
+const formatSettingsSummary = (settings: ChunkedDownloadSettings): string => {
+  const chunkSizeLabel = settings.useAutomaticChunkSize
+    ? 'авто (10% от архива)'
+    : `${Math.round(settings.chunkSizeInBytes / 1024)} KB`;
+  const saveMethodLabel = settings.saveMethod === 'fileApi' ? 'File API' : 'браузер';
+
+  return `Чанк: ${chunkSizeLabel} · Сохранение: ${saveMethodLabel} · Параллельно: ${settings.parallelDownloads} · Ретраи: ${settings.retryAttempts}`;
+};
+
+const isFileApiSaveSupported = (): boolean => (
+  typeof window !== 'undefined' && typeof window.showSaveFilePicker === 'function'
+);
+
+const normalizeSettingsForBrowserSupport = (settings: ChunkedDownloadSettings): ChunkedDownloadSettings => {
+  if (settings.saveMethod === 'fileApi' && !isFileApiSaveSupported()) {
+    return { ...settings, saveMethod: 'browser' };
+  }
+
+  return settings;
+};
+
+const getChunkSizeForSettings = (settings: ChunkedDownloadSettings): number => (
+  settings.useAutomaticChunkSize ? AUTO_CHUNK_SIZE_SENTINEL : settings.chunkSizeInBytes
+);
+
+const requestFileApiWritable = async (fileName: string): Promise<FileSystemWritableFileStream> => {
+  if (!isFileApiSaveSupported()) {
+    throw new Error('File API сохранение не поддерживается в этом браузере');
+  }
+
+  const fileHandle = await window.showSaveFilePicker({
+    suggestedName: fileName,
+    types: [
+      {
+        description: 'ZIP archive',
+        accept: { 'application/zip': ['.zip'] },
+      },
+    ],
+  });
+
+  return fileHandle.createWritable();
 };
 
 export const PackageDownloadAsChunksButton: FC<PackageDownloadAsChunksButtonProps> = ({
@@ -46,16 +118,75 @@ export const PackageDownloadAsChunksButton: FC<PackageDownloadAsChunksButtonProp
     cancel,
     reset,
   } = useChunkedDownload();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [settings, setSettings] = useState<ChunkedDownloadSettings>(() => (
+    normalizeSettingsForBrowserSupport(loadChunkedDownloadSettings())
+  ));
+  const [chunksInfo, setChunksInfo] = useState<PackagesEntryChunksInfo | null>(null);
+  const [isChunksInfoLoading, setIsChunksInfoLoading] = useState(false);
 
-  const handleDownload = (): void => {
+  const settingsSummary = useMemo(() => formatSettingsSummary(settings), [settings]);
+  const isFileApiSupported = isFileApiSaveSupported();
+
+  const updateSettings = (patch: Partial<ChunkedDownloadSettings>): void => {
+    const nextSettings = normalizeSettingsForBrowserSupport(
+      sanitizeChunkedDownloadSettings({ ...settings, ...patch })
+    );
+    setSettings(nextSettings);
+    setChunksInfo(null);
+    saveChunkedDownloadSettings(nextSettings);
+
+    if (isSettingsOpen) {
+      void loadChunksInfo(nextSettings);
+    }
+  };
+
+  const loadChunksInfo = async (settingsSnapshot: ChunkedDownloadSettings): Promise<void> => {
+    setIsChunksInfoLoading(true);
+    try {
+      const apiClient = await getPackageApiClient();
+      const nextChunksInfo = await apiClient.getChunksInfo(
+        packagesArchiveId,
+        getChunkSizeForSettings(settingsSnapshot)
+      );
+      setChunksInfo(nextChunksInfo);
+    } catch {
+      setChunksInfo(null);
+    } finally {
+      setIsChunksInfoLoading(false);
+    }
+  };
+
+  const handleDownloadClick = (): void => {
+    setIsSettingsOpen(true);
+    void loadChunksInfo(settings);
+  };
+
+  const handleStartDownload = async (): Promise<void> => {
+    let fileApiWritable: FileSystemWritableFileStream | undefined;
+
+    if (settings.saveMethod === 'fileApi') {
+      try {
+        fileApiWritable = await requestFileApiWritable(chunksInfo?.fileName ?? 'packages.zip');
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') {
+          return;
+        }
+
+        throw error;
+      }
+    }
+
     reset();
-    download(packagesArchiveId);
+    saveChunkedDownloadSettings(settings);
+    setIsSettingsOpen(false);
+    void download(packagesArchiveId, settings, fileApiWritable, chunksInfo ?? undefined);
   };
 
   const renderButtonIcon = (): React.ReactNode => {
     if (isDownloading) return <CircularProgress size={18} color="inherit" />;
     if (isCompleted) return <CheckCircleIcon />;
-    if (isSupported) return <FolderOpenIcon />;
+    if (isSupported) return <SettingsIcon />;
     return <DownloadIcon />;
   };
 
@@ -67,21 +198,17 @@ export const PackageDownloadAsChunksButton: FC<PackageDownloadAsChunksButtonProp
 
   return (
     <Stack spacing={1.5} sx={{ width: '100%', maxWidth: 480 }}>
-
-      {/* Кнопка скачивания + отмена/сброс */}
       <Box sx={{ display: 'flex', gap: 1 }}>
-        <Tooltip
-          title={isSupported ? 'Выбрать папку и скачать чанками' : 'Скачать файл'}
-          placement="top"
-        >
+        <Tooltip title="Настроить скачивание чанками" placement="top">
           <span style={{ flex: 1 }}>
             <Button
               variant="contained"
               fullWidth
               disabled={isDownloading}
-              onClick={handleDownload}
+              onClick={handleDownloadClick}
               color={isCompleted ? 'success' : 'primary'}
               startIcon={renderButtonIcon()}
+              data-testid="chunked-download-open-settings"
             >
               {renderButtonLabel()}
             </Button>
@@ -94,6 +221,7 @@ export const PackageDownloadAsChunksButton: FC<PackageDownloadAsChunksButtonProp
               onClick={cancel}
               color="error"
               sx={{ border: 1, borderColor: 'error.main' }}
+              data-testid="chunked-download-cancel"
             >
               <CancelIcon />
             </IconButton>
@@ -101,15 +229,18 @@ export const PackageDownloadAsChunksButton: FC<PackageDownloadAsChunksButtonProp
         )}
 
         {isCompleted && (
-          <Tooltip title="Скачать снова">
-            <IconButton onClick={reset} color="primary">
+          <Tooltip title="Сбросить состояние">
+            <IconButton onClick={reset} color="primary" data-testid="chunked-download-reset">
               <ReplayIcon />
             </IconButton>
           </Tooltip>
         )}
       </Box>
 
-      {/* Прогресс */}
+      <Typography variant="caption" color="text.secondary" data-testid="chunked-download-settings-summary">
+        {settingsSummary}
+      </Typography>
+
       <Collapse in={isDownloading && progress !== null}>
         {progress !== null && (
           <Paper variant="outlined" sx={{ p: 1.5, borderRadius: 2 }}>
@@ -118,23 +249,23 @@ export const PackageDownloadAsChunksButton: FC<PackageDownloadAsChunksButtonProp
                 <Typography variant="body2" fontWeight={500}>
                   Скачивание файла
                 </Typography>
-                <Typography variant="body2" color="primary" fontWeight={600}>
-                  {progress?.percent ?? 0}%
+                <Typography variant="body2" color="primary" fontWeight={600} data-testid="chunked-download-progress-percent">
+                  {progress.percent}%
                 </Typography>
               </Box>
 
               <LinearProgress
                 variant="determinate"
-                value={progress?.percent ?? 0}
+                value={progress.percent}
                 sx={{ height: 8, borderRadius: 4 }}
               />
 
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}>
                 <Typography variant="caption" color="text.secondary">
-                  {formatBytes(progress?.loaded ?? 0)} / {formatBytes(progress?.total ?? 0)}
+                  {formatBytes(progress.loaded)} / {formatBytes(progress.total)}
                 </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Чанк {progress?.currentChunk ?? 0} из {progress?.totalChunks ?? 0}
+                <Typography variant="caption" color="text.secondary" data-testid="chunked-download-progress-chunks">
+                  Чанк {progress.currentChunk} из {progress.totalChunks}
                 </Typography>
               </Box>
             </Stack>
@@ -142,22 +273,136 @@ export const PackageDownloadAsChunksButton: FC<PackageDownloadAsChunksButtonProp
         )}
       </Collapse>
 
-      {/* Успех */}
       <Collapse in={isCompleted}>
-        <Alert severity="success" onClose={reset} icon={<CheckCircleIcon />}>
+        <Alert severity="success" onClose={reset} icon={<CheckCircleIcon />} data-testid="chunked-download-success">
           Файл успешно сохранён
         </Alert>
       </Collapse>
 
-      {/* Ошибка */}
       <Collapse in={error !== null}>
         {error !== null && (
-          <Alert severity="error" onClose={reset}>
+          <Alert severity="error" onClose={reset} data-testid="chunked-download-error">
             {error}
           </Alert>
         )}
       </Collapse>
 
+      <Modal open={isSettingsOpen} onClose={() => setIsSettingsOpen(false)}>
+        <Box sx={MODAL_BOX_SX}>
+          <Stack spacing={2}>
+            <Typography variant="h6">
+              Настройки скачивания чанками
+            </Typography>
+
+            <Box>
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                Метод сохранения
+              </Typography>
+              <ToggleButtonGroup
+                value={settings.saveMethod}
+                exclusive
+                fullWidth
+                onChange={(_, value: ChunkedDownloadSaveMethod | null) => {
+                  if (value !== null) {
+                    updateSettings({ saveMethod: value });
+                  }
+                }}
+                aria-label="Метод сохранения"
+                data-testid="chunked-download-save-method"
+              >
+                <ToggleButton value="browser" aria-label="Стандартная загрузка через браузер">
+                  <SaveAltIcon fontSize="small" sx={{ mr: 1 }} />
+                  Браузер
+                </ToggleButton>
+                <ToggleButton
+                  value="fileApi"
+                  aria-label="Сохранение через File API"
+                  disabled={!isFileApiSupported}
+                >
+                  <FolderOpenIcon fontSize="small" sx={{ mr: 1 }} />
+                  File API
+                </ToggleButton>
+              </ToggleButtonGroup>
+              <Typography variant="caption" color="text.secondary">
+                {isChunksInfoLoading
+                  ? 'Получаем имя архива...'
+                  : `Имя файла: ${chunksInfo?.fileName ?? 'packages.zip'}`}
+              </Typography>
+            </Box>
+
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={settings.useAutomaticChunkSize}
+                  onChange={(_, checked) => updateSettings({ useAutomaticChunkSize: checked })}
+                />
+              }
+              label="Автоматически определить размер чанка на бэкенде"
+            />
+
+            <TextField
+              label="Размер чанка, KB"
+              type="number"
+              value={Math.round(settings.chunkSizeInBytes / 1024)}
+              onChange={(event) => {
+                const chunkSizeInKb = Number(event.target.value);
+                updateSettings({
+                  chunkSizeInBytes: Math.max(1, Math.round(chunkSizeInKb || 0)) * 1024,
+                });
+              }}
+              disabled={settings.useAutomaticChunkSize}
+              inputProps={{ min: 1 }}
+              helperText={settings.useAutomaticChunkSize ? 'Размер чанка будет рассчитан на сервере как 10% от архива.' : 'По умолчанию 70 KB.'}
+              fullWidth
+            />
+
+            <TextField
+              label="Одновременных скачиваний"
+              type="number"
+              value={settings.parallelDownloads}
+              onChange={(event) => updateSettings({ parallelDownloads: Number(event.target.value) })}
+              inputProps={{ min: 1 }}
+              helperText="Сколько запросов на чанки выполнять одновременно."
+              fullWidth
+            />
+
+            <TextField
+              label="Попыток скачивания"
+              type="number"
+              value={settings.retryAttempts}
+              onChange={(event) => updateSettings({ retryAttempts: Number(event.target.value) })}
+              inputProps={{ min: 1 }}
+              helperText="Максимальное количество попыток для каждого чанка."
+              fullWidth
+            />
+
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+              <Button onClick={() => setIsSettingsOpen(false)} color="inherit">
+                Закрыть
+              </Button>
+              <Button
+                onClick={() => {
+                  const defaultSettings = normalizeSettingsForBrowserSupport(DEFAULT_CHUNKED_DOWNLOAD_SETTINGS);
+                  setSettings(defaultSettings);
+                  saveChunkedDownloadSettings(defaultSettings);
+                }}
+                color="secondary"
+                data-testid="chunked-download-reset-settings"
+              >
+                Сбросить
+              </Button>
+              <Button
+                variant="contained"
+                onClick={handleStartDownload}
+                disabled={settings.saveMethod === 'fileApi' && isChunksInfoLoading}
+                data-testid="chunked-download-start"
+              >
+                Начать скачивание
+              </Button>
+            </Box>
+          </Stack>
+        </Box>
+      </Modal>
     </Stack>
   );
 };

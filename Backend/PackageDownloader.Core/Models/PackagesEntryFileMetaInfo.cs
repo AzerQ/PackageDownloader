@@ -4,6 +4,8 @@ namespace PackageDownloader.Core.Models;
 
 public class PackagesEntryFileMetaInfo
 {
+    private const int AutoChunkDivisor = 10;
+
     public Guid Id { get; }
     public PackageRequest SourceRequest { get; } 
     public string MimeType { get; } 
@@ -22,15 +24,24 @@ public class PackagesEntryFileMetaInfo
     }
 
     public PackagesEntryChunksInfo GetChunksInformation(int chunkSizeInBytes) {
-        var totalChunks = (int)Math.Ceiling((double)SizeInBytes / chunkSizeInBytes);
+        var resolvedChunkSizeInBytes = ResolveChunkSizeInBytes(chunkSizeInBytes);
+        var totalChunks = (int)Math.Ceiling((double)Math.Max(SizeInBytes, 1) / resolvedChunkSizeInBytes);
         return new PackagesEntryChunksInfo
                     (
                         FileName: FileName, 
                         TotalSizeInBytes: SizeInBytes, 
-                        ChunkSizeInBytes: chunkSizeInBytes,
+                        ChunkSizeInBytes: resolvedChunkSizeInBytes,
                         TotalChunks: totalChunks,
                         MimeType: MimeType 
                     );
+    }
+
+    public int ResolveChunkSizeInBytes(int requestedChunkSizeInBytes)
+    {
+        if (requestedChunkSizeInBytes > 0)
+            return requestedChunkSizeInBytes;
+
+        return (int)Math.Max(Math.Ceiling((double)Math.Max(SizeInBytes, 1) / AutoChunkDivisor), 1);
     }
 
     public async Task<byte[]> ReadChunk(int chunkIndex, int chunkSizeInBytes) {

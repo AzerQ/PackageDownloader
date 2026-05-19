@@ -10,64 +10,134 @@ export interface DownloadProgressEvent {
 
 export interface ChunkedDownloadOptions {
   packagesArchiveId: string;
+  chunksInfo?: PackagesEntryChunksInfo;
   chunkSizeInBytes?: number;
+  parallelDownloads?: number;
+  retryAttempts?: number;
+  saveMethod?: "fileApi" | "browser";
+  fileApiWritable?: FileSystemWritableFileStream;
   onProgress?: (event: DownloadProgressEvent) => void;
   signal?: AbortSignal;
 }
 
+function throwIfAborted(signal?: AbortSignal): void {
+  if (signal?.aborted) {
+    throw new DOMException('Загрузка отменена', 'AbortError');
+  }
+}
+
+async function saveBlobWithFileApi(blob: Blob, writable?: FileSystemWritableFileStream): Promise<void> {
+  if (!writable) {
+    throw new Error("File API файл не выбран");
+  }
+
+  await writable.write(blob);
+  await writable.close();
+}
+
+function saveBlobWithBrowserDownload(blob: Blob, fileName: string): void {
+  const objectUrl = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = objectUrl;
+  link.download = fileName;
+  link.click();
+  URL.revokeObjectURL(objectUrl);
+}
+
+async function saveBlobToClient(
+  blob: Blob,
+  fileName: string,
+  saveMethod: "fileApi" | "browser",
+  fileApiWritable?: FileSystemWritableFileStream
+): Promise<void> {
+  if (saveMethod === "fileApi") {
+    await saveBlobWithFileApi(blob, fileApiWritable);
+    return;
+  }
+
+  saveBlobWithBrowserDownload(blob, fileName);
+}
+
 export async function chunkedDownload({
   packagesArchiveId,
+  chunksInfo,
   chunkSizeInBytes = DEFAULT_CHUNK_SIZE,
+  parallelDownloads = 3,
+  retryAttempts = 3,
+  saveMethod = "fileApi",
+  fileApiWritable,
   onProgress,
   signal,
 }: ChunkedDownloadOptions): Promise<void> {
+  throwIfAborted(signal);
 
-    const {getChunk, getChunksInfo} = await getPackageApiClient();
+  const { getChunk, getChunksInfo } = await getPackageApiClient();
 
-  // 1. Получаем метаданные
-  const info: PackagesEntryChunksInfo = await getChunksInfo(
+  const info: PackagesEntryChunksInfo = chunksInfo ?? await getChunksInfo(
     packagesArchiveId,
     chunkSizeInBytes
   );
-
-  // 2. Открываем диалог сохранения
-  const extension = `.${info.fileName.split('.').pop() ?? ''}`;
-  const fileHandle = await window.showSaveFilePicker({
-    suggestedName: info.fileName,
-    types: [
-      {
-        description: info.mimeType,
-        accept: { [info.mimeType]: [extension] },
-      },
-    ],
-  });
-
-  const writable = await fileHandle.createWritable();
+  const chunks = new Array<ArrayBuffer>(info.totalChunks);
+  const maxParallelDownloads = Math.max(1, Math.min(parallelDownloads, info.totalChunks));
+  const maxAttempts = Math.max(1, retryAttempts);
   let loadedBytes = 0;
+  let completedChunks = 0;
+  let nextChunkIndex = 0;
 
-  try {
-    for (let i = 0; i < info.totalChunks; i++) {
-      // Проверяем отмену перед каждым чанком
-      if (signal?.aborted) throw new DOMException('Загрузка отменена', 'AbortError');
+  const downloadChunk = async (chunkIndex: number): Promise<void> => {
+    let attempt = 0;
 
-      const chunk = await getChunk(
-        packagesArchiveId,
-        i,
-        chunkSizeInBytes
-      );
+    while (attempt < maxAttempts) {
+      throwIfAborted(signal);
 
-      await writable.write(chunk);
+      try {
+        const chunk = await getChunk(
+          packagesArchiveId,
+          chunkIndex,
+          info.chunkSizeInBytes,
+          signal
+        );
 
-      loadedBytes += chunk.byteLength;
-      onProgress?.({
-        loaded: loadedBytes,
-        total: info.totalSizeInBytes,
-        percent: Math.round((loadedBytes / info.totalSizeInBytes) * 100),
-        currentChunk: i + 1,
-        totalChunks: info.totalChunks,
-      });
+        chunks[chunkIndex] = chunk;
+        loadedBytes += chunk.byteLength;
+        completedChunks += 1;
+        const totalBytes = Math.max(info.totalSizeInBytes, 1);
+        onProgress?.({
+          loaded: loadedBytes,
+          total: info.totalSizeInBytes,
+          percent: Math.min(100, Math.round((loadedBytes / totalBytes) * 100)),
+          currentChunk: completedChunks,
+          totalChunks: info.totalChunks,
+        });
+        return;
+      } catch (error) {
+        attempt += 1;
+        if (error instanceof DOMException && error.name === "AbortError") {
+          throw error;
+        }
+
+        if (attempt >= maxAttempts) {
+          throw error;
+        }
+      }
     }
-  } finally {
-    await writable.close();
-  }
+  };
+
+  const runWorker = async (): Promise<void> => {
+    while (nextChunkIndex < info.totalChunks) {
+      throwIfAborted(signal);
+      const chunkIndex = nextChunkIndex;
+      nextChunkIndex += 1;
+      await downloadChunk(chunkIndex);
+    }
+  };
+
+  await Promise.all(
+    Array.from({ length: maxParallelDownloads }, () => runWorker())
+  );
+
+  throwIfAborted(signal);
+
+  const fileBlob = new Blob(chunks, { type: info.mimeType });
+  await saveBlobToClient(fileBlob, info.fileName, saveMethod, fileApiWritable);
 }

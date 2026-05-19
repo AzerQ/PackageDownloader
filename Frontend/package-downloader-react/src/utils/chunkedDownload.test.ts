@@ -31,16 +31,10 @@ describe("chunkedDownload", () => {
   it("downloads chunks in memory and writes a single blob", async () => {
     const writeMock = vi.fn();
     const closeMock = vi.fn();
-    const showSaveFilePickerMock = vi.fn(async () => ({
-      createWritable: async () => ({
-        write: writeMock,
-        close: closeMock,
-      }),
-    }));
-    Object.defineProperty(window, "showSaveFilePicker", {
-      configurable: true,
-      value: showSaveFilePickerMock,
-    });
+    const fileApiWritable = {
+      write: writeMock,
+      close: closeMock,
+    } as unknown as FileSystemWritableFileStream;
 
     const getChunkMock = vi
       .fn()
@@ -66,6 +60,7 @@ describe("chunkedDownload", () => {
       packagesArchiveId: "archive-id",
       parallelDownloads: 2,
       retryAttempts: 3,
+      fileApiWritable,
       onProgress: (event) => progressEvents.push(event.currentChunk),
     });
 
@@ -127,12 +122,7 @@ describe("chunkedDownload", () => {
     expect(clickMock).toHaveBeenCalledTimes(1);
   });
 
-  it("fails when File API save method is selected but unsupported", async () => {
-    Object.defineProperty(window, "showSaveFilePicker", {
-      configurable: true,
-      value: undefined,
-    });
-
+  it("fails when File API save method is selected without a chosen file", async () => {
     getPackageApiClientMock.mockResolvedValue({
       getChunksInfo: vi.fn().mockResolvedValue({
         fileName: "archive.zip",
@@ -149,7 +139,7 @@ describe("chunkedDownload", () => {
         packagesArchiveId: "archive-id",
         saveMethod: "fileApi",
       })
-    ).rejects.toThrow("File API сохранение не поддерживается");
+    ).rejects.toThrow("File API файл не выбран");
   });
 
   it("stops when aborted", async () => {

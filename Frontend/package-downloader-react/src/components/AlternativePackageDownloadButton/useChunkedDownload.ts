@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { chunkedDownload, DownloadProgressEvent } from '../../utils/chunkedDownload';
 import { AUTO_CHUNK_SIZE_SENTINEL, ChunkedDownloadSettings } from './chunkedDownloadSettings';
+import { PackagesEntryChunksInfo } from '../../services/apiClient';
 
 interface DownloadState {
   isDownloading: boolean;
@@ -22,7 +23,12 @@ export function useChunkedDownload() {
 
   const isSupported = typeof window !== 'undefined';
 
-  const download = useCallback(async (packagesArchiveId: string, settings: ChunkedDownloadSettings) => {
+  const download = useCallback(async (
+    packagesArchiveId: string,
+    settings: ChunkedDownloadSettings,
+    fileApiWritable?: FileSystemWritableFileStream,
+    chunksInfo?: PackagesEntryChunksInfo
+  ) => {
     abortControllerRef.current = new AbortController();
 
     setState({ ...INITIAL_STATE, isDownloading: true });
@@ -30,10 +36,12 @@ export function useChunkedDownload() {
     try {
       await chunkedDownload({
         packagesArchiveId,
+        chunksInfo,
         chunkSizeInBytes: settings.useAutomaticChunkSize ? AUTO_CHUNK_SIZE_SENTINEL : settings.chunkSizeInBytes,
         parallelDownloads: settings.parallelDownloads,
         retryAttempts: settings.retryAttempts,
         saveMethod: settings.saveMethod,
+        fileApiWritable,
         signal: abortControllerRef.current.signal,
         onProgress: (progress) => {
           setState(prev => ({ ...prev, progress }));

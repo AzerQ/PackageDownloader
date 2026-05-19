@@ -27,6 +27,7 @@ import SaveAltIcon from '@mui/icons-material/SaveAlt';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import { useChunkedDownload } from './useChunkedDownload';
 import {
+  AUTO_CHUNK_SIZE_SENTINEL,
   ChunkedDownloadSaveMethod,
   ChunkedDownloadSettings,
   DEFAULT_CHUNKED_DOWNLOAD_SETTINGS,
@@ -34,6 +35,7 @@ import {
   saveChunkedDownloadSettings,
   sanitizeChunkedDownloadSettings,
 } from './chunkedDownloadSettings';
+import { getPackageApiClient, PackagesEntryChunksInfo } from '../../services/apiClient';
 
 interface PackageDownloadAsChunksButtonProps {
   packagesArchiveId: string;
@@ -80,6 +82,28 @@ const normalizeSettingsForBrowserSupport = (settings: ChunkedDownloadSettings): 
   return settings;
 };
 
+const getChunkSizeForSettings = (settings: ChunkedDownloadSettings): number => (
+  settings.useAutomaticChunkSize ? AUTO_CHUNK_SIZE_SENTINEL : settings.chunkSizeInBytes
+);
+
+const requestFileApiWritable = async (fileName: string): Promise<FileSystemWritableFileStream> => {
+  if (!isFileApiSaveSupported()) {
+    throw new Error('File API сохранение не поддерживается в этом браузере');
+  }
+
+  const fileHandle = await window.showSaveFilePicker({
+    suggestedName: fileName,
+    types: [
+      {
+        description: 'ZIP archive',
+        accept: { 'application/zip': ['.zip'] },
+      },
+    ],
+  });
+
+  return fileHandle.createWritable();
+};
+
 export const PackageDownloadAsChunksButton: FC<PackageDownloadAsChunksButtonProps> = ({
   packagesArchiveId,
   label = 'Скачать пакеты',
@@ -98,6 +122,8 @@ export const PackageDownloadAsChunksButton: FC<PackageDownloadAsChunksButtonProp
   const [settings, setSettings] = useState<ChunkedDownloadSettings>(() => (
     normalizeSettingsForBrowserSupport(loadChunkedDownloadSettings())
   ));
+  const [chunksInfo, setChunksInfo] = useState<PackagesEntryChunksInfo | null>(null);
+  const [isChunksInfoLoading, setIsChunksInfoLoading] = useState(false);
 
   const settingsSummary = useMemo(() => formatSettingsSummary(settings), [settings]);
   const isFileApiSupported = isFileApiSaveSupported();
@@ -107,18 +133,54 @@ export const PackageDownloadAsChunksButton: FC<PackageDownloadAsChunksButtonProp
       sanitizeChunkedDownloadSettings({ ...settings, ...patch })
     );
     setSettings(nextSettings);
+    setChunksInfo(null);
     saveChunkedDownloadSettings(nextSettings);
+
+    if (isSettingsOpen) {
+      void loadChunksInfo(nextSettings);
+    }
+  };
+
+  const loadChunksInfo = async (settingsSnapshot: ChunkedDownloadSettings): Promise<void> => {
+    setIsChunksInfoLoading(true);
+    try {
+      const apiClient = await getPackageApiClient();
+      const nextChunksInfo = await apiClient.getChunksInfo(
+        packagesArchiveId,
+        getChunkSizeForSettings(settingsSnapshot)
+      );
+      setChunksInfo(nextChunksInfo);
+    } catch {
+      setChunksInfo(null);
+    } finally {
+      setIsChunksInfoLoading(false);
+    }
   };
 
   const handleDownloadClick = (): void => {
     setIsSettingsOpen(true);
+    void loadChunksInfo(settings);
   };
 
-  const handleStartDownload = (): void => {
+  const handleStartDownload = async (): Promise<void> => {
+    let fileApiWritable: FileSystemWritableFileStream | undefined;
+
+    if (settings.saveMethod === 'fileApi') {
+      try {
+        fileApiWritable = await requestFileApiWritable(chunksInfo?.fileName ?? 'packages.zip');
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') {
+          return;
+        }
+
+        throw error;
+      }
+    }
+
     reset();
     saveChunkedDownloadSettings(settings);
     setIsSettingsOpen(false);
-    void download(packagesArchiveId, settings);
+    void download(packagesArchiveId, settings, fileApiWritable, chunksInfo ?? undefined);
   };
 
   const renderButtonIcon = (): React.ReactNode => {
@@ -262,7 +324,9 @@ export const PackageDownloadAsChunksButton: FC<PackageDownloadAsChunksButtonProp
                 </ToggleButton>
               </ToggleButtonGroup>
               <Typography variant="caption" color="text.secondary">
-                File API запросит доступ к выбранному файлу и запишет архив напрямую.
+                {isChunksInfoLoading
+                  ? 'Получаем имя архива...'
+                  : `Имя файла: ${chunksInfo?.fileName ?? 'packages.zip'}`}
               </Typography>
             </Box>
 
@@ -330,6 +394,7 @@ export const PackageDownloadAsChunksButton: FC<PackageDownloadAsChunksButtonProp
               <Button
                 variant="contained"
                 onClick={handleStartDownload}
+                disabled={settings.saveMethod === 'fileApi' && isChunksInfoLoading}
                 data-testid="chunked-download-start"
               >
                 Начать скачивание

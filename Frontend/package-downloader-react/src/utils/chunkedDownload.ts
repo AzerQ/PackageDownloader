@@ -10,10 +10,12 @@ export interface DownloadProgressEvent {
 
 export interface ChunkedDownloadOptions {
   packagesArchiveId: string;
+  chunksInfo?: PackagesEntryChunksInfo;
   chunkSizeInBytes?: number;
   parallelDownloads?: number;
   retryAttempts?: number;
   saveMethod?: "fileApi" | "browser";
+  fileApiWritable?: FileSystemWritableFileStream;
   onProgress?: (event: DownloadProgressEvent) => void;
   signal?: AbortSignal;
 }
@@ -24,22 +26,11 @@ function throwIfAborted(signal?: AbortSignal): void {
   }
 }
 
-async function saveBlobWithFileApi(blob: Blob, fileName: string, mimeType: string): Promise<void> {
-  if (typeof window === "undefined" || typeof window.showSaveFilePicker !== "function") {
-    throw new Error("File API сохранение не поддерживается в этом браузере");
+async function saveBlobWithFileApi(blob: Blob, writable?: FileSystemWritableFileStream): Promise<void> {
+  if (!writable) {
+    throw new Error("File API файл не выбран");
   }
 
-  const extension = `.${fileName.split('.').pop() ?? ''}`;
-  const fileHandle = await window.showSaveFilePicker({
-    suggestedName: fileName,
-    types: [
-      {
-        description: mimeType,
-        accept: { [mimeType]: [extension] },
-      },
-    ],
-  });
-  const writable = await fileHandle.createWritable();
   await writable.write(blob);
   await writable.close();
 }
@@ -56,11 +47,11 @@ function saveBlobWithBrowserDownload(blob: Blob, fileName: string): void {
 async function saveBlobToClient(
   blob: Blob,
   fileName: string,
-  mimeType: string,
-  saveMethod: "fileApi" | "browser"
+  saveMethod: "fileApi" | "browser",
+  fileApiWritable?: FileSystemWritableFileStream
 ): Promise<void> {
   if (saveMethod === "fileApi") {
-    await saveBlobWithFileApi(blob, fileName, mimeType);
+    await saveBlobWithFileApi(blob, fileApiWritable);
     return;
   }
 
@@ -69,10 +60,12 @@ async function saveBlobToClient(
 
 export async function chunkedDownload({
   packagesArchiveId,
+  chunksInfo,
   chunkSizeInBytes = DEFAULT_CHUNK_SIZE,
   parallelDownloads = 3,
   retryAttempts = 3,
   saveMethod = "fileApi",
+  fileApiWritable,
   onProgress,
   signal,
 }: ChunkedDownloadOptions): Promise<void> {
@@ -80,7 +73,7 @@ export async function chunkedDownload({
 
   const { getChunk, getChunksInfo } = await getPackageApiClient();
 
-  const info: PackagesEntryChunksInfo = await getChunksInfo(
+  const info: PackagesEntryChunksInfo = chunksInfo ?? await getChunksInfo(
     packagesArchiveId,
     chunkSizeInBytes
   );
@@ -146,5 +139,5 @@ export async function chunkedDownload({
   throwIfAborted(signal);
 
   const fileBlob = new Blob(chunks, { type: info.mimeType });
-  await saveBlobToClient(fileBlob, info.fileName, info.mimeType, saveMethod);
+  await saveBlobToClient(fileBlob, info.fileName, saveMethod, fileApiWritable);
 }

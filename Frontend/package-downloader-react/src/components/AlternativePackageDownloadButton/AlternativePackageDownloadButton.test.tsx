@@ -3,6 +3,10 @@ import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
 import { PackageDownloadAsChunksButton } from "./AlternativePackageDownloadButton";
 
+const { getPackageApiClientMock } = vi.hoisted(() => ({
+  getPackageApiClientMock: vi.fn(),
+}));
+
 const downloadMock = vi.fn();
 const cancelMock = vi.fn();
 const resetMock = vi.fn();
@@ -20,10 +24,24 @@ vi.mock("./useChunkedDownload", () => ({
   }),
 }));
 
+vi.mock("../../services/apiClient", () => ({
+  DEFAULT_CHUNK_SIZE: 1024 * 70,
+  getPackageApiClient: getPackageApiClientMock,
+}));
+
 describe("PackageDownloadAsChunksButton", () => {
   beforeEach(() => {
     window.localStorage.clear();
     vi.clearAllMocks();
+    getPackageApiClientMock.mockResolvedValue({
+      getChunksInfo: vi.fn().mockResolvedValue({
+        fileName: "real-archive.zip",
+        totalSizeInBytes: 10,
+        chunkSizeInBytes: 5,
+        totalChunks: 2,
+        mimeType: "application/zip",
+      }),
+    });
   });
 
   it("loads settings from localStorage and starts download with them", async () => {
@@ -52,7 +70,7 @@ describe("PackageDownloadAsChunksButton", () => {
       parallelDownloads: 5,
       retryAttempts: 4,
       saveMethod: "browser",
-    });
+    }, undefined, expect.objectContaining({ fileName: "real-archive.zip" }));
   });
 
   it("updates settings and persists them", async () => {
@@ -77,9 +95,12 @@ describe("PackageDownloadAsChunksButton", () => {
     await user.click(screen.getByRole("button", { name: "Стандартная загрузка через браузер" }));
     await user.click(screen.getByTestId("chunked-download-start"));
 
-    expect(downloadMock).toHaveBeenCalledWith("archive-id", expect.objectContaining({
-      saveMethod: "browser",
-    }));
+    expect(downloadMock).toHaveBeenCalledWith(
+      "archive-id",
+      expect.objectContaining({ saveMethod: "browser" }),
+      undefined,
+      expect.objectContaining({ fileName: "real-archive.zip" })
+    );
     expect(window.localStorage.getItem("package_downloader_chunked_download_settings")).toContain("\"saveMethod\":\"browser\"");
   });
 });

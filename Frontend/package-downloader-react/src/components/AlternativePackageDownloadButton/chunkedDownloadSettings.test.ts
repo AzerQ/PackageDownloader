@@ -22,6 +22,7 @@ describe("chunkedDownloadSettings", () => {
         parallelDownloads: 0,
         retryAttempts: NaN,
         useAutomaticChunkSize: true,
+        saveMethod: "unknown" as never,
       })
     ).toEqual({
       ...DEFAULT_CHUNKED_DOWNLOAD_SETTINGS,
@@ -35,6 +36,7 @@ describe("chunkedDownloadSettings", () => {
       chunkSizeInBytes: 123456,
       parallelDownloads: 5,
       retryAttempts: 4,
+      saveMethod: "browser",
     });
 
     expect(window.localStorage.getItem(CHUNKED_DOWNLOAD_SETTINGS_STORAGE_KEY)).toBeTruthy();
@@ -43,6 +45,7 @@ describe("chunkedDownloadSettings", () => {
       chunkSizeInBytes: 123456,
       parallelDownloads: 5,
       retryAttempts: 4,
+      saveMethod: "browser",
     });
   });
 });

@@ -120,10 +120,36 @@ describe("chunkedDownload", () => {
     await chunkedDownload({
       packagesArchiveId: "archive-id",
       retryAttempts: 3,
+      saveMethod: "browser",
     });
 
     expect(attempts).toBe(3);
     expect(clickMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("fails when File API save method is selected but unsupported", async () => {
+    Object.defineProperty(window, "showSaveFilePicker", {
+      configurable: true,
+      value: undefined,
+    });
+
+    getPackageApiClientMock.mockResolvedValue({
+      getChunksInfo: vi.fn().mockResolvedValue({
+        fileName: "archive.zip",
+        totalSizeInBytes: 2,
+        chunkSizeInBytes: 2,
+        totalChunks: 1,
+        mimeType: "application/zip",
+      }),
+      getChunk: vi.fn().mockResolvedValue(new TextEncoder().encode("OK").buffer),
+    });
+
+    await expect(
+      chunkedDownload({
+        packagesArchiveId: "archive-id",
+        saveMethod: "fileApi",
+      })
+    ).rejects.toThrow("File API сохранение не поддерживается");
   });
 
   it("stops when aborted", async () => {

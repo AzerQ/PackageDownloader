@@ -33,6 +33,7 @@ export function useChunkedDownload() {
         chunkSizeInBytes: settings.useAutomaticChunkSize ? AUTO_CHUNK_SIZE_SENTINEL : settings.chunkSizeInBytes,
         parallelDownloads: settings.parallelDownloads,
         retryAttempts: settings.retryAttempts,
+        saveMethod: settings.saveMethod,
         signal: abortControllerRef.current.signal,
         onProgress: (progress) => {
           setState(prev => ({ ...prev, progress }));

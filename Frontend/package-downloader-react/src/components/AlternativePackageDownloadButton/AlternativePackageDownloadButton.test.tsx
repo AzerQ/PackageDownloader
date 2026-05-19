@@ -34,6 +34,7 @@ describe("PackageDownloadAsChunksButton", () => {
         chunkSizeInBytes: 999999,
         parallelDownloads: 5,
         retryAttempts: 4,
+        saveMethod: "browser",
       })
     );
     const user = userEvent.setup();
@@ -50,6 +51,7 @@ describe("PackageDownloadAsChunksButton", () => {
       chunkSizeInBytes: 999999,
       parallelDownloads: 5,
       retryAttempts: 4,
+      saveMethod: "browser",
     });
   });
 
@@ -64,5 +66,20 @@ describe("PackageDownloadAsChunksButton", () => {
 
     expect(screen.getByTestId("chunked-download-settings-summary")).toHaveTextContent("Параллельно: 7");
     expect(window.localStorage.getItem("package_downloader_chunked_download_settings")).toContain("\"parallelDownloads\":7");
+  });
+
+  it("updates save method and persists it", async () => {
+    const user = userEvent.setup();
+
+    render(<PackageDownloadAsChunksButton packagesArchiveId="archive-id" />);
+
+    await user.click(screen.getByTestId("chunked-download-open-settings"));
+    await user.click(screen.getByRole("button", { name: "Стандартная загрузка через браузер" }));
+    await user.click(screen.getByTestId("chunked-download-start"));
+
+    expect(downloadMock).toHaveBeenCalledWith("archive-id", expect.objectContaining({
+      saveMethod: "browser",
+    }));
+    expect(window.localStorage.getItem("package_downloader_chunked_download_settings")).toContain("\"saveMethod\":\"browser\"");
   });
 });

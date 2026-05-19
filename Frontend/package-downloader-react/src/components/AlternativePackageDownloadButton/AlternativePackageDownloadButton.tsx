@@ -14,6 +14,8 @@ import {
   Switch,
   TextField,
   Tooltip,
+  ToggleButton,
+  ToggleButtonGroup,
   Typography,
 } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
@@ -21,8 +23,11 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ReplayIcon from '@mui/icons-material/Replay';
+import SaveAltIcon from '@mui/icons-material/SaveAlt';
+import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import { useChunkedDownload } from './useChunkedDownload';
 import {
+  ChunkedDownloadSaveMethod,
   ChunkedDownloadSettings,
   DEFAULT_CHUNKED_DOWNLOAD_SETTINGS,
   loadChunkedDownloadSettings,
@@ -58,8 +63,21 @@ const formatSettingsSummary = (settings: ChunkedDownloadSettings): string => {
   const chunkSizeLabel = settings.useAutomaticChunkSize
     ? 'авто (10% от архива)'
     : `${Math.round(settings.chunkSizeInBytes / 1024)} KB`;
+  const saveMethodLabel = settings.saveMethod === 'fileApi' ? 'File API' : 'браузер';
 
-  return `Чанк: ${chunkSizeLabel} · Параллельно: ${settings.parallelDownloads} · Ретраи: ${settings.retryAttempts}`;
+  return `Чанк: ${chunkSizeLabel} · Сохранение: ${saveMethodLabel} · Параллельно: ${settings.parallelDownloads} · Ретраи: ${settings.retryAttempts}`;
+};
+
+const isFileApiSaveSupported = (): boolean => (
+  typeof window !== 'undefined' && typeof window.showSaveFilePicker === 'function'
+);
+
+const normalizeSettingsForBrowserSupport = (settings: ChunkedDownloadSettings): ChunkedDownloadSettings => {
+  if (settings.saveMethod === 'fileApi' && !isFileApiSaveSupported()) {
+    return { ...settings, saveMethod: 'browser' };
+  }
+
+  return settings;
 };
 
 export const PackageDownloadAsChunksButton: FC<PackageDownloadAsChunksButtonProps> = ({
@@ -77,12 +95,17 @@ export const PackageDownloadAsChunksButton: FC<PackageDownloadAsChunksButtonProp
     reset,
   } = useChunkedDownload();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [settings, setSettings] = useState<ChunkedDownloadSettings>(() => loadChunkedDownloadSettings());
+  const [settings, setSettings] = useState<ChunkedDownloadSettings>(() => (
+    normalizeSettingsForBrowserSupport(loadChunkedDownloadSettings())
+  ));
 
   const settingsSummary = useMemo(() => formatSettingsSummary(settings), [settings]);
+  const isFileApiSupported = isFileApiSaveSupported();
 
   const updateSettings = (patch: Partial<ChunkedDownloadSettings>): void => {
-    const nextSettings = sanitizeChunkedDownloadSettings({ ...settings, ...patch });
+    const nextSettings = normalizeSettingsForBrowserSupport(
+      sanitizeChunkedDownloadSettings({ ...settings, ...patch })
+    );
     setSettings(nextSettings);
     saveChunkedDownloadSettings(nextSettings);
   };
@@ -209,6 +232,40 @@ export const PackageDownloadAsChunksButton: FC<PackageDownloadAsChunksButtonProp
               Настройки скачивания чанками
             </Typography>
 
+            <Box>
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                Метод сохранения
+              </Typography>
+              <ToggleButtonGroup
+                value={settings.saveMethod}
+                exclusive
+                fullWidth
+                onChange={(_, value: ChunkedDownloadSaveMethod | null) => {
+                  if (value !== null) {
+                    updateSettings({ saveMethod: value });
+                  }
+                }}
+                aria-label="Метод сохранения"
+                data-testid="chunked-download-save-method"
+              >
+                <ToggleButton value="browser" aria-label="Стандартная загрузка через браузер">
+                  <SaveAltIcon fontSize="small" sx={{ mr: 1 }} />
+                  Браузер
+                </ToggleButton>
+                <ToggleButton
+                  value="fileApi"
+                  aria-label="Сохранение через File API"
+                  disabled={!isFileApiSupported}
+                >
+                  <FolderOpenIcon fontSize="small" sx={{ mr: 1 }} />
+                  File API
+                </ToggleButton>
+              </ToggleButtonGroup>
+              <Typography variant="caption" color="text.secondary">
+                File API запросит доступ к выбранному файлу и запишет архив напрямую.
+              </Typography>
+            </Box>
+
             <FormControlLabel
               control={
                 <Switch
@@ -261,8 +318,9 @@ export const PackageDownloadAsChunksButton: FC<PackageDownloadAsChunksButtonProp
               </Button>
               <Button
                 onClick={() => {
-                  setSettings(DEFAULT_CHUNKED_DOWNLOAD_SETTINGS);
-                  saveChunkedDownloadSettings(DEFAULT_CHUNKED_DOWNLOAD_SETTINGS);
+                  const defaultSettings = normalizeSettingsForBrowserSupport(DEFAULT_CHUNKED_DOWNLOAD_SETTINGS);
+                  setSettings(defaultSettings);
+                  saveChunkedDownloadSettings(defaultSettings);
                 }}
                 color="secondary"
                 data-testid="chunked-download-reset-settings"

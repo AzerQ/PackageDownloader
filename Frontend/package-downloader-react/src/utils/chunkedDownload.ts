@@ -13,6 +13,7 @@ export interface ChunkedDownloadOptions {
   chunkSizeInBytes?: number;
   parallelDownloads?: number;
   retryAttempts?: number;
+  saveMethod?: "fileApi" | "browser";
   onProgress?: (event: DownloadProgressEvent) => void;
   signal?: AbortSignal;
 }
@@ -23,30 +24,27 @@ function throwIfAborted(signal?: AbortSignal): void {
   }
 }
 
-async function saveBlobToClient(blob: Blob, fileName: string, mimeType: string): Promise<void> {
-  if (typeof window !== "undefined" && "showSaveFilePicker" in window) {
-    try {
-      const extension = `.${fileName.split('.').pop() ?? ''}`;
-      const fileHandle = await window.showSaveFilePicker({
-        suggestedName: fileName,
-        types: [
-          {
-            description: mimeType,
-            accept: { [mimeType]: [extension] },
-          },
-        ],
-      });
-      const writable = await fileHandle.createWritable();
-      await writable.write(blob);
-      await writable.close();
-      return;
-    } catch (error) {
-      if (error instanceof DOMException && error.name === "AbortError") {
-        throw error;
-      }
-    }
+async function saveBlobWithFileApi(blob: Blob, fileName: string, mimeType: string): Promise<void> {
+  if (typeof window === "undefined" || typeof window.showSaveFilePicker !== "function") {
+    throw new Error("File API сохранение не поддерживается в этом браузере");
   }
 
+  const extension = `.${fileName.split('.').pop() ?? ''}`;
+  const fileHandle = await window.showSaveFilePicker({
+    suggestedName: fileName,
+    types: [
+      {
+        description: mimeType,
+        accept: { [mimeType]: [extension] },
+      },
+    ],
+  });
+  const writable = await fileHandle.createWritable();
+  await writable.write(blob);
+  await writable.close();
+}
+
+function saveBlobWithBrowserDownload(blob: Blob, fileName: string): void {
   const objectUrl = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = objectUrl;
@@ -55,11 +53,26 @@ async function saveBlobToClient(blob: Blob, fileName: string, mimeType: string):
   URL.revokeObjectURL(objectUrl);
 }
 
+async function saveBlobToClient(
+  blob: Blob,
+  fileName: string,
+  mimeType: string,
+  saveMethod: "fileApi" | "browser"
+): Promise<void> {
+  if (saveMethod === "fileApi") {
+    await saveBlobWithFileApi(blob, fileName, mimeType);
+    return;
+  }
+
+  saveBlobWithBrowserDownload(blob, fileName);
+}
+
 export async function chunkedDownload({
   packagesArchiveId,
   chunkSizeInBytes = DEFAULT_CHUNK_SIZE,
   parallelDownloads = 3,
   retryAttempts = 3,
+  saveMethod = "fileApi",
   onProgress,
   signal,
 }: ChunkedDownloadOptions): Promise<void> {
@@ -133,5 +146,5 @@ export async function chunkedDownload({
   throwIfAborted(signal);
 
   const fileBlob = new Blob(chunks, { type: info.mimeType });
-  await saveBlobToClient(fileBlob, info.fileName, info.mimeType);
+  await saveBlobToClient(fileBlob, info.fileName, info.mimeType, saveMethod);
 }

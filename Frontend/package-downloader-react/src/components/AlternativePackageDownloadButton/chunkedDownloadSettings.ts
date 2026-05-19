@@ -3,11 +3,14 @@ import { DEFAULT_CHUNK_SIZE } from "../../services/apiClient";
 export const CHUNKED_DOWNLOAD_SETTINGS_STORAGE_KEY = "package_downloader_chunked_download_settings";
 export const AUTO_CHUNK_SIZE_SENTINEL = 0;
 
+export type ChunkedDownloadSaveMethod = "fileApi" | "browser";
+
 export interface ChunkedDownloadSettings {
   useAutomaticChunkSize: boolean;
   chunkSizeInBytes: number;
   parallelDownloads: number;
   retryAttempts: number;
+  saveMethod: ChunkedDownloadSaveMethod;
 }
 
 export const DEFAULT_CHUNKED_DOWNLOAD_SETTINGS: ChunkedDownloadSettings = {
@@ -15,6 +18,7 @@ export const DEFAULT_CHUNKED_DOWNLOAD_SETTINGS: ChunkedDownloadSettings = {
   chunkSizeInBytes: DEFAULT_CHUNK_SIZE,
   parallelDownloads: 3,
   retryAttempts: 3,
+  saveMethod: "fileApi",
 };
 
 export function sanitizeChunkedDownloadSettings(
@@ -23,6 +27,9 @@ export function sanitizeChunkedDownloadSettings(
   const chunkSizeInBytes = Number(value?.chunkSizeInBytes);
   const parallelDownloads = Number(value?.parallelDownloads);
   const retryAttempts = Number(value?.retryAttempts);
+  const saveMethod = value?.saveMethod === "browser" || value?.saveMethod === "fileApi"
+    ? value.saveMethod
+    : DEFAULT_CHUNKED_DOWNLOAD_SETTINGS.saveMethod;
 
   return {
     useAutomaticChunkSize: Boolean(value?.useAutomaticChunkSize),
@@ -35,6 +42,7 @@ export function sanitizeChunkedDownloadSettings(
     retryAttempts: Number.isFinite(retryAttempts) && retryAttempts > 0
       ? Math.round(retryAttempts)
       : DEFAULT_CHUNKED_DOWNLOAD_SETTINGS.retryAttempts,
+    saveMethod,
   };
 }
 

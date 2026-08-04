@@ -14,23 +14,28 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v6
 
     - name: Setup Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v6
       with:
-        node-version: '18'
+        node-version: '26.5.1'
+        cache: 'npm'
+        cache-dependency-path: Frontend/package-downloader-react/package-lock.json
+
+    - name: Setup npm
+      run: npm install --global npm@12.0.2
 
     - name: Install npm dependencies
-      run: cd Frontend/package-downloader-react && npm install && cd -
+      run: npm ci --prefix "Frontend/package-downloader-react"
 
     - name: Build frontend
       run: npm run build --prefix "Frontend/package-downloader-react"
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v2
+      uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: '8.x'
+        dotnet-version: '10.0.x'
 
     - name: Restore NuGet packages
       run: dotnet restore Backend/PackageDownloader.API

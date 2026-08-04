@@ -2,6 +2,13 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/dotnet
 {
 	"name": "C# (.NET) and React (Node.js)",
+	"image": "mcr.microsoft.com/devcontainers/dotnet:1-10.0",
+	"features": {
+		"ghcr.io/devcontainers/features/node:1": {
+			"version": "26.5.1"
+		}
+	},
+	"postCreateCommand": "npm install --global npm@12.0.2 && dotnet restore Backend/PackageDownloader.sln && npm ci --prefix Frontend/package-downloader-react",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
 	"customizations": {
     "vscode": {
@@ -24,8 +31,6 @@
 	// }
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "dotnet restore",
-
 	// Configure tool-specific properties.
 	// "customizations": {},
 

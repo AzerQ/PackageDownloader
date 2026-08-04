@@ -1,6 +1,9 @@
 # Этап сборки фронтенда
-FROM node:18-alpine as frontend-build
+FROM node:26.5.1-bookworm-slim AS frontend-build
+ARG NPM_VERSION=12.0.2
 WORKDIR /app
+
+RUN npm install --global "npm@${NPM_VERSION}"
 
 # Копируем зависимости фронтенда и устанавливаем их
 COPY Frontend/package-downloader-react/package*.json ./
@@ -11,7 +14,7 @@ COPY Frontend/package-downloader-react/ .
 RUN npm run build
 
 # Этап сборки бэкенда
-FROM mcr.microsoft.com/dotnet/sdk:8.0 as backend-build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS backend-build
 WORKDIR /src
 
 # Копируем файлы решения и проектов
@@ -21,6 +24,7 @@ COPY Backend/PackageDownloader.Application/*.csproj ./PackageDownloader.Applicat
 COPY Backend/PackageDownloader.Core/*.csproj ./PackageDownloader.Core/
 COPY Backend/PackageDownloader.Infrastructure/*.csproj ./PackageDownloader.Infrastructure/
 COPY Backend/PackageDownloader.AI/*.csproj ./PackageDownloader.AI/
+COPY Backend/PackageDownloader.Persistence/*.csproj ./PackageDownloader.Persistence/
 
 # Восстанавливаем зависимости
 RUN dotnet restore "PackageDownloader.API/PackageDownloader.API.csproj"
@@ -32,20 +36,11 @@ COPY Backend/ .
 RUN dotnet publish "PackageDownloader.API/PackageDownloader.API.csproj" -c Release -o /app/publish
 
 # Финальный этап
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
+FROM mcr.microsoft.com/dotnet/sdk:10.0
 WORKDIR /app
 
-# Устанавливаем зависимости для рантайма
-RUN apt-get update && \
-    apt-get install -y wget && \
-    # Устанавливаем .NET SDK
-    wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh && \
-    chmod +x ./dotnet-install.sh && \
-    ./dotnet-install.sh --channel 8.0 --install-dir /usr/share/dotnet && \
-    # Устанавливаем Node.js и npm
-    apt-get install -y curl && \
-    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
-    apt-get install -y nodejs
+# Добавляем в runtime те же версии Node.js и npm, что использовались для сборки frontend
+COPY --from=frontend-build /usr/local/ /usr/local/
 
 # Копируем собранный фронтенд
 COPY --from=frontend-build /app/dist ./wwwroot

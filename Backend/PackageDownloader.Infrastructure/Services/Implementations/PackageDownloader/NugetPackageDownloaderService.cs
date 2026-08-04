@@ -11,6 +11,8 @@ public static class DotnetFrameworks
     public const string Net6 = "net6.0";
     public const string Net7 = "net7.0";
     public const string Net8 = "net8.0";
+    public const string Net9 = "net9.0";
+    public const string Net10 = "net10.0";
 }
 
 /// <summary>
@@ -44,7 +46,8 @@ public class NugetPackageDownloaderService : CliPackageDownloader
     private static string GetAvailableFrameworkVersion(string? currentVersion)
     {
         string[] availableFrameworks = [DotnetFrameworks.NetStandart20, DotnetFrameworks.NetStandart21,
-                                                    DotnetFrameworks.Net6, DotnetFrameworks.Net7, DotnetFrameworks.Net8];
+                                                    DotnetFrameworks.Net6, DotnetFrameworks.Net7, DotnetFrameworks.Net8,
+                                                    DotnetFrameworks.Net9, DotnetFrameworks.Net10];
 
         string defaultFrameworkVersion = DotnetFrameworks.NetStandart20;
 

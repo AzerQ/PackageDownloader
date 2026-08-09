@@ -101,7 +101,15 @@ public sealed class NugetClientPackageDownloaderService : IPackageDownloadServic
         if (string.IsNullOrWhiteSpace(sdkVersion))
             return fallbackFramework;
 
-        NuGetFramework framework = NuGetFramework.ParseFolder(sdkVersion);
+        string targetFramework = sdkVersion.Trim();
+
+        if (char.IsDigit(targetFramework[0]) &&
+            NuGetVersion.TryParse(targetFramework, out NuGetVersion? parsedSdkVersion))
+        {
+            targetFramework = $"net{parsedSdkVersion.Major}.{parsedSdkVersion.Minor}";
+        }
+
+        NuGetFramework framework = NuGetFramework.ParseFolder(targetFramework);
         return framework.IsUnsupported ? fallbackFramework : framework;
     }
 

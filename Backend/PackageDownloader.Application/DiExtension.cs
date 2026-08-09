@@ -23,7 +23,7 @@ namespace PackageDownloader.Application
             return packageType switch
             {
                 PackageType.Npm => serviceProvider.GetRequiredService<NpmPackageDownloaderService>(),
-                PackageType.Nuget => serviceProvider.GetRequiredService<NugetPackageDownloaderService>(),
+                PackageType.Nuget => serviceProvider.GetRequiredService<NugetClientPackageDownloaderService>(),
                 PackageType.VsCode => serviceProvider.GetRequiredService<HttpPackageDownloaderService>(),
                 PackageType.Docker => serviceProvider.GetRequiredService<DockerPackageDownloaderService>(),
                 _ => throw new InvalidOperationException()
@@ -90,6 +90,7 @@ namespace PackageDownloader.Application
             // Package download services
 
             services.AddTransient<NugetPackageDownloaderService>();
+            services.AddTransient<NugetClientPackageDownloaderService>();
             services.AddTransient<NpmPackageDownloaderService>();
             services.AddTransient<DockerPackageDownloaderService>();
 

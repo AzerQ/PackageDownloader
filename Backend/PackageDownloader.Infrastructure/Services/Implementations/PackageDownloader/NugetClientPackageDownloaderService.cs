@@ -1,8 +1,11 @@
 using NuGet.Common;
 using NuGet.Configuration;
+using NuGet.Frameworks;
+using NuGet.Packaging;
 using NuGet.Packaging.Core;
 using NuGet.Protocol;
 using NuGet.Protocol.Core.Types;
+using NuGet.Resolver;
 using NuGet.Versioning;
 using PackageDownloader.Core.Models;
 using PackageDownloader.Core.Services.Abstractions;
@@ -52,7 +55,10 @@ public sealed class NugetClientPackageDownloaderService : IPackageDownloadServic
             _packagesDirectoryCreator.CreatePackagesTempDirectory(packageRequest);
 
         using var cacheContext = new SourceCacheContext();
-        var downloadedPackages = new HashSet<PackageIdentity>(PackageIdentityComparer.Default);
+        NuGetFramework targetFramework = ResolveTargetFramework(packageRequest.SdkVersion);
+        var rootPackages = new List<PackageIdentity>();
+        var availablePackages = new HashSet<SourcePackageDependencyInfo>(PackageIdentityComparer.Default);
+        var visitedPackages = new HashSet<PackageIdentity>(PackageIdentityComparer.Default);
 
         foreach (PackageDetails packageDetails in packageRequest.PackagesDetails)
         {
@@ -61,9 +67,23 @@ public sealed class NugetClientPackageDownloaderService : IPackageDownloadServic
                 cacheContext,
                 cancellationToken);
 
-            if (!downloadedPackages.Add(package))
-                continue;
+            rootPackages.Add(package);
+            await GatherPackageGraphAsync(
+                package,
+                targetFramework,
+                cacheContext,
+                availablePackages,
+                visitedPackages,
+                cancellationToken);
+        }
 
+        IEnumerable<PackageIdentity> resolvedPackages = ResolvePackageGraph(
+            rootPackages,
+            availablePackages,
+            cancellationToken);
+
+        foreach (PackageIdentity package in resolvedPackages)
+        {
             await DownloadPackageAsync(
                 package,
                 packagesDirectory,
@@ -72,6 +92,128 @@ public sealed class NugetClientPackageDownloaderService : IPackageDownloadServic
         }
 
         return _archiveService.ArchiveFolder(packagesDirectory, tempFolderPath);
+    }
+
+    private static NuGetFramework ResolveTargetFramework(string? sdkVersion)
+    {
+        NuGetFramework fallbackFramework = NuGetFramework.ParseFolder(DotnetFrameworks.NetStandart20);
+
+        if (string.IsNullOrWhiteSpace(sdkVersion))
+            return fallbackFramework;
+
+        NuGetFramework framework = NuGetFramework.ParseFolder(sdkVersion);
+        return framework.IsUnsupported ? fallbackFramework : framework;
+    }
+
+    private async Task GatherPackageGraphAsync(
+        PackageIdentity package,
+        NuGetFramework targetFramework,
+        SourceCacheContext cacheContext,
+        ISet<SourcePackageDependencyInfo> availablePackages,
+        ISet<PackageIdentity> visitedPackages,
+        CancellationToken cancellationToken)
+    {
+        if (!visitedPackages.Add(package))
+            return;
+
+        SourcePackageDependencyInfo? dependencyInfo = null;
+
+        foreach (SourceRepository repository in _sourceRepositories)
+        {
+            DependencyInfoResource resource =
+                await repository.GetResourceAsync<DependencyInfoResource>(cancellationToken);
+            dependencyInfo = await resource.ResolvePackage(
+                package,
+                targetFramework,
+                cacheContext,
+                NullLogger.Instance,
+                cancellationToken);
+
+            if (dependencyInfo is not null)
+                break;
+        }
+
+        if (dependencyInfo is null)
+        {
+            throw new InvalidOperationException(
+                $"NuGet package '{package.Id}' version '{package.Version}' was not found " +
+                $"for target framework '{targetFramework.GetShortFolderName()}'.");
+        }
+
+        availablePackages.Add(dependencyInfo);
+
+        foreach (PackageDependency dependency in dependencyInfo.Dependencies)
+        {
+            PackageIdentity dependencyPackage = await ResolveDependencyAsync(
+                dependency,
+                cacheContext,
+                cancellationToken);
+
+            await GatherPackageGraphAsync(
+                dependencyPackage,
+                targetFramework,
+                cacheContext,
+                availablePackages,
+                visitedPackages,
+                cancellationToken);
+        }
+    }
+
+    private async Task<PackageIdentity> ResolveDependencyAsync(
+        PackageDependency dependency,
+        SourceCacheContext cacheContext,
+        CancellationToken cancellationToken)
+    {
+        var versions = new HashSet<NuGetVersion>();
+
+        foreach (SourceRepository repository in _sourceRepositories)
+        {
+            FindPackageByIdResource resource =
+                await repository.GetResourceAsync<FindPackageByIdResource>(cancellationToken);
+            IEnumerable<NuGetVersion> sourceVersions = await resource.GetAllVersionsAsync(
+                dependency.Id,
+                cacheContext,
+                NullLogger.Instance,
+                cancellationToken);
+
+            versions.UnionWith(sourceVersions);
+        }
+
+        NuGetVersion? resolvedVersion = dependency.VersionRange.FindBestMatch(
+            versions.OrderBy(version => version));
+
+        return resolvedVersion is null
+            ? throw new InvalidOperationException(
+                $"Dependency '{dependency.Id}' matching range '{dependency.VersionRange}' " +
+                "was not found in configured NuGet sources.")
+            : new PackageIdentity(dependency.Id, resolvedVersion);
+    }
+
+    private IEnumerable<PackageIdentity> ResolvePackageGraph(
+        IReadOnlyCollection<PackageIdentity> rootPackages,
+        IReadOnlyCollection<SourcePackageDependencyInfo> availablePackages,
+        CancellationToken cancellationToken)
+    {
+        string[] rootPackageIds = rootPackages
+            .Select(package => package.Id)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        var resolverContext = new PackageResolverContext(
+            DependencyBehavior.Lowest,
+            rootPackageIds,
+            rootPackageIds,
+            Enumerable.Empty<PackageReference>(),
+            rootPackages,
+            availablePackages,
+            _sourceRepositories.Select(repository => repository.PackageSource),
+            NullLogger.Instance);
+
+        return new PackageResolver()
+            .Resolve(resolverContext, cancellationToken)
+            .OrderBy(package => package.Id, StringComparer.OrdinalIgnoreCase)
+            .ThenBy(package => package.Version)
+            .ToArray();
     }
 
     private async Task<PackageIdentity> ResolvePackageAsync(

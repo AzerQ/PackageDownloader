@@ -35,6 +35,7 @@
   <ItemGroup>
     <PackageReference Include="JsonCons.JsonPath" Version="1.1.0" />
     <PackageReference Include="NuGet.Protocol" Version="7.6.0" />
+    <PackageReference Include="NuGet.Resolver" Version="7.6.0" />
   </ItemGroup>
 
 </Project>

@@ -7,5 +7,7 @@ namespace PackageDownloader.Core.Services.Abstractions
         Task<IEnumerable<PackageInfo>> SearchPackagesByName(string namePart);
 
         Task<IEnumerable<string>> GetPackagesNamesSuggestions(string namePart);
+        
+        Task<IEnumerable<PackageVersion>> GetPackageVersions(string packageName, int maxVersionsCount);
     }
 }

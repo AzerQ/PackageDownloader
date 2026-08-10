@@ -1,6 +1,8 @@
+using System.Text.Json;
 using PackageDownloader.Core.Models;
 using PackageDownloader.Core.Models.Docker;
 using PackageDownloader.Core.Services.Abstractions;
+using PackageDownloader.Infrastructure.Extensions;
 using PackageDownloader.Infrastructure.Services.Abstractions;
 
 namespace PackageDownloader.Infrastructure.Services.Implementations.Docker;
@@ -12,9 +14,11 @@ public class DockerPackageSearchService : IPackageSearchService
 {
     private readonly IDockerHubHttpClient _dockerHubClient;
 
-    public DockerPackageSearchService(IDockerHubHttpClient dockerHubClient)
+    private readonly IJsonPathExecutor _jsonPathExecutor;
+    public DockerPackageSearchService(IDockerHubHttpClient dockerHubClient, IJsonPathExecutor jsonPathExecutor)
     {
         _dockerHubClient = dockerHubClient;
+        _jsonPathExecutor = jsonPathExecutor;
     }
 
     public async Task<IEnumerable<PackageInfo>> SearchPackagesByName(string namePart)
@@ -102,5 +106,51 @@ public class DockerPackageSearchService : IPackageSearchService
             .Where(name => name.Contains(namePart, StringComparison.OrdinalIgnoreCase))
             .OrderBy(name => name.Length)
             .Take(10);
+    }
+
+    public async Task<IEnumerable<PackageVersion>> GetPackageVersions(string packageName, int maxVersionsCount)
+    {
+         ArgumentException.ThrowIfNullOrWhiteSpace(packageName);
+
+        const int pageSize = 100;
+
+        var parts = packageName.Split('/', 2);
+        string repository = parts.Length == 2 ? packageName : $"library/{packageName}";
+
+        var nextUri = new Uri(
+            $"https://hub.docker.com/v2/repositories/{repository}/tags" +
+            $"?page_size={pageSize}&ordering=last_updated");
+
+        var versions = new List<PackageVersion>();
+
+        while (nextUri is not null && versions.Count < maxVersionsCount)
+        {
+            using JsonDocument document = await nextUri.GetJsonContentAsync();
+
+            foreach (JsonElement node in _jsonPathExecutor.GetAllNodes(document.RootElement, "$.results[*]"))
+            {
+                string? tag = _jsonPathExecutor.GetSingleNode(node, "$.name")?.GetString();
+                if (string.IsNullOrEmpty(tag))
+                    continue;
+
+                long size = _jsonPathExecutor.GetSingleNode(node, "$.full_size") is { ValueKind: JsonValueKind.Number } sizeNode
+                    ? sizeNode.GetInt64()
+                    : 0;
+
+                versions.Add(new PackageVersion(tag, node.GetProperty("last_updated").GetDateTime()));
+
+                if (versions.Count >= maxVersionsCount)
+                    break;
+            }
+
+            string? next = _jsonPathExecutor.GetSingleNode(document.RootElement, "$.next") is
+                { ValueKind: JsonValueKind.String } nextNode
+                ? nextNode.GetString()
+                : null;
+
+            nextUri = next is null ? null : new Uri(next);
+        }
+
+        return versions.OrderByDescending(v => v.ReleaseDate);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using PackageDownloader.Core.Models;
 using System.Text.Json;
+using PackageDownloader.Core.Services.Abstractions;
 
 namespace PackageDownloader.Infrastructure.Services.Abstractions
 {
@@ -14,7 +15,10 @@ namespace PackageDownloader.Infrastructure.Services.Abstractions
         IEnumerable<string> ConvertNpmJsonToSuggestionsList(JsonDocument json);
 
         IEnumerable<string> ConvertNugetJsonToSuggestionsList(JsonDocument json);
-        
 
+
+        IEnumerable<PackageVersion> ConvertNpmJsonToPackageVersions(JsonDocument content, int maxVersionsCount);
+        IEnumerable<PackageVersion> ConvertNugetJsonToPackageVersions(JsonDocument content, int maxVersionsCount);
+        IEnumerable<PackageVersion> ConvertVsCodeJsonToPackageVersions(JsonDocument content, int maxVersionsCount);
     }
 }

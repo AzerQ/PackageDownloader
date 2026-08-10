@@ -8,4 +8,6 @@ public interface IJsonPathExecutor
     
     JsonElement? GetSingleNode(JsonElement rootElement, string jsonPath);
     
+    JsonElement GetRequiredSingleNode(JsonElement rootElement, string jsonPath);
+    
 }

@@ -29,4 +29,8 @@ public class JsonPathExecutor : IJsonPathExecutor
        return result.ValueKind != JsonValueKind.Undefined  ? result : null;
     }
 
+    public JsonElement GetRequiredSingleNode(JsonElement rootElement, string jsonPath)
+    {
+        return GetSingleNode(rootElement, jsonPath) ?? throw new JsonException($"Expected single node at path {jsonPath}");
+    }
 }

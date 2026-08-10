@@ -1,12 +1,13 @@
 ﻿using System.Text.Json;
 using JsonCons.JsonPath;
 using PackageDownloader.Core.Models;
+using PackageDownloader.Core.Services.Abstractions;
 using PackageDownloader.Infrastructure.Extensions;
 using PackageDownloader.Infrastructure.Services.Abstractions;
 
 namespace PackageDownloader.Infrastructure.Services.Implementations.Other
 {
-    public class PackageInfoConverterService (IJsonPathExecutor jPath) : IPackageInfoConverterService
+    public class PackageInfoConverterService(IJsonPathExecutor jPath) : IPackageInfoConverterService
     {
         private PackageInfo NpmConverter(JsonElement element)
         {
@@ -15,16 +16,18 @@ namespace PackageDownloader.Infrastructure.Services.Implementations.Other
             var packageElement = element.TryGetProperty("package", out var pkg) ? pkg : element;
 
             var repositoryUrl = "";
-            if (packageElement.TryGetProperty("links", out var links) && links.TryGetProperty("repository", out var repo))
+            if (packageElement.TryGetProperty("links", out var links) &&
+                links.TryGetProperty("repository", out var repo))
             {
                 repositoryUrl = repo.GetStringOrDefault();
-                repositoryUrl = repositoryUrl.StartsWith("git+") 
-                    ? repositoryUrl.Substring(4, repositoryUrl.Length - 4) 
+                repositoryUrl = repositoryUrl.StartsWith("git+")
+                    ? repositoryUrl.Substring(4, repositoryUrl.Length - 4)
                     : repositoryUrl;
             }
-             
+
             var npmUrl = "";
-            if (packageElement.TryGetProperty("links", out var linksForNpm) && linksForNpm.TryGetProperty("npm", out var npmLink))
+            if (packageElement.TryGetProperty("links", out var linksForNpm) &&
+                linksForNpm.TryGetProperty("npm", out var npmLink))
             {
                 npmUrl = npmLink.GetStringOrDefault();
             }
@@ -33,27 +36,28 @@ namespace PackageDownloader.Infrastructure.Services.Implementations.Other
                 var name = packageElement.GetProperty("name").GetStringOrDefault();
                 npmUrl = $"https://www.npmjs.com/package/{name}";
             }
-            
+
             string authors = "";
             if (packageElement.TryGetProperty("maintainers", out var maintainers))
             {
-                authors = string.Join(",", maintainers.EnumerateArray().Select(m => 
+                authors = string.Join(",", maintainers.EnumerateArray().Select(m =>
                     m.TryGetProperty("username", out var username) ? username.GetString() ?? "" : ""));
             }
-            else if (packageElement.TryGetProperty("publisher", out var publisher) && 
+            else if (packageElement.TryGetProperty("publisher", out var publisher) &&
                      publisher.TryGetProperty("username", out var publisherUsername))
             {
                 authors = publisherUsername.GetStringOrDefault();
             }
-            
+
             string packageLastVersion = packageElement.GetProperty("version").GetStringOrDefault();
-            
+
             long downloadsCount = 0;
-            if (element.TryGetProperty("downloads", out var downloads) && downloads.TryGetProperty("monthly", out var monthly))
+            if (element.TryGetProperty("downloads", out var downloads) &&
+                downloads.TryGetProperty("monthly", out var monthly))
             {
                 downloadsCount = monthly.GetInt64();
             }
-            
+
             PackageInfo packageInfo = new()
             {
                 Id = packageElement.GetProperty("name").GetStringOrDefault(),
@@ -73,14 +77,14 @@ namespace PackageDownloader.Infrastructure.Services.Implementations.Other
         private PackageInfo NugetConverter(JsonElement element)
         {
             string author = element.GetProperty("authors")
-                            .EnumerateArray()
-                            .FirstOrDefault()
-                            .GetStringOrDefault();
+                .EnumerateArray()
+                .FirstOrDefault()
+                .GetStringOrDefault();
 
             bool hasProjectUrl = element.TryGetProperty("projectUrl", out var projectUrl);
             bool hasIconUrl = element.TryGetProperty("iconUrl", out var iconUrl);
             string packageId = element.GetProperty("id").GetStringOrDefault();
-            
+
             PackageInfo packageInfo = new()
             {
                 Id = packageId,
@@ -99,29 +103,30 @@ namespace PackageDownloader.Infrastructure.Services.Implementations.Other
         }
 
         private readonly string _vsCodeLinkTemplate = "https://marketplace.visualstudio.com/items?itemName={0}.{1}";
+
         private PackageInfo VsCodeConverter(JsonElement element)
         {
-            
+
             string authorName = jPath.GetString(element, "$.publisher.displayName") ?? "";
             string authorId = jPath.GetString(element, "$.publisher.publisherName") ?? "";
 
             string sourceRepoLink = jPath.GetString(element,
                 "$.versions[0].properties[?(@.key=='Microsoft.VisualStudio.Services.Links.Source')].value") ?? "";
-            
+
             string iconUrl = jPath.GetString(element,
-                "$.versions[0].files[?(@.assetType=='Microsoft.VisualStudio.Services.Icons.Small')].source") ?? ""; 
-            
+                "$.versions[0].files[?(@.assetType=='Microsoft.VisualStudio.Services.Icons.Small')].source") ?? "";
+
             string packageName = jPath.GetString(element, "$.extensionName") ?? "";
             string packageId = $"{authorId}/{packageName}";
-            
-            string packageLastVersion =  jPath.GetString(element, "$.versions[0].version") ?? "";
-            
+
+            string packageLastVersion = jPath.GetString(element, "$.versions[0].version") ?? "";
+
             long downloadsCount = jPath.GetLong(element, "$.statistics[?(@.statisticName=='install')].value") ?? 0;
 
             string packageUrl = string.Format(_vsCodeLinkTemplate, authorId, packageName);
 
             string description = jPath.GetString(element, "$.shortDescription") ?? "";
-            
+
             PackageInfo packageInfo = new()
             {
                 Id = packageId,
@@ -138,15 +143,16 @@ namespace PackageDownloader.Infrastructure.Services.Implementations.Other
 
             return packageInfo;
         }
-        
-        private IEnumerable<T> ConvertModelFromJson<T>(JsonDocument data, Func<JsonElement, T> converter, string? arrayJsonPath = default)
+
+        private IEnumerable<T> ConvertModelFromJson<T>(JsonDocument data, Func<JsonElement, T> converter,
+            string? arrayJsonPath = default)
         {
-            var rootElements = arrayJsonPath != default 
+            var rootElements = arrayJsonPath != default
                 ? jPath.GetAllNodes(data.RootElement, arrayJsonPath)
                 : data.RootElement.EnumerateArray().ToList();
 
             return rootElements.Select(converter);
-            
+
         }
 
         public IEnumerable<PackageInfo> ConvertNpmJsonToPackageInfo(JsonDocument json)
@@ -169,19 +175,73 @@ namespace PackageDownloader.Infrastructure.Services.Implementations.Other
         {
             // NPM Registry API возвращает: {"objects": [{"package": {"name": "..."}, ...}, ...]}
             var objects = jPath.GetAllNodes(json.RootElement, "$.objects");
-            return objects.Select(obj => 
+            return objects.Select(obj =>
             {
-                if (obj.TryGetProperty("package", out var package) && 
+                if (obj.TryGetProperty("package", out var package) &&
                     package.TryGetProperty("name", out var name))
                 {
                     return name.GetString() ?? "";
                 }
+
                 return "";
             }).Where(name => !string.IsNullOrEmpty(name));
         }
 
         public IEnumerable<string> ConvertNugetJsonToSuggestionsList(JsonDocument json) =>
-           json.RootElement.GetStrings(arrayFieldName: "data");
-        
-    }
+            json.RootElement.GetStrings(arrayFieldName: "data");
+
+        public IEnumerable<PackageVersion> ConvertNpmJsonToPackageVersions(JsonDocument content, int maxVersionsCount)
+        {
+            HashSet<string> ignoreVersionsTags = ["created", "modified"];
+
+            return jPath.GetRequiredSingleNode(content.RootElement, "$.time")
+                .EnumerateObject()
+                .Select(time => new PackageVersion(time.Name, time.Value.GetDateTime()))
+                .Where(v => !ignoreVersionsTags.Contains(v.VersionTag))
+                .OrderByDescending(v => v.ReleaseDate)
+                .Take(maxVersionsCount);
+        }
+
+        public IEnumerable<PackageVersion> ConvertNugetJsonToPackageVersions(JsonDocument content, int maxVersionsCount)
+        {
+            return jPath
+                .GetAllNodes(content.RootElement, "$.items[*].items[*].catalogEntry")
+                .Select(node => new PackageVersion(
+                    node.GetProperty("version").GetStringOrDefault(),
+                    node.GetProperty("published").GetDateTime()
+                ))
+                .OrderByDescending(v => v.ReleaseDate)
+                .Take(maxVersionsCount);
+
+        }
+
+        public IEnumerable<PackageVersion> ConvertVsCodeJsonToPackageVersions(JsonDocument content,
+            int maxVersionsCount)
+        {
+            var versions = new List<PackageVersion>();
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (JsonElement node in jPath.GetAllNodes(
+                         content.RootElement, "$.results[0].extensions[0].versions[*]"))
+            {
+                string? version = jPath.GetSingleNode(node, "$.version")?.GetString();
+                if (string.IsNullOrEmpty(version))
+                    continue;
+
+                if (!seen.Add(version))
+                    continue;
+
+                DateTime lastUpdated =
+                    jPath.GetSingleNode(node, "$.lastUpdated") is { } updatedNode &&
+                    updatedNode.TryGetDateTime(out var parsed)
+                        ? parsed
+                        : DateTime.MinValue;
+
+
+                versions.Add(new PackageVersion(version, lastUpdated));
+            }
+
+            return versions.OrderByDescending(v => v.ReleaseDate).Take(maxVersionsCount);
+        }
+}   
 }

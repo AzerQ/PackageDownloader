@@ -26,5 +26,14 @@ namespace PackageDownloader.API.Controllers
             var packageSearchService = serviceAccessor(packageType);
             return await packageSearchService.GetPackagesNamesSuggestions(namePart);
         }
+
+        [HttpGet("[action]")]
+        [Produces("application/json")]
+        public async Task<IEnumerable<PackageVersion>> GetPackageVersions([FromQuery] PackageType packageType,
+            [FromQuery] string packageName, [FromQuery] int maxVersionsCount = 40)
+        {
+            var packageSearchService = serviceAccessor(packageType);
+            return await packageSearchService.GetPackageVersions(packageName, maxVersionsCount);
+        }
     }
 }

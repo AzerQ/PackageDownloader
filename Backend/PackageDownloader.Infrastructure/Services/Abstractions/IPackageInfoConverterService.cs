@@ -18,7 +18,7 @@ namespace PackageDownloader.Infrastructure.Services.Abstractions
 
 
         IEnumerable<PackageVersion> ConvertNpmJsonToPackageVersions(JsonDocument content, int maxVersionsCount);
-        IEnumerable<PackageVersion> ConvertNugetJsonToPackageVersions(JsonDocument content, int maxVersionsCount);
+        IEnumerable<PackageVersion> ConvertNugetJsonToPackageVersions(JsonDocument content, int maxVersionsCount, out List<string?> pagesRefs);
         IEnumerable<PackageVersion> ConvertVsCodeJsonToPackageVersions(JsonDocument content, int maxVersionsCount);
     }
 }

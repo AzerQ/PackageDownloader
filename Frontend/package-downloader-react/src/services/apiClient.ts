@@ -60,7 +60,7 @@ export class PackagesAPIClient {
     getPackageVersions = async (
         packageType: PackageType,
         packageName: string,
-        maxVersionsCount = 40,
+        maxVersionsCount = 100,
     ): Promise<PackageVersion[]> => {
         const response: AxiosResponse<PackageVersion[]> = await this.http.get(
             "/api/PackageInfo/GetPackageVersions",

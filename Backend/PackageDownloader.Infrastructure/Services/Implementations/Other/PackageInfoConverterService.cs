@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using JsonCons.JsonPath;
+using NuGet.Versioning;
 using PackageDownloader.Core.Models;
 using PackageDownloader.Core.Services.Abstractions;
 using PackageDownloader.Infrastructure.Extensions;
@@ -202,10 +203,30 @@ namespace PackageDownloader.Infrastructure.Services.Implementations.Other
                 .Take(maxVersionsCount);
         }
 
-        public IEnumerable<PackageVersion> ConvertNugetJsonToPackageVersions(JsonDocument content, int maxVersionsCount)
+        public IEnumerable<PackageVersion> ConvertNugetJsonToPackageVersions(JsonDocument content, int maxVersionsCount, out List<string?> pagesRefs )
         {
-            return jPath
-                .GetAllNodes(content.RootElement, "$.items[*].items[*].catalogEntry")
+
+            var itemsNodes = jPath
+                .GetAllNodes(content.RootElement, "$.items[*].items[*].catalogEntry").ToList();
+
+            itemsNodes = itemsNodes.Count != 0
+                ? itemsNodes
+                : jPath.GetAllNodes(content.RootElement, "$.items[*].catalogEntry").ToList();
+
+            if (!itemsNodes.Any())
+            {
+                pagesRefs = jPath.GetAllNodes(content.RootElement, "$.items[*]")
+                    .Select(n => new
+                    {
+                        Link = n.GetProperty("@id").GetString(),
+                        MaxVersion = n.GetProperty("upper").GetString() ?? throw new InvalidOperationException()
+                    })
+                    .Select(v => v.Link).ToList();
+               return [];
+            }
+
+            pagesRefs = [];
+            return itemsNodes
                 .Select(node => new PackageVersion(
                     node.GetProperty("version").GetStringOrDefault(),
                     node.GetProperty("published").GetDateTime()

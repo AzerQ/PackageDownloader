@@ -32,8 +32,8 @@ const SearchResults: React.FC<ISearchResultsProps> = memo(({fondedPackages, isSe
                 gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
                 gap: 2
             }}>
-                {fondedPackages.map((packageInfo, index) => (
-                    <Grid item key={index}>
+                {fondedPackages.map((packageInfo) => (
+                    <Grid item key={packageInfo.id}>
                         <Card variant="outlined">
                             <CardContent>
                                 <PackageSearchResult packageInfo={packageInfo}/>

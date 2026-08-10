@@ -37,7 +37,7 @@ public class VsCodePackageSearchService (IPackageInfoConverterService packageInf
                 {
                     criteria = new[]
                     {
-                        new { filterType = filterTypeExtensionName, value = packageName },
+                        new { filterType = filterTypeExtensionName, value = packageName.Replace("/", ".") },
                         new { filterType = filterTypeTarget, value = "Microsoft.VisualStudio.Code" }
                     },
                     pageNumber = 1,

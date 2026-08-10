@@ -55,6 +55,27 @@ export class PackagesAPIClient {
     };
 
     /**
+     * Returns package versions ordered by the package repository.
+     */
+    getPackageVersions = async (
+        packageType: PackageType,
+        packageName: string,
+        maxVersionsCount = 40,
+    ): Promise<PackageVersion[]> => {
+        const response: AxiosResponse<PackageVersion[]> = await this.http.get(
+            "/api/PackageInfo/GetPackageVersions",
+            {
+                params: {
+                    packageType,
+                    packageName,
+                    maxVersionsCount,
+                },
+            },
+        );
+        return response.data;
+    };
+
+    /**
      * @param body (optional)
      * @return Success
      */
@@ -167,6 +188,11 @@ export interface PackageRecommendation {
     id: string;
     choiceDescription: string;
     codeExample: string;
+}
+
+export interface PackageVersion {
+    versionTag: string;
+    releaseDate: string | null;
 }
 
 export interface PackageRequest {

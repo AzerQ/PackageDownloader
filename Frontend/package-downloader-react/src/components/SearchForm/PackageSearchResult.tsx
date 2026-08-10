@@ -12,18 +12,19 @@ import {
     Select,
     MenuItem,
     FormControl,
+    CircularProgress,
 } from "@mui/material";
-import {PackageInfo} from "../../services/apiClient";
+import {getPackageApiClient, PackageInfo} from "../../services/apiClient";
 import {cartStore} from "../../stores/CartStore";
 import DownloadIcon from '@mui/icons-material/Download'; // Импортируем иконку загрузки
 import {Add, GitHub, LibraryBooks, Public} from "@mui/icons-material";
 import {packagesSearchStore} from "../../stores/PackagesStore";
-import {compareVersions} from "../../utils/versionsComparer";
 import {useState} from "react";
 import {useTranslation} from "react-i18next";
 import {packageInfoStore} from "../../stores/PackageInfoStore.ts";
 import {sideNavigationStore} from "../../stores/SideNavigationStore.ts";
 import {AdditionalPanel} from "../SideNavigationLayout/PanelsContext/additionalPanel.ts";
+import {notificationStore} from "../../stores/NotificationStore.ts";
 
 interface PackageSearchResultsProps {
     packageInfo: PackageInfo;
@@ -40,7 +41,6 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = ({
                                                                           tags,
                                                                           repositoryUrl,
                                                                           packageUrl,
-                                                                          otherVersions,
                                                                           isAddedInCart,
                                                                           defaultIcon
                                                                       }
@@ -49,10 +49,35 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = ({
     const {t} = useTranslation();
 
     const [selectedVersion, setSelectedVersion] = useState<string>(currentVersion);
+    const [versions, setVersions] = useState<string[]>([currentVersion]);
+    const [areVersionsLoading, setAreVersionsLoading] = useState(false);
+    const [areVersionsLoaded, setAreVersionsLoaded] = useState(false);
 
     const {fetchReadmeContent} = packageInfoStore;
 
     const {repositoryType} = packagesSearchStore;
+
+    const loadVersions = async () => {
+        if (areVersionsLoaded || areVersionsLoading) {
+            return;
+        }
+
+        setAreVersionsLoading(true);
+        try {
+            const {getPackageVersions} = await getPackageApiClient();
+            const packageVersions = await getPackageVersions(repositoryType, id);
+            setVersions(Array.from(new Set([
+                currentVersion,
+                ...packageVersions.map(({versionTag}) => versionTag).filter(Boolean),
+            ])));
+            setAreVersionsLoaded(true);
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            notificationStore.addError(`${t("ErrorOccurred")}: ${message}`);
+        } finally {
+            setAreVersionsLoading(false);
+        }
+    };
 
     return (
         <Card variant="outlined">
@@ -132,19 +157,19 @@ const PackageSearchResult: React.FC<PackageSearchResultsProps> = ({
                             <Select
                                 value={selectedVersion}
                                 onChange={(e) => setSelectedVersion(e.target.value)}
+                                onOpen={() => void loadVersions()}
                             >
-                                <MenuItem key={id + currentVersion} value={currentVersion}>
-                                    {currentVersion}
-                                </MenuItem>
-                                {otherVersions && otherVersions.length > 0 &&
-                                    otherVersions
-                                        .filter(ver => ver !== currentVersion)
-                                        .sort((a, b) => compareVersions(a, b, "DESC"))
-                                        .map((ver) => (
-                                            <MenuItem key={id + ver} value={ver}>
-                                                {ver}
-                                            </MenuItem>
-                                        ))}
+                                {versions.map((version) => (
+                                    <MenuItem key={id + version} value={version}>
+                                        {version}
+                                    </MenuItem>
+                                ))}
+                                {areVersionsLoading && (
+                                    <MenuItem disabled>
+                                        <CircularProgress size={18} sx={{mr: 1}}/>
+                                        {t("LoadingData")}
+                                    </MenuItem>
+                                )}
                             </Select>
                         </FormControl>
                         {!isAddedInCart && (

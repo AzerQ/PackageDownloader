@@ -11,6 +11,8 @@ namespace PackageDownloader.Infrastructure.Services.Implementations.PackageSearc
 
         const string AutocompleteTemplateUrl = "https://azuresearch-ussc.nuget.org/autocomplete?q={0}";
 
+        private const string PackageDetailsTemplateUrl = "https://api.nuget.org/v3/registration5-semver1/{0}/index.json";
+        
         public async Task<IEnumerable<string>> GetPackagesNamesSuggestions(string namePart)
         {
             string url = string.Format(AutocompleteTemplateUrl, namePart);
@@ -18,6 +20,15 @@ namespace PackageDownloader.Infrastructure.Services.Implementations.PackageSearc
             var content = await new Uri(url).GetJsonContentAsync();
 
             return packageInfoConverter.ConvertNugetJsonToSuggestionsList(content);
+        }
+
+        public async Task<IEnumerable<PackageVersion>> GetPackageVersions(string packageName, int maxVersionsCount)
+        {
+            string url = string.Format(PackageDetailsTemplateUrl, packageName.ToLowerInvariant());
+            
+            var content = await new Uri(url).GetJsonContentAsync();
+
+            return packageInfoConverter.ConvertNugetJsonToPackageVersions(content, maxVersionsCount);
         }
 
         public async Task<IEnumerable<PackageInfo>> SearchPackagesByName(string name)

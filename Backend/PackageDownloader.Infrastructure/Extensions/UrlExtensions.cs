@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Net;
+using System.Text;
 using System.Text.Json;
 
 namespace PackageDownloader.Infrastructure.Extensions
@@ -13,7 +14,8 @@ namespace PackageDownloader.Infrastructure.Extensions
         {
             PooledConnectionLifetime = TimeSpan.FromMinutes(PooledConnectionLifetimeMin),
             PooledConnectionIdleTimeout = TimeSpan.FromMinutes(PooledConnectionIdleTimeoutMin),
-            MaxConnectionsPerServer = MaxConnectionsPerServer
+            MaxConnectionsPerServer = MaxConnectionsPerServer,
+            AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
         };
         
         private static readonly HttpClient HttpClient = CreateHttpClient();

@@ -46,7 +46,7 @@ namespace PackageDownloader.Infrastructure.Services.Implementations.PackageSearc
             
             return alreadyAddedVersions
                 .DistinctBy(v => v.VersionTag)
-                .OrderByDescending(v => SemanticVersion.Parse(v.VersionTag))
+                .OrderByDescending(v => NuGetVersion.Parse(v.VersionTag))
                 .Take(maxVersionsCount);
         }
 

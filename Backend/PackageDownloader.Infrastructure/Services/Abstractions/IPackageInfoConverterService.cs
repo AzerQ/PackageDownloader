@@ -6,19 +6,19 @@ namespace PackageDownloader.Infrastructure.Services.Abstractions
 {
     public interface IPackageInfoConverterService
     {
-        IEnumerable<PackageInfo> ConvertNugetJsonToPackageInfo(JsonDocument json);
+        IReadOnlyList<PackageInfo> ConvertNugetJsonToPackageInfo(JsonDocument json);
 
-        IEnumerable<PackageInfo> ConvertNpmJsonToPackageInfo(JsonDocument json);
+        IReadOnlyList<PackageInfo> ConvertNpmJsonToPackageInfo(JsonDocument json);
         
-        IEnumerable<PackageInfo> ConvertVsCodeJsonToPackageInfo(JsonDocument json);
+        IReadOnlyList<PackageInfo> ConvertVsCodeJsonToPackageInfo(JsonDocument json);
 
-        IEnumerable<string> ConvertNpmJsonToSuggestionsList(JsonDocument json);
+        IReadOnlyList<string> ConvertNpmJsonToSuggestionsList(JsonDocument json);
 
-        IEnumerable<string> ConvertNugetJsonToSuggestionsList(JsonDocument json);
+        IReadOnlyList<string> ConvertNugetJsonToSuggestionsList(JsonDocument json);
 
 
-        IEnumerable<PackageVersion> ConvertNpmJsonToPackageVersions(JsonDocument content, int maxVersionsCount);
-        IEnumerable<PackageVersion> ConvertNugetJsonToPackageVersions(JsonDocument content, int maxVersionsCount, out List<string?> pagesRefs);
-        IEnumerable<PackageVersion> ConvertVsCodeJsonToPackageVersions(JsonDocument content, int maxVersionsCount);
+        IReadOnlyList<PackageVersion> ConvertNpmJsonToPackageVersions(JsonDocument content, int maxVersionsCount);
+        IReadOnlyList<PackageVersion> ConvertNugetJsonToPackageVersions(JsonDocument content, int maxVersionsCount, out List<string?> pagesRefs);
+        IReadOnlyList<PackageVersion> ConvertVsCodeJsonToPackageVersions(JsonDocument content, int maxVersionsCount);
     }
 }

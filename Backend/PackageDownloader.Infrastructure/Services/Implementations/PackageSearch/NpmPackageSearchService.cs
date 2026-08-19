@@ -16,7 +16,7 @@ public class NpmPackageSearchService(IPackageInfoConverterService packageInfoCon
     {
         string url = string.Format(SearchPackageRequestUrl, namePart);
 
-        var content = await new Uri(url).GetJsonContentAsync();
+        using var content = await new Uri(url).GetJsonContentAsync();
 
         return packageInfoConverter.ConvertNpmJsonToSuggestionsList(content);  
     }
@@ -24,7 +24,7 @@ public class NpmPackageSearchService(IPackageInfoConverterService packageInfoCon
     public async Task<IEnumerable<PackageVersion>> GetPackageVersions(string packageName, int maxVersionsCount)
     {
         string url = string.Format(GetPackageDetailsUrl, packageName);
-        var content = await new Uri(url).GetJsonContentAsync();
+        using var content = await new Uri(url).GetJsonContentAsync();
         return packageInfoConverter.ConvertNpmJsonToPackageVersions(content, maxVersionsCount);
     }
 
@@ -32,7 +32,7 @@ public class NpmPackageSearchService(IPackageInfoConverterService packageInfoCon
     {
         string url = string.Format(SearchPackageRequestUrl, name);
 
-        var content = await new Uri(url).GetJsonContentAsync();
+        using var content = await new Uri(url).GetJsonContentAsync();
 
         return packageInfoConverter.ConvertNpmJsonToPackageInfo(content);
     }

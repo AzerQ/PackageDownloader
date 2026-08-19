@@ -18,43 +18,48 @@ namespace PackageDownloader.Infrastructure.Services.Implementations.PackageSearc
         {
             string url = string.Format(AutocompleteTemplateUrl, namePart);
 
-            var content = await new Uri(url).GetJsonContentAsync();
+            using var content = await new Uri(url).GetJsonContentAsync();
 
             return packageInfoConverter.ConvertNugetJsonToSuggestionsList(content);
         }
 
         public async Task<IEnumerable<PackageVersion>> GetPackageVersions(string packageName, int maxVersionsCount)
         {
-            return await GetPackageVersionsInternal(packageName, maxVersionsCount);
+            var versions = await GetPackageVersionsInternal(packageName, maxVersionsCount);
+            return versions
+                .DistinctBy(version => version.VersionTag)
+                .OrderByDescending(version => NuGetVersion.Parse(version.VersionTag))
+                .Take(maxVersionsCount)
+                .ToArray();
         }
 
-        private async Task<IEnumerable<PackageVersion>> GetPackageVersionsInternal(string packageName, int maxVersionsCount, List<PackageVersion>? alreadyAddedVersions = null, string? externalPageRef = null)
+        private async Task<IReadOnlyList<PackageVersion>> GetPackageVersionsInternal(
+            string packageName,
+            int maxVersionsCount,
+            string? externalPageRef = null)
         {
             string url = string.Format(PackageDetailsTemplateUrl, packageName.ToLowerInvariant());
             
-            var content = await new Uri(externalPageRef ?? url).GetJsonContentAsync();
-            
-            alreadyAddedVersions ??= new List<PackageVersion>(maxVersionsCount);
-            alreadyAddedVersions.AddRange(packageInfoConverter.ConvertNugetJsonToPackageVersions(content, maxVersionsCount, out var pagesRefs));
-            if (pagesRefs.Count > 0)
-            {
-                var pagesLoadTasks = pagesRefs.Select(async pageRef =>
-                    await GetPackageVersionsInternal(packageName, maxVersionsCount, alreadyAddedVersions, pageRef));
-                var results = await Task.WhenAll(pagesLoadTasks);
-                return results.SelectMany(v => v);
-            }
-            
-            return alreadyAddedVersions
-                .DistinctBy(v => v.VersionTag)
-                .OrderByDescending(v => NuGetVersion.Parse(v.VersionTag))
-                .Take(maxVersionsCount);
+            using var content = await new Uri(externalPageRef ?? url).GetJsonContentAsync();
+            var localVersions = packageInfoConverter
+                .ConvertNugetJsonToPackageVersions(content, maxVersionsCount, out var pagesRefs);
+
+            if (pagesRefs.Count == 0)
+                return localVersions;
+
+            var pageTasks = pagesRefs
+                .Where(pageRef => pageRef is not null)
+                .Select(pageRef => GetPackageVersionsInternal(packageName, maxVersionsCount, pageRef));
+            var pageVersions = await Task.WhenAll(pageTasks);
+
+            return localVersions.Concat(pageVersions.SelectMany(versions => versions)).ToArray();
         }
 
         public async Task<IEnumerable<PackageInfo>> SearchPackagesByName(string name)
         {
             string url = string.Format(SearchPackageRequestUrl, name);
 
-            var content = await new Uri(url).GetJsonContentAsync();
+            using var content = await new Uri(url).GetJsonContentAsync();
 
             return packageInfoConverter.ConvertNugetJsonToPackageInfo(content);
         }

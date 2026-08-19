@@ -86,7 +86,7 @@ public class VsCodePackageSearchService (IPackageInfoConverterService packageInf
             },
             flags = 870
         };
-        var jsonResult = await new Uri(SearchExtensionRequestUrl).PostJsonDataAsync(searchRequestData);
+        using var jsonResult = await new Uri(SearchExtensionRequestUrl).PostJsonDataAsync(searchRequestData);
         return packageInfoConverter.ConvertVsCodeJsonToPackageInfo(jsonResult);
     }
 }

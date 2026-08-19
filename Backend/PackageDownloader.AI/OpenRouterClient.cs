@@ -1,4 +1,4 @@
-using System.Text;
+using System.Net.Http.Json;
 using System.Text.Json;
 using PackageDownloader.AI.Models;
 
@@ -6,6 +6,7 @@ namespace PackageDownloader.AI;
 
 public partial class OpenRouterClient
 {
+    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
     private readonly HttpClient _httpClient;
     private readonly string _apiKey;
     private readonly string _modelName;
@@ -39,18 +40,17 @@ public partial class OpenRouterClient
             }
         };
 
-        var jsonContent = JsonSerializer.Serialize(request);
-        var httpContent = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-
-        var response = await _httpClient.PostAsync("chat/completions", httpContent);
+        using var httpRequest = new HttpRequestMessage(HttpMethod.Post, "chat/completions")
+        {
+            Content = JsonContent.Create(request, options: JsonOptions)
+        };
+        using var response = await _httpClient.SendAsync(
+            httpRequest,
+            HttpCompletionOption.ResponseHeadersRead);
 
         response.EnsureSuccessStatusCode();
 
-        var responseContent = await response.Content.ReadAsStringAsync();
-        
-        return JsonSerializer.Deserialize<ChatCompletionResponse>(responseContent, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        });
+        await using var responseStream = await response.Content.ReadAsStreamAsync();
+        return await JsonSerializer.DeserializeAsync<ChatCompletionResponse>(responseStream, JsonOptions);
     }
 }

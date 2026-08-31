@@ -22,9 +22,18 @@ public class PackagesDirectoryCreator (IFileSystemService fileSystemService) : I
                 .Append('_')
                 .Append(packageRequest.SdkVersion ?? "default");
 
-            return fileNameBuilder.ToString();
+            return ReplaceInvalidChars(fileNameBuilder.ToString());
 
         }
+    }
+
+    /// <summary>
+    /// Package ids may contain path separators (docker "library/nginx", github "owner/repo"),
+    /// which would otherwise turn the packages folder into a nested one.
+    /// </summary>
+    private static string ReplaceInvalidChars(string directoryName)
+    {
+        return string.Join('_', directoryName.Split(Path.GetInvalidFileNameChars()));
     }
 
     

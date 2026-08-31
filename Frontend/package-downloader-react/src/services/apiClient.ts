@@ -205,7 +205,8 @@ export enum PackageType {
     Npm = "Npm",
     Nuget = "Nuget",
     VsCode = "VsCode",
-    Docker = "Docker"
+    Docker = "Docker",
+    GitHub = "GitHub"
 }
 
 export interface PackagesEntryChunksInfo {

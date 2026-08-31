@@ -7,13 +7,15 @@ import {useTranslation} from "react-i18next";
 import CodeIcon from '@mui/icons-material/Code';
 import {FileDownload, ViewInAr} from "@mui/icons-material";
 import DeveloperBoardIcon from '@mui/icons-material/DeveloperBoard';
+import GitHubIcon from '@mui/icons-material/GitHub';
 
 
 const iconsMap: Map<PackageType, React.ReactNode> = new Map<PackageType, React.ReactNode>([
     [PackageType.VsCode, <CodeIcon sx={{ color: '#007ACC' }}/>],
     [PackageType.Npm, <FileDownload sx={{ color: '#CB3837' }}/>],
     [PackageType.Nuget, <DeveloperBoardIcon sx={{ color: '#004880' }}/>],
-    [PackageType.Docker, <ViewInAr sx={{ color: '#2496ED' }}/>]
+    [PackageType.Docker, <ViewInAr sx={{ color: '#2496ED' }}/>],
+    [PackageType.GitHub, <GitHubIcon sx={{ color: '#181717' }}/>]
 ])
 
 const PackageTypeSelector: React.FC = observer(() => {

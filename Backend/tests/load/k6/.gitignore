@@ -1,0 +1,5 @@
+.env
+.env.*
+!.env.example
+!.env.baseline.example
+!.env.optimized.example

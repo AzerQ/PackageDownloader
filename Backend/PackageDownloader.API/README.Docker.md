@@ -188,18 +188,18 @@ The implementation is designed to work within Docker containers:
 
 ### Search for Images
 ```bash
-curl "https://localhost:7104/api/Docker/search?query=nginx&pageSize=5"
+curl "http://localhost:5093/api/Docker/search?query=nginx&pageSize=5"
 ```
 
 ### Get Image Tags  
 ```bash
-curl "https://localhost:7104/api/Docker/tags/nginx?pageSize=10"
+curl "http://localhost:5093/api/Docker/tags/nginx?pageSize=10"
 ```
 
 ### Download Images
 ```bash
 # 1. Prepare download
-curl -X POST "https://localhost:7104/api/Docker/packages/download/prepare" \
+curl -X POST "http://localhost:5093/api/Docker/packages/download/prepare" \
   -H "Content-Type: application/json" \
   -d '{
     "packageType": "Docker",
@@ -212,7 +212,7 @@ curl -X POST "https://localhost:7104/api/Docker/packages/download/prepare" \
   }'
 
 # 2. Download using returned URL
-curl -O "https://localhost:7104/api/Docker/packages/download/{archiveId}"
+curl -O "http://localhost:5093/api/Docker/packages/download/{archiveId}"
 ```
 
 ## Testing

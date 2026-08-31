@@ -1,5 +1,5 @@
 ﻿using System.Net;
-using System.Text;
+using System.Net.Http.Json;
 using System.Text.Json;
 
 namespace PackageDownloader.Infrastructure.Extensions
@@ -33,10 +33,10 @@ namespace PackageDownloader.Infrastructure.Extensions
         public static async Task<JsonDocument> GetJsonContentAsync(this Uri url)
         {
            
-            var response = await HttpClient.GetAsync(url);
+            using var response = await HttpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
-            string serverResponse = await response.Content.ReadAsStringAsync();
-            return JsonDocument.Parse(serverResponse);
+            await using var responseStream = await response.Content.ReadAsStreamAsync();
+            return await JsonDocument.ParseAsync(responseStream);
         }
 
         public static async Task SaveFileAsync(this Uri url, string fileSavePath)
@@ -49,13 +49,11 @@ namespace PackageDownloader.Infrastructure.Extensions
         public static async Task<JsonDocument> PostJsonDataAsync<TRequest>(this Uri url, TRequest requestData, Dictionary<string, string>? customHeaders = null)
         {
            
-            string requestBody = JsonSerializer.Serialize(requestData);
-
-            HttpRequestMessage httpRequestMessage = new()
+            using HttpRequestMessage httpRequestMessage = new()
             {
                 RequestUri = url,
                 Method = HttpMethod.Post,
-                Content = new StringContent(requestBody, Encoding.UTF8, "application/json")
+                Content = JsonContent.Create(requestData)
             };
 
             if (customHeaders != null)
@@ -67,10 +65,12 @@ namespace PackageDownloader.Infrastructure.Extensions
             }
 
 
-            var response = await HttpClient.SendAsync(httpRequestMessage);
+            using var response = await HttpClient.SendAsync(
+                httpRequestMessage,
+                HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
-            string serverResponse = await response.Content.ReadAsStringAsync();
-            return JsonDocument.Parse(serverResponse);
+            await using var responseStream = await response.Content.ReadAsStreamAsync();
+            return await JsonDocument.ParseAsync(responseStream);
         }
         
     }

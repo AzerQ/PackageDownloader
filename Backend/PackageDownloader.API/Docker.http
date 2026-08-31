@@ -1,5 +1,7 @@
 ### Docker Hub Search API Tests - Fast Performance
 
+@host = http://localhost:5093
+
 # Search for Docker images (FAST - no additional API calls)
 GET {{host}}/api/Docker/search?query=mysql&page=1&pageSize=10
 Accept: application/json
@@ -136,5 +138,3 @@ Accept: application/json
 # BALANCED: Optimized unified search (top 10 get versions, others don't)  
 GET {{host}}/api/PackageInfo/GetSearchResults?packageType=Docker&namePart=redis
 Accept: application/json
-
-@host = https://localhost:7104

@@ -10,6 +10,7 @@ namespace PackageDownloader.Infrastructure.Services.Implementations.Docker;
 /// </summary>
 public class DockerHubHttpClient : IDockerHubHttpClient
 {
+    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
     private readonly HttpClient _httpClient;
     private const string DockerHubApiBaseUrl = "https://hub.docker.com/v2/";
     private const string DockerRegistryBaseUrl = "https://registry-1.docker.io/v2/";
@@ -24,14 +25,10 @@ public class DockerHubHttpClient : IDockerHubHttpClient
     {
         var url = $"{DockerHubApiBaseUrl}search/repositories/?query={Uri.EscapeDataString(query)}&page={page}&page_size={pageSize}";
         
-        var response = await _httpClient.GetAsync(url);
+        using var response = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
         response.EnsureSuccessStatusCode();
-        
-        var jsonString = await response.Content.ReadAsStringAsync();
-        var result = JsonSerializer.Deserialize<DockerHubSearchResponse>(jsonString, new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        });
+        await using var stream = await response.Content.ReadAsStreamAsync();
+        var result = await JsonSerializer.DeserializeAsync<DockerHubSearchResponse>(stream, JsonOptions);
         
         return result ?? new DockerHubSearchResponse();
     }
@@ -46,14 +43,10 @@ public class DockerHubHttpClient : IDockerHubHttpClient
 
         var url = $"{DockerHubApiBaseUrl}repositories/{repository}/tags/?page={page}&page_size={pageSize}";
         
-        var response = await _httpClient.GetAsync(url);
+        using var response = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
         response.EnsureSuccessStatusCode();
-        
-        var jsonString = await response.Content.ReadAsStringAsync();
-        var result = JsonSerializer.Deserialize<DockerHubTagsResponse>(jsonString, new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        });
+        await using var stream = await response.Content.ReadAsStreamAsync();
+        var result = await JsonSerializer.DeserializeAsync<DockerHubTagsResponse>(stream, JsonOptions);
         
         return result ?? new DockerHubTagsResponse();
     }
@@ -80,22 +73,17 @@ public class DockerHubHttpClient : IDockerHubHttpClient
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.oci.image.index.v1+json"));
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.docker.distribution.manifest.list.v2+json"));
         
-        var response = await _httpClient.SendAsync(request);
+        using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
         response.EnsureSuccessStatusCode();
-        
-        var jsonString = await response.Content.ReadAsStringAsync();
-        
+        await using var stream = await response.Content.ReadAsStreamAsync();
         // Check if it's a manifest list (multi-platform)
-        using var doc = JsonDocument.Parse(jsonString);
+        using var doc = await JsonDocument.ParseAsync(stream);
         var root = doc.RootElement;
         
         if (root.TryGetProperty("manifests", out _))
         {
             // This is a manifest list - get the first linux/amd64 manifest
-            var manifestList = JsonSerializer.Deserialize<DockerManifestList>(jsonString, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            });
+            var manifestList = root.Deserialize<DockerManifestList>(JsonOptions);
             
             if (manifestList == null || !manifestList.Manifests.Any())
             {
@@ -113,10 +101,7 @@ public class DockerHubHttpClient : IDockerHubHttpClient
         }
         
         // It's a regular manifest, parse it directly
-        var manifest = JsonSerializer.Deserialize<DockerManifest>(jsonString, new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        });
+        var manifest = root.Deserialize<DockerManifest>(JsonOptions);
         
         return manifest ?? throw new InvalidOperationException("Failed to parse Docker manifest");
     }
@@ -130,14 +115,10 @@ public class DockerHubHttpClient : IDockerHubHttpClient
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.docker.distribution.manifest.v2+json"));
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.oci.image.manifest.v1+json"));
         
-        var response = await _httpClient.SendAsync(request);
+        using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
         response.EnsureSuccessStatusCode();
-        
-        var jsonString = await response.Content.ReadAsStringAsync();
-        var manifest = JsonSerializer.Deserialize<DockerManifest>(jsonString, new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        });
+        await using var stream = await response.Content.ReadAsStreamAsync();
+        var manifest = await JsonSerializer.DeserializeAsync<DockerManifest>(stream, JsonOptions);
         
         return manifest ?? throw new InvalidOperationException("Failed to parse Docker manifest");
     }
@@ -156,7 +137,7 @@ public class DockerHubHttpClient : IDockerHubHttpClient
         using var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         
-        var response = await _httpClient.SendAsync(request);
+        using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
         response.EnsureSuccessStatusCode();
         
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath)!);
@@ -261,11 +242,10 @@ public class DockerHubHttpClient : IDockerHubHttpClient
     {
         var tokenUrl = $"https://auth.docker.io/token?service=registry.docker.io&scope=repository:{repository}:pull";
         
-        var response = await _httpClient.GetAsync(tokenUrl);
+        using var response = await _httpClient.GetAsync(tokenUrl, HttpCompletionOption.ResponseHeadersRead);
         response.EnsureSuccessStatusCode();
-        
-        var jsonString = await response.Content.ReadAsStringAsync();
-        using var doc = JsonDocument.Parse(jsonString);
+        await using var stream = await response.Content.ReadAsStreamAsync();
+        using var doc = await JsonDocument.ParseAsync(stream);
         
         return doc.RootElement.GetProperty("token").GetString() ?? 
                throw new InvalidOperationException("Failed to get Docker registry token");

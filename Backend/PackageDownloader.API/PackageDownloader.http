@@ -1,4 +1,4 @@
-@PackageDownloader_HostAddress = http://localhost:5026
+@PackageDownloader_HostAddress = http://localhost:5093
 @NpmJSApiHost = https://www.npmjs.com
 @NugetApiHost = https://azuresearch-usnc.nuget.org
 

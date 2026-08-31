@@ -7,7 +7,9 @@ public class ArchiveService : IArchiveService
 {
     public string ArchiveFolder(string folderPath, string outputFolder)
     {
-        string archiveFileName = Path.GetFileNameWithoutExtension(folderPath) + ".zip";
+        // The folder name itself may contain dots (package ids, versions like "latest.source"),
+        // so it must be taken as a whole instead of being treated as "name + extension"
+        string archiveFileName = new DirectoryInfo(folderPath).Name + ".zip";
         string archiveFilePath = Path.Combine(outputFolder, archiveFileName);
 
         ZipFile.CreateFromDirectory(folderPath, archiveFilePath);

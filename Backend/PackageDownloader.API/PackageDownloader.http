@@ -1,10 +1,11 @@
-@PackageDownloader_HostAddress = http://localhost:5093
+﻿@PackageDownloader_HostAddress = http://localhost:5093
 @NpmJSApiHost = https://www.npmjs.com
 @NugetApiHost = https://azuresearch-usnc.nuget.org
 
 @NPMPackageName = lodash
 @NugetPackageName = Dapper
 @AIQuestion = 2D графика
+@GitHubRepository = sharkdp/hyperfine
 
 # Поисковые подcказки яндекса
 
@@ -76,3 +77,102 @@ Accept: application/json
 
 # Скачать vsix расширение для Vs Code
 GET https://marketplace.visualstudio.com/_apis/public/gallery/publishers/{{Publisher}}/vsextensions/{{ExtensionName}}/{{Version}}/vspackage
+
+
+###
+
+# ---------------------------------------------------------------------------
+# GitHub: релизы репозитория (ассеты) + всегда доступная версия latest.source
+# ---------------------------------------------------------------------------
+
+# Найти репозитории на GitHub
+GET {{PackageDownloader_HostAddress}}/api/PackageInfo/GetSearchResults?packageType=GitHub&namePart=hyperfine
+Accept: application/json
+
+###
+
+# Подсказки по именам репозиториев
+GET {{PackageDownloader_HostAddress}}/api/PackageInfo/GetSearchSuggestions?packageType=GitHub&namePart=hyperfine
+Accept: application/json
+
+###
+
+# Версии репозитория: первым всегда идёт latest.source (главная ветка), далее теги релизов
+GET {{PackageDownloader_HostAddress}}/api/PackageInfo/GetPackageVersions?packageType=GitHub&packageName={{GitHubRepository}}&maxVersionsCount=10
+Accept: application/json
+
+###
+
+# Типы артефактов выбранной версии (ассеты релиза + source, и all при нескольких ассетах)
+GET {{PackageDownloader_HostAddress}}/api/GitHub/packages/artifacts?packageId={{GitHubRepository}}&version=v1.20.0
+Accept: application/json
+
+###
+
+# Подробная информация о репозитории
+GET {{PackageDownloader_HostAddress}}/api/GitHub/packages/details?packageId={{GitHubRepository}}
+Accept: application/json
+
+###
+
+# Скачать конкретный ассет конкретного релиза
+POST {{PackageDownloader_HostAddress}}/api/Packages/PreparePackagesDownloadLink
+Content-Type: application/json
+
+{
+  "packageType": "GitHub",
+  "packagesDetails": [
+    {
+      "packageID": "{{GitHubRepository}}",
+      "packageVersion": "v1.20.0",
+      "artifactType": "hyperfine_1.20.0_arm64.deb"
+    }
+  ]
+}
+
+###
+
+# Скачать все ассеты последнего релиза (artifactType не указан == all)
+POST {{PackageDownloader_HostAddress}}/api/Packages/PreparePackagesDownloadLink
+Content-Type: application/json
+
+{
+  "packageType": "GitHub",
+  "packagesDetails": [
+    {
+      "packageID": "{{GitHubRepository}}"
+    }
+  ]
+}
+
+###
+
+# Скачать главную ветку репозитория архивом (версия latest.source)
+POST {{PackageDownloader_HostAddress}}/api/Packages/PreparePackagesDownloadLink
+Content-Type: application/json
+
+{
+  "packageType": "GitHub",
+  "packagesDetails": [
+    {
+      "packageID": "{{GitHubRepository}}",
+      "packageVersion": "latest.source"
+    }
+  ]
+}
+
+###
+
+# Скачать исходники конкретного тега (суффикс .source у любой версии)
+POST {{PackageDownloader_HostAddress}}/api/Packages/PreparePackagesDownloadLink
+Content-Type: application/json
+
+{
+  "packageType": "GitHub",
+  "packagesDetails": [
+    {
+      "packageID": "{{GitHubRepository}}",
+      "packageVersion": "v1.20.0.source"
+    }
+  ]
+}

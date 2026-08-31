@@ -6,6 +6,7 @@ using PackageDownloader.Core.Services.Abstractions;
 using PackageDownloader.Infrastructure.Services.Abstractions;
 using PackageDownloader.Infrastructure.Services.Implementations;
 using PackageDownloader.Infrastructure.Services.Implementations.Docker;
+using PackageDownloader.Infrastructure.Services.Implementations.GitHub;
 using PackageDownloader.Infrastructure.Services.Implementations.Other;
 using PackageDownloader.Infrastructure.Services.Implementations.PackageDownloader;
 using PackageDownloader.Infrastructure.Services.Implementations.PackageSearch;
@@ -26,6 +27,7 @@ namespace PackageDownloader.Application
                 PackageType.Nuget => serviceProvider.GetRequiredService<NugetClientPackageDownloaderService>(),
                 PackageType.VsCode => serviceProvider.GetRequiredService<HttpPackageDownloaderService>(),
                 PackageType.Docker => serviceProvider.GetRequiredService<DockerPackageDownloaderService>(),
+                PackageType.GitHub => serviceProvider.GetRequiredService<GitHubPackageDownloaderService>(),
                 _ => throw new InvalidOperationException()
             };
         }
@@ -39,6 +41,7 @@ namespace PackageDownloader.Application
                 PackageType.Nuget => serviceProvider.GetRequiredService<NugetPackageSearchService>(),
                 PackageType.VsCode => serviceProvider.GetRequiredService<VsCodePackageSearchService>(),
                 PackageType.Docker => serviceProvider.GetRequiredService<DockerPackageSearchService>(),
+                PackageType.GitHub => serviceProvider.GetRequiredService<GitHubPackageSearchService>(),
                 _ => throw new InvalidOperationException()
             };
         }
@@ -87,12 +90,19 @@ namespace PackageDownloader.Application
                 new DockerHubHttpClient(new HttpClient()));
             services.AddTransient<IDockerPackageService, DockerPackageService>();
 
+            // GitHub services
+            services.AddTransient<IGitHubHttpClient>(provider =>
+                new GitHubHttpClient(new HttpClient(),
+                    provider.GetService<IConfiguration>()?["GitHub:TOKEN"]));
+            services.AddTransient<IGitHubPackageService, GitHubPackageService>();
+
             // Package download services
 
             services.AddTransient<NugetPackageDownloaderService>();
             services.AddTransient<NugetClientPackageDownloaderService>();
             services.AddTransient<NpmPackageDownloaderService>();
             services.AddTransient<DockerPackageDownloaderService>();
+            services.AddTransient<GitHubPackageDownloaderService>();
 
             services.AddTransient<Func<PackageType, PackageDetails, Uri>>(_ => PackageDownloadUriResolver);
             services.AddTransient<Func<PackageType, PackageDetails, string>>(_ => PackageFileNameResolver);
@@ -109,6 +119,7 @@ namespace PackageDownloader.Application
             services.AddTransient<NpmPackageSearchService>();
             services.AddTransient<VsCodePackageSearchService>();
             services.AddTransient<DockerPackageSearchService>();
+            services.AddTransient<GitHubPackageSearchService>();
 
             services.AddTransient<Func<PackageType, IPackageSearchService>>(serviceProvider => packageType => PackageSearchFactory(serviceProvider, packageType));
 

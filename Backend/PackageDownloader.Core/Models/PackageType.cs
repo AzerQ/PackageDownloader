@@ -8,5 +8,6 @@ public enum PackageType
     Npm,
     Nuget,
     VsCode,
-    Docker
+    Docker,
+    GitHub
 }
